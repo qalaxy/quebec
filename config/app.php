@@ -53,7 +53,7 @@ return [
     */
 
     //'url' => env('APP_URL', 'http://localhost'),
-    'url' => env('APP_URL', 'http://localhost/Laravel/blog'),
+    'url' => env('APP_URL', 'http://localhost/quebec'),
 
     'asset_url' => env('ASSET_URL', null),
 
