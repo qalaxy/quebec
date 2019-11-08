@@ -61,7 +61,7 @@
 	Administration <i class="fa fa-caret-down"></i>
   </button>
   <div id="administration" class="w3-hide w3-white w3-card w3-margin-left w3-leftbar w3-border-gray w3-text-blue-gray">
-    <a id="permissions" href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Permissions</a>
+    <a id="permissions" href="{{url('/permissions')}}" class="w3-bar-item w3-button w3-hover-light-blue">Permissions</a>
     <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Roles</a>
     <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Error status</a>
     <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Offices</a>

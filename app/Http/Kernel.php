@@ -19,7 +19,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-		//\App\Http\Middleware\AppAuth::class,
+		
     ];
 
     /**
@@ -64,6 +64,7 @@ class Kernel extends HttpKernel
 		'role' => \Zizaco\Entrust\Middleware\EntrustRole::class,
 		'permission' => \Zizaco\Entrust\Middleware\EntrustPermission::class,
 		'ability' => \Zizaco\Entrust\Middleware\EntrustAbility::class,
+		'guardian' => \App\Http\Middleware\GuardPermission::class,
     ];
 
     /**
@@ -74,7 +75,7 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middlewarePriority = [
-        \Illuminate\Session\Middleware\StartSession::class,
+       \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         \App\Http\Middleware\Authenticate::class,
         \Illuminate\Session\Middleware\AuthenticateSession::class,

@@ -19,7 +19,7 @@ class EntrustSetupTables extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->bigIncrements('id');
 			$table->uuid('uuid');
-            $table->string('name')->unique();
+            $table->string('name');
             $table->string('display_name')->nullable();
             $table->string('description')->nullable();
             $table->timestamps();
@@ -43,7 +43,7 @@ class EntrustSetupTables extends Migration
         Schema::create('permissions', function (Blueprint $table) {
             $table->bigIncrements('id');
 			$table->uuid('uuid');
-            $table->string('name')->unique();
+            $table->string('name');
             $table->string('display_name')->nullable();
             $table->string('description')->nullable();
             $table->timestamps();

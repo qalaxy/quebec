@@ -1,5 +1,11 @@
 
-@isset($notification)
+@if(session('notification'))
+	@php $notification = session('notification'); @endphp
+@elseif(isset($notification))
+	@php $notification = $notification; @endphp
+@endif
+
+@if(isset($notification))
 	@switch($notification['indicator'])
 		@case('danger')
 			@php $color = 'w3-pale-red'; $border = 'w3-border-pink'; @endphp
@@ -23,6 +29,4 @@
 	  class="w3-button {{$color}} w3-large w3-display-topright">&times;</span>
 	  <p>{{$notification['message']}}</p>
 	</div>
-	
-
-@endisset
+@endif

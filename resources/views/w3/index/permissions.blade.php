@@ -10,7 +10,7 @@
   <h1 class="w3-xlarge">Permissions</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		<div class="w3-row">
-			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{asset('/create-error')}}">CREATE</a>
+			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{asset('/create-permission')}}">CREATE</a>
 			<button class="w3-button w3-blue w3-hover w3-hover-light-blue w3-right" onclick="document.getElementById('id01').style.display='block'">SEARCH</button>
 		</div>
 		<div id="id01" class="w3-modal">
@@ -26,7 +26,11 @@
 				</div>
 			</div>
 		</div>
+		<div id="delete" class="w3-modal">
+			
+		</div>
 		@include('w3.components.notification')
+		@isset($permissions)
 		<div class="w3-responsive w3-white w3-padding-16 w3-text-dark-gray">
 			<table class="w3-table-all w3-hoverable">
 				<tr class="w3-theme w3-text-white">
@@ -34,37 +38,21 @@
 					<th>Description</th>
 					<th colspan="2"></th>
 				</tr>
+				@foreach($permissions as $permission)
 				<tr>
-					<td>Create system data</td>
-					<td>User can create system data</td>
-					<td><a>Edit</a></td>
-					<td><a>Delete</a></td>
+					<td><a href="{{url('permission/'.$permission->uuid)}}" style="text-decoration:none;">{{$permission->display_name}}</a></td>
+					<td><a href="{{url('permission/'.$permission->uuid)}}" style="text-decoration:none;">{{$permission->description}}</a></td>
+					<td><a class="w3-button" href="{{url('edit-permission/'.$permission->uuid)}}" title="Edit {{$permission->display_name}}"><i class="fa fa-edit fa-lg"></i></a></td>
+					<td><button class="w3-button" onclick="deletePerm('{{$permission->uuid}}');" title="Delete {{$permission->display_name}}">
+						<i class="fa fa-trash fa-lg"></i>
+						</button>
+					</td>
 				</tr>
-				<tr>
-					<td>View error messages</td>
-					<td>User can view all error messages</td>
-					<td><a>Edit</a></td>
-					<td><a>Delete</a></td>
-				</tr>
-				<tr>
-					<td>Edit users</td>
-					<td>User should edit all user's information</td>
-					<td><a>Edit</a></td>
-					<td><a>Delete</a></td>
-				</tr>
+				@endforeach
 			</table>
 		</div>
-		<div class="w3-row w3-padding-16 w3-right">
-			<div class="w3-bar w3-border">
-			  <a href="#" class="w3-bar-item w3-button">&laquo;</a>
-			  <a href="#" class="w3-bar-item w3-button">1</a>
-			  <a href="#" class="w3-bar-item w3-button">2</a>
-			  <a href="#" class="w3-bar-item w3-button">3</a>
-			  <a href="#" class="w3-bar-item w3-button">...</a>
-			  <a href="#" class="w3-bar-item w3-button">10</a>
-			  <a href="#" class="w3-bar-item w3-button">&raquo;</a>
-			</div>
-		</div>
+		{{$permissions->links('vendor.pagination.paginator')}}
+		@endisset
 	</div>
 </div>
 
@@ -81,6 +69,22 @@ document.getElementById('menu-administration').className += " w3-text-blue";
 menuAcc('administration');
 w3_show_nav('menuQMS');
 
+function deletePerm(uuid){
+	let xhr = new XMLHttpRequest();
+	
+	xhr.open("GET", "{{url('delete-permission')}}/"+uuid);
+	xhr.send();
+	
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById("delete").innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block'
+			
+		}
+	}
+	
+	
+}
 </script>
 
 

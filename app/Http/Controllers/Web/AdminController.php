@@ -20,100 +20,92 @@ class AdminController extends Controller
     public function __construct(){
 		$this->ext = new AdminExt();
 		$this->mnt = new AdminMnt();
-		//$this->middleware('auth');
+		$this->middleware('auth');
 	}
 	
-	public permissions(){
-		if(Auth::user()->hasRole('supper_admin') && Auth::user()->can('view_permissions')){
-			$permissions = $this->ext->getPermissions();
+	public function permissions(){
+		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('view_permissions')){
+			$permissions = $this->ext->getPaginatedPermissions();
 			if(is_object($permissions)){
-				$permissions = $permissions->paginate($this->rec_num);
-				if(View::exists('w3.index.permission'))
-					return view('w3.index.permission')->with(compact('permissions'));
+				if(View::exists('w3.index.permissions'))
+					return view('w3.index.permissions')->with(compact('permissions'));
 				else{
 					$notification = $this->missing_view;
 					return back()->with(compact('notification'));
 				}
 			}else{
-				$notification = array('indicator'=>'warning', 'message'=>$permissions);
-				return back()->with(compact('notification'));
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$permissions));
 			}
 		}else{
-			$notification = array('indicator'=>'danger', 'message'=>'You are not allowed to view permissions');
-			return back()->with(compact('notification'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view permissions'));
 		}
 	}
 	
 	public function createPermission(){
-		if(Auth::user()->hasRole('supper_admin') && Auth::user()->can('create_permissions')){
+		if(Auth::user()->hasRole('super_admin')){
 			if(View::exists('w3.create.permission'))
-				return view('w3.create.permission');
+				return view('w3.create.permission')->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 			else{
-				$notification = $this->missing_view;
-				return back()->with(compact('notification'));
+				return back()->with('notification', $this->missing_view);
 			}
 		}else{
-			$notification = array('indicator'=>'danger', 'message'=>'You do not have permission to create permissions');
-			return back()->with(compact('notification'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to create permissions'));
 		}
 	}
 	
 	public function storePermission(Request $request){
-		if(Auth::user()->hasRole('supper_admin') && Auth::user()->can('create_permission')){
+		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('create_permissions')){
 			$validation = $this->ext->validatePermData($request->all());
 			if($validation->fails()){
-				return redirect('create-perm')
+				return redirect('create-permission')
 							->withErrors($validation)
 							->withInput();
 			}
-			
 			$notification = $this->mnt->createPerm($request->all());
 			if(in_array('success', $notification)){
-				if(View::exists('w3.index.permission')){
-					return redirect('w3.index.permission')
+				if(View::exists('w3.index.permissions')){
+					return redirect('permissions')
 								->with(compact('notification'));
 				}else
 					return back()->with(compact('notification'));
 			}else{
-				return redirect('w3.create.permission')
+				return redirect('create-permission')
 							->with(compact('notification'))
 							->withInput();
 			}
 		}else{
-			$notification = array('indicator'=>'danger', 'message'=>'You are not allowed to create a permission');
-			return back()->with(compact('notification'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to create a permission'));
 		}
 	}
 	
 	public function showPermission($uuid){
-		if(Auth::user()->hasRole('supper_admin') && Auth::user()->can('view_permissions')){
-			$permission = $this->ext->getPerm($uuid);
+		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('view_permissions')){
+			$permission = $this->ext->getPermission($uuid);
 			if(is_object($permission)){
 				if(View::exists('w3.show.permission')){
 					return view('w3.show.permission')->with(compact('permission'));
 				}else{
-					$notification = $this->missing_view;
-					return back()->with(compact('notification'));
+					return back()->with('notification', array('indicator'=>'danger', 'message'=>$this->missing_view));
 				}
 			}else{
-				$notification = array('indicator'=>'warning', 'message'=> $permission);
-				return back()->with(compact('notification'));
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $permission));
 			}
 		}else{
-			$notification = array('indicator'=>'danger', 'message'=>'You are not allowed to view permissions');
-			return back()->with(compact('notification'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view permissions'));
 		}
 	}
 	
 	public function editPermission($uuid){
-		if(Auth::user()->hasRole('supper_admin') && Auth::user()->can('edit_permission')){
-			$permission = $this->ext->getPerm($uuid);
+		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('edit_permissions')){
+			//middleware to prevent update
+			
+			$permission = $this->ext->getPermission($uuid);
 			if(is_object($permission)){
 				if(View::exists('w3.edit.permission')){
-					return view('w3.edit.permission')->with(compact('permission'));
+					return view('w3.edit.permission')->with(compact('permission'))
+							->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 				}else{
-					$notification = $this->missing_view;
-					return back()->with(compact('notification'));
+					return back()->with('notification', $this->missing_view);
 				}
 			}else{
 				$notification = array('indicator'=>'warning', 'message'=> $permission);
@@ -126,39 +118,41 @@ class AdminController extends Controller
 	}
 	
 	public function updatePermission(Request $request, $uuid){
-		if(Auth::user()->hasRole('supper_admin') && Auth::user()->can('edit_permission')){
+		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('edit_permissions')){
 			$validation = $this->ext->validatePermData($request->all());
 			if($validation->fails()){
-				return redirect('edit-perm')
+				return redirect('edit-permission/'.$uuid)
 							->withErrors($validation)
 							->withInput();
 			}
-			$perm = $this->ext->getPerm($uuid);
 			
-			$notification = $this->mnt->editPerm($request->all());
+			$perm = $this->ext->getPermission($uuid);
+			
+			$notification = $this->mnt->editPerm($request->all(), $uuid);
 			if(in_array('success', $notification)){
-				$perm = $this->ext->archivePerm($perm);
+				//$perm = $this->ext->archivePerm($perm);
 				if(View::exists('w3.show.permission')){
-					return redirect('w3.show.permission')
+					return redirect('permission/'.$uuid)
 								->with(compact('notification'));
 				}else
 					return back()->with(compact('notification'));
 			}else{
-				return redirect('w3.edit.permission')
+				return redirect('edit-permission/'.$uuid)
 							->with(compact('notification'))
 							->withInput();
 			}
 		}else{
-			$notification = array('indicator'=>'danger', 'message'=>'You are not allowed to edit a permission');
-			return back()->with(compact('notification'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to edit a permission'));
 		}
 	}
 	
 	public function deletePermission($uuid){
-		if(Auth::user()->hasRole('supper_admin') && Auth::user()->can('delete_permission')){
-			$permission = $this->ext->getPerm($uuid);
+		
+		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('delete_permissions')){
+			
+			$permission = $this->ext->getPermission($uuid); //var_dump($permission->description); return;
 			if(is_object($permission)){
-				return $this->ext->htmlentities(deletePerm($permission), ENT_QUOTES);
+				return $this->ext->deletePerm($permission);
 			}else{
 				return $this->ext->invalidDeletion();
 			}
@@ -169,13 +163,14 @@ class AdminController extends Controller
 	}
 	
 	public function destroyPermission($uuid){
-		if(Auth::user()->hasRole('supper_admin') && Auth::user()->can('delete_permission')){
-			$permission = $this->ext->getPerm($uuid);
+		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('delete_permissions')){
+			//middleware to prevent delete
+			$permission = $this->ext->getPermission($uuid);
 			if(is_object($permission)){
-				$notification = $this->mnt->deletePerm($request->all());
+				$notification = $this->mnt->deletePerm($permission);
 				if(in_array('success', $notification)){
-					if(View::exists('w3.index.permission')){
-						return redirect('w3.index.permission')
+					if(View::exists('w3.index.permissions')){
+						return redirect('permissions')
 									->with(compact('notification'));
 					}else
 						return back()->with(compact('notification'));
@@ -184,12 +179,28 @@ class AdminController extends Controller
 								->with(compact('notification'));
 				}
 			}else{
-				$notification = array('indicator'=>'warning', 'message'=> $permission);
-				return back()->with(compact('notification'));
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $permission));
 			}
 		}else{
 			$notification = array('indicator'=>'danger', 'message'=>'You are not allowed to edit a permission');
 			return back()->with(compact('notification'));
+		}
+	}
+	
+	public function searchPermission(Request $request){
+		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('view_permissions')){
+			$permissions = $this->ext->searchPermission($request->all());
+			if(is_object($permissions)){
+				if(View::exists('w3.index.permissions'))
+					return view('w3.index.permissions')->with(compact('permissions'));
+				else{
+					return back()->with('notification', $this->missing_view);
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$permissions));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view permissions'));
 		}
 	}
 }

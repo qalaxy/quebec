@@ -11,6 +11,7 @@ use App\Shell\Data\PermissionData;
 class AdminExt extends Base{
 	
 	private $perm_data;
+	private $rows = 15;
 	
 	public function __construct(){
 		$this->perm_data = new PermissionData();
@@ -18,7 +19,7 @@ class AdminExt extends Base{
 	
 	public function getPermissions(){
 		try{
-			$perms = Permission::all();
+			$perms = Permission::all()->paginate(2);
 			if(is_null($perms)){
 				throw new Exception('Permissions have not been retrieved successfully');
 			}
@@ -26,6 +27,30 @@ class AdminExt extends Base{
 			return $e->getMessage();
 		}
 		return $perms;
+	}
+	
+	public function getPaginatedPermissions(){
+		try{
+			$perms = Permission::paginate($this->perm_data->rows);
+			if(is_null($perms)){
+				throw new Exception('Permissions have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $perms;
+	}
+	
+	public function getPermission($uuid){
+		try{
+			$permission = Permission::withUuid($uuid)->first();
+			if(is_null($permission)){
+				throw new Exception('Permission has not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $permission;
 	}
 	
 	public function validatePermData(array $data){
@@ -47,7 +72,7 @@ class AdminExt extends Base{
 		if($this->recordValidator($old, Permission::withUuid($old->uuid)->first(), $keys)){
 			if(!is_int($this->archiver($old)))
 				$this->sendDeveloperEmail($old);
-			}
+			
 		}
 	}
 	
@@ -59,14 +84,28 @@ class AdminExt extends Base{
 						<h2>Delete permission</h2>
 					</header>
 					<div class="w3-container">
-						<p class="w3-padding-16">Your are about to delete this permission:</p>
-						<p>Name: '.$perm->name.'<br /> '.(is_null($perm->description) ? '' : '<br />Description: '.$perm->description).'</p>
-						<form id="destroy-perm" action="'.url('destroy-perm/'.$perm->uuid).'" method="POST" style="display: none;">
-                            @csrf
-							<input type="hidden" name="delete" value="true" readonly/>
-                        </form>
+						<p class="w3-padding-8 w3-large">Your are about to delete a permission:</p>
+						<p><strong>Name:</strong> '.$perm->display_name.'<br /> '.((strlen($perm->description) < 1) ? '' : '<br /><strong>Description:</strong> '.$perm->description).'</p>
 					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-permission').'/'.$perm->uuid.'" title="Delete permission">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
 				</div>';
+	}
+	
+	public function searchPermission(array $data){
+		//prepare search params
+		$params = $this->prepareSearchParam($data);
+		
+		if(isset($data['name']) && isset($data['display_name']))
+			$permissions = Permission::where('name',$data['name'])->where('display_name', $data['display_name']);
+		else if(isset())
+			$permissions = Permission::where('name',$data['name'])
+			
 	}
 }
 

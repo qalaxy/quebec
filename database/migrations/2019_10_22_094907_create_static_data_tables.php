@@ -21,7 +21,7 @@ class CreateStaticDataTables extends Migration
 			$table->uuid('uuid');
 			$table->string('name');
 			$table->string('code');
-			$table->string('description');
+			$table->string('description')->nullable();
             $table->timestamps();
 			$table->softDeletes();
         });
@@ -30,7 +30,7 @@ class CreateStaticDataTables extends Migration
             $table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->string('name');
-			$table->string('description');
+			$table->string('description')->nullable();
             $table->timestamps();
 			$table->softDeletes();
         });
@@ -39,7 +39,7 @@ class CreateStaticDataTables extends Migration
             $table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->string('name');
-			$table->string('description');
+			$table->string('description')->nullable();
             $table->timestamps();
 			$table->softDeletes();
         });
@@ -48,7 +48,7 @@ class CreateStaticDataTables extends Migration
             $table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->string('name');
-			$table->string('description');
+			$table->string('description')->nullable();
             $table->timestamps();
 			$table->softDeletes();
         });
@@ -57,7 +57,7 @@ class CreateStaticDataTables extends Migration
             $table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->string('name');
-			$table->string('description');
+			$table->string('description')->nullable();
             $table->timestamps();
 			$table->softDeletes();
         });

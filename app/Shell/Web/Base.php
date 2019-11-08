@@ -24,7 +24,7 @@ class Base{
 		}while(is_null($f_status));
 		
 		$data = array();
-		$url = asset('App\Shell\Data\Archive\\'.$table.'\\'.record->uuid.'.json');
+		$url = asset('App\Shell\Data\Archive\\'.$table.'\\'.$record->uuid.'.json');
 		$file = fopen($url);
 		if($file){
 			$data = fread($file, filesize($url));
@@ -73,7 +73,7 @@ class Base{
 			$locker = fopen($url, 'w');
 			array_push($data, array('file'=>$record->uuid, 'status'=>$status, 'user'=>Auth::id()));
 		}
-		$fw = fwrite($locker, json_encode($data))
+		$fw = fwrite($locker, json_encode($data));
 		fclose($locker);
 		return $fw;
 	}
@@ -91,6 +91,17 @@ class Base{
 	
 	protected function sendDeveloperEmail(object $record){
 		//
+	}
+	
+	protected function prepareSearchParam(array $data){
+		//get keys
+		$keys = array_keys($data);
+		//get data
+		for($i = 0; $i < count($keys); $i++){
+			if(is_null($data[$keys[$i]]))
+				unset($data[$keys[$i]]);
+		}
+		return $data;
 	}
 }
 
