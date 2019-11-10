@@ -16,6 +16,19 @@ class PermTableSeeder extends Seeder
 					array('name'=>'create_permissions', 'display_name'=>'Create permissions', 'description'=>''),
 					array('name'=>'edit_permissions', 'display_name'=>'Edit permissions', 'description'=>'User can edit permissions'),
 					array('name'=>'delete_permissions', 'display_name'=>'Delete permissions', 'description'=>''),
+					array('name'=>'perm_1', 'display_name'=>'Some permission', 'description'=>'Permission 1'),
+					array('name'=>'perm_2', 'display_name'=>'Some permission', 'description'=>'Permission 2'),
+					array('name'=>'perm_3', 'display_name'=>'Some permission', 'description'=>'Permission 3'),
+					array('name'=>'perm_4', 'display_name'=>'Some permission', 'description'=>'Permission 4'),
+					array('name'=>'perm_5', 'display_name'=>'Some permission', 'description'=>'Permission 5'),
+					array('name'=>'perm_6', 'display_name'=>'Some permission', 'description'=>'Permission 6'),
+					array('name'=>'perm_7', 'display_name'=>'Some permission', 'description'=>'Permission 7'),
+					array('name'=>'view_roles', 'display_name'=>'View roles', 'description'=>''),
+					array('name'=>'create_roles', 'display_name'=>'Create roles', 'description'=>''),
+					array('name'=>'edit_roles', 'display_name'=>'Edit roles', 'description'=>''),
+					array('name'=>'delete_roles', 'display_name'=>'Delete roles', 'description'=>''),
+					array('name'=>'view_role_permissions', 'display_name'=>'View role permissions', 'description'=>''),
+					array('name'=>'add_role_permission', 'display_name'=>'Add role permissions', 'description'=>''),
 		);
 		
 		for($i = 0; $i < count($perms); $i++){

@@ -15,23 +15,30 @@ class AdminController extends Controller
 	private $ext;
 	private $mnt;
 	private $missing_view = array('indicator'=>'information', 'message'=>'The web application interface is missing');
-	private $rec_num = 15;
 	
     public function __construct(){
 		$this->ext = new AdminExt();
 		$this->mnt = new AdminMnt();
 		$this->middleware('auth');
+		
 	}
 	
-	public function permissions(){
+	public function permissions(Request $request){
 		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('view_permissions')){
-			$permissions = $this->ext->getPaginatedPermissions();
+			if(count($request->all())){
+				$permissions = $this->ext->searchPermission($request->all());
+			}else{				
+				$permissions = $this->ext->getPaginatedPermissions();
+			}
 			if(is_object($permissions)){
 				if(View::exists('w3.index.permissions'))
-					return view('w3.index.permissions')->with(compact('permissions'));
+					if(count($permissions))
+						return view('w3.index.permissions')->with(compact('permissions'));
+					else
+						return view('w3.index.permissions')->with(compact('permissions'))
+								->with('notification', array('indicator'=>'warning', 'message'=>'Permissions not found'));
 				else{
-					$notification = $this->missing_view;
-					return back()->with(compact('notification'));
+					return back()->with('notification', $this->missing_view);
 				}
 			}else{
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$permissions));
@@ -61,10 +68,10 @@ class AdminController extends Controller
 							->withErrors($validation)
 							->withInput();
 			}
-			$notification = $this->mnt->createPerm($request->all());
+			$notification = $this->mnt->createPerm($request->all()); //return var_dump($notification['uuid']);
 			if(in_array('success', $notification)){
-				if(View::exists('w3.index.permissions')){
-					return redirect('permissions')
+				if(View::exists('w3.show.permission')){
+					return redirect('permission/'.$notification['uuid'])
 								->with(compact('notification'));
 				}else
 					return back()->with(compact('notification'));
@@ -97,8 +104,6 @@ class AdminController extends Controller
 	
 	public function editPermission($uuid){
 		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('edit_permissions')){
-			//middleware to prevent update
-			
 			$permission = $this->ext->getPermission($uuid);
 			if(is_object($permission)){
 				if(View::exists('w3.edit.permission')){
@@ -126,7 +131,7 @@ class AdminController extends Controller
 							->withInput();
 			}
 			
-			$perm = $this->ext->getPermission($uuid);
+			//$perm = $this->ext->getPermission($uuid);
 			
 			$notification = $this->mnt->editPerm($request->all(), $uuid);
 			if(in_array('success', $notification)){
@@ -147,10 +152,11 @@ class AdminController extends Controller
 	}
 	
 	public function deletePermission($uuid){
+		if(session()->has('params')) session()->reflash();
 		
 		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('delete_permissions')){
 			
-			$permission = $this->ext->getPermission($uuid); //var_dump($permission->description); return;
+			$permission = $this->ext->getPermission($uuid);
 			if(is_object($permission)){
 				return $this->ext->deletePerm($permission);
 			}else{
@@ -164,7 +170,6 @@ class AdminController extends Controller
 	
 	public function destroyPermission($uuid){
 		if(Auth::user()->hasRole('super_admin') && Auth::user()->can('delete_permissions')){
-			//middleware to prevent delete
 			$permission = $this->ext->getPermission($uuid);
 			if(is_object($permission)){
 				$notification = $this->mnt->deletePerm($permission);
@@ -203,4 +208,6 @@ class AdminController extends Controller
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view permissions'));
 		}
 	}
+	
+	
 }

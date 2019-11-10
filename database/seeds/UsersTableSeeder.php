@@ -18,6 +18,7 @@ class UsersTableSeeder extends Seeder
 					array('name'=>'Seth','email'=>'seth@email', 'password'=>'12345678'),
 					array('name'=>'Kibet','email'=>'kibeliask@gmail.com', 'password'=>'12345678'),
 					array('name'=>'Korir','email'=>'ekorir@kcaa.or.ke', 'password'=>'12345678'),
+					array('name'=>'John','email'=>'jnjoroge@kcaa.or.ke', 'password'=>'12345678'),
 				);
 				
 		for($i = 0; $i < count($users); $i++){

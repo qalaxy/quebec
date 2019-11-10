@@ -4,6 +4,8 @@ namespace App\Shell\Web;
 use Illuminate\Support\Facades\Auth;
 class Base{
 
+	protected $missing_view = array('indicator'=>'information', 'message'=>'The web application interface is missing');
+	
 	protected function checkUuid($uuid){
 		
 	}
@@ -93,15 +95,30 @@ class Base{
 		//
 	}
 	
-	protected function prepareSearchParam(array $data){
-		//get keys
-		$keys = array_keys($data);
-		//get data
-		for($i = 0; $i < count($keys); $i++){
-			if(is_null($data[$keys[$i]]))
-				unset($data[$keys[$i]]);
+	protected function prepareSearchParam(array $request, array $keys){		
+		$params = array(); $data = array();
+		
+		if(session()->has('params')){
+			for($i = 0; $i < count($keys); $i++){
+				if(array_key_exists($keys[$i], $request))
+					$data[$keys[$i]] = $request[$keys[$i]];
+			}
+			if(empty($data))
+				$data = session('params');
+		}else{
+			$data = $request;
 		}
-		return $data;
+		
+		for($i = 0; $i < count($keys); $i++){
+			if(array_key_exists($keys[$i], $data)){
+				if(is_null($data[$keys[$i]]))
+					continue;
+				else
+					array_push($params, [$keys[$i], $data[$keys[$i]]]);
+			}
+		}
+		session()->flash('params', $data);
+		return $params;
 	}
 }
 

@@ -17,6 +17,17 @@ class RolePermTableSeeder extends Seeder
 						array('role'=>'super_admin', 'perm'=>'create_permissions'),
 						array('role'=>'super_admin', 'perm'=>'edit_permissions'),
 						array('role'=>'super_admin', 'perm'=>'delete_permissions'),
+						array('role'=>'super_admin', 'perm'=>'view_roles'),
+						array('role'=>'super_admin', 'perm'=>'create_roles'),
+						array('role'=>'super_admin', 'perm'=>'edit_roles'),
+						array('role'=>'super_admin', 'perm'=>'delete_roles'),
+						array('role'=>'system_admin', 'perm'=>'view_roles'),
+						array('role'=>'system_admin', 'perm'=>'create_roles'),
+						array('role'=>'system_admin', 'perm'=>'edit_roles'),
+						array('role'=>'system_admin', 'perm'=>'delete_roles'),
+						array('role'=>'admin', 'perm'=>'view_roles'),
+						array('role'=>'super_admin', 'perm'=>'view_role_permissions'),
+						array('role'=>'super_admin', 'perm'=>'add_role_permission'),
 	   ); 
 	   
 	   $roles = Role::all();

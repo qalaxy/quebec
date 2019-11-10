@@ -96,4 +96,8 @@ class User extends Authenticatable
 	public function systemErrorNotification(){
 		return $this->hasMany('App\SystemErrorNotification', 'user_id');
 	}
+	
+	public function tracker(){
+		return $this->hasMany('App\Tracker', 'user_id');
+	}
 }

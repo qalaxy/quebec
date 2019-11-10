@@ -29,7 +29,7 @@ class AdminExe extends Base{
 				throw new Exception('Permission has not been created successfully');
 			}
 			else{
-				$this->success = array('indicator'=>'success', 'message'=>'Permission successfully created');
+				$this->success = array('indicator'=>'success', 'message'=>'Permission successfully created', 'uuid'=>$perm->uuid);
 			}
 		}catch(Exception $e){
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());

@@ -11,7 +11,6 @@ use App\Shell\Data\PermissionData;
 class AdminExt extends Base{
 	
 	private $perm_data;
-	private $rows = 15;
 	
 	public function __construct(){
 		$this->perm_data = new PermissionData();
@@ -19,7 +18,7 @@ class AdminExt extends Base{
 	
 	public function getPermissions(){
 		try{
-			$perms = Permission::all()->paginate(2);
+			$perms = Permission::all();
 			if(is_null($perms)){
 				throw new Exception('Permissions have not been retrieved successfully');
 			}
@@ -98,14 +97,17 @@ class AdminExt extends Base{
 	}
 	
 	public function searchPermission(array $data){
-		//prepare search params
-		$params = $this->prepareSearchParam($data);
 		
-		if(isset($data['name']) && isset($data['display_name']))
-			$permissions = Permission::where('name',$data['name'])->where('display_name', $data['display_name']);
-		else if(isset())
-			$permissions = Permission::where('name',$data['name'])
-			
+		$params = $this->prepareSearchParam($data, ['name','display_name']);
+		try{
+			$permissions = Permission::where($params)->paginate($this->perm_data->rows);
+			if(is_null($permissions)){
+				throw new Exception('Permissions could not be retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $permissions;		
 	}
 }
 

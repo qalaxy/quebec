@@ -16,6 +16,7 @@ class RoleUserTableSeeder extends Seeder
         $role_user = array(array('user'=>'Kibet', 'role'=>'super_admin'),
 						array('user'=>'Korir', 'role'=>'system_admin'),
 						array('user'=>'elias', 'role'=>'admin'),
+						array('user'=>'John', 'role'=>'super_admin'),
 		);
 		
 		$users = User::all();

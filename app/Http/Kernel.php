@@ -65,6 +65,7 @@ class Kernel extends HttpKernel
 		'permission' => \Zizaco\Entrust\Middleware\EntrustPermission::class,
 		'ability' => \Zizaco\Entrust\Middleware\EntrustAbility::class,
 		'guardian' => \App\Http\Middleware\GuardPermission::class,
+		'tracker'=> \App\Http\Middleware\ActionTracker::class,
     ];
 
     /**

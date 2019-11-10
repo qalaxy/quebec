@@ -74,6 +74,18 @@ class CreateStaticDataTables extends Migration
             $table->primary(['product_id', 'function_id']);
 		});
 		
+		Schema::create('trackers', function (Blueprint $table) {
+            $table->bigIncrements('id');
+			$table->uuid('uuid');
+			$table->unsignedBigInteger('user_id');
+			$table->string('action');
+			$table->date('date');
+			$table->time('time');
+            $table->timestamps();
+			$table->softDeletes();
+			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+        });
+		
 		
 		DB::commit();
     }
@@ -85,6 +97,7 @@ class CreateStaticDataTables extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('trackers');
         Schema::dropIfExists('function_product');
         Schema::dropIfExists('functions');
         Schema::dropIfExists('products');

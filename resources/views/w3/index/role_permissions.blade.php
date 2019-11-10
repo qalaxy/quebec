@@ -1,16 +1,16 @@
 @extends('w3.layout.app')
 
 @section('title')
-<title>Permissions</title>
+<title>Role permissions</title>
 @endsection
 
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Permissions</h1>
+  <h1 class="w3-xlarge">Role permissions</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		<div class="w3-row">
-			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{asset('/create-permission')}}">CREATE</a>
+			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{($role)?url('/add-role-permission/'.$role->uuid):null}}">CREATE</a>
 			<button class="w3-button w3-blue w3-hover w3-hover-light-blue w3-right" onclick="document.getElementById('search').style.display='block'">SEARCH</button>
 		</div>
 		<div id="search" class="w3-modal">
@@ -18,10 +18,10 @@
 				<header class="w3-container w3-theme"> 
 					<span onclick="document.getElementById('search').style.display='none'" 
 					class="w3-button w3-display-topright">&times;</span>
-					<h2>Search permissions</h2>
+					<h2>Search roles</h2>
 				</header>
 				<div class="w3-container w3-padding-24">
-					<form class="w3-container" method="POST" action="{{url('/permissions')}}">
+					<form class="w3-container" method="POST" action="{{url('/roles')}}">
 						@csrf
 						<div class="w3-row">
 							<div class="w3-col s12 m6 l6">
@@ -63,18 +63,11 @@
 						</div>
 						<div class="w3-row">
 							<div class="w3-col w3-padding-small">
-								<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Search permission">Go&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
+								<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Search roles">Go&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
 							</div>
 						</div>
 					</form>
 				</div>
-				<!--<footer class="w3-container ">
-					<div class="w3-row w3-padding-16">
-						<div class="w3-col">
-							<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Search permission">Search&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>	
-						</div>
-					</div>
-				</footer>-->
 			</div>
 		</div>
 		<div id="delete" class="w3-modal">
@@ -87,14 +80,13 @@
 				<tr class="w3-theme w3-text-white">
 					<th>Name</th>
 					<th>Description</th>
-					<th colspan="2"></th>
+					<th></th>
 				</tr>
 				@foreach($permissions as $permission)
 				<tr>
 					<td><a href="{{url('permission/'.$permission->uuid)}}" style="text-decoration:none;">{{$permission->display_name}}</a></td>
 					<td><a href="{{url('permission/'.$permission->uuid)}}" style="text-decoration:none;">{{$permission->description}}</a></td>
-					<td><a class="w3-button" href="{{url('edit-permission/'.$permission->uuid)}}" title="Edit {{$permission->display_name}}"><i class="fa fa-edit fa-lg"></i></a></td>
-					<td><button class="w3-button" onclick="deletePerm('{{$permission->uuid}}');" title="Delete {{$permission->display_name}}">
+					<td><button class="w3-button" onclick="deleteRolePerm('{{$permission->uuid}}');" title="Delete {{$permission->display_name}}">
 						<i class="fa fa-trash fa-lg"></i>
 						</button>
 					</td>
@@ -115,15 +107,15 @@
 @section('scripts')
 <script>
 
-document.getElementById('permissions').className += " w3-text-blue";
+document.getElementById('roles').className += " w3-text-blue";
 document.getElementById('menu-administration').className += " w3-text-blue";
 menuAcc('administration');
 w3_show_nav('menuQMS');
 
-function deletePerm(uuid){
+function deleteRole(uuid){
 	let xhr = new XMLHttpRequest();
 	
-	xhr.open("GET", "{{url('delete-permission')}}/"+uuid);
+	xhr.open("GET", "{{url('delete-role')}}/"+uuid);
 	xhr.send();
 	
 	xhr.onreadystatechange = function(){
