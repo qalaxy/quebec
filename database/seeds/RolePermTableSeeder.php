@@ -28,8 +28,14 @@ class RolePermTableSeeder extends Seeder
 						array('role'=>'admin', 'perm'=>'view_roles'),
 						array('role'=>'super_admin', 'perm'=>'view_role_permissions'),
 						array('role'=>'super_admin', 'perm'=>'add_role_permission'),
+						array('role'=>'super_admin', 'perm'=>'delete_role_permissions'),
+						array('role'=>'super_admin', 'perm'=>'view_users'),
+						array('role'=>'super_admin', 'perm'=>'create_users'),
+						array('role'=>'super_admin', 'perm'=>'edit_users'),
+						array('role'=>'super_admin', 'perm'=>'delete_users'),
 	   ); 
-	   
+	   //role e18b3170-045b-11ea-8128-1996de07c7a6, perm def10b50-046b-11ea-8926-5b9fa0c0bb69
+	   //http://127.0.0.1/quebec/delete-role-permission/e1555460-045b-11ea-b69d-d3ec56a6c0c2/e18b3170-045b-11ea-8128-1996de07c7a6
 	   $roles = Role::all();
 	   $perms = Permission::all();
 	   for($i = 0; $i < count($role_perm); $i++){

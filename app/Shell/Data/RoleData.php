@@ -8,6 +8,8 @@ class RoleData{
 	public $display_name_key = 'display_name';
 	public $description_key = 'description';
 	public $permission_key = 'permission';
+	public $permission_id_key = 'permission_id';
+	public $role_id_key = 'role_id';
 	
 	public $name_req = 'required|alpha_dash';
 	public $display_name_req = 'required|regex:/[a-zA-Z0-9\ \-\.]+/';

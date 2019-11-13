@@ -43,14 +43,24 @@ class RoleMnt extends RoleExe{
 	}
 	
 	public function addRolePerm($role, $permission){
-		$this->data = $data;
 		DB::beginTransaction();
 		$role_perm = $this->storeRolePerm($role, $permission);
 		if(is_null($role_perm)){
 			DB::rollback();
 			return $this->error;
 		}
-		DB::rollback();
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function deleteRolePermission($role, $permission){
+		DB::beginTransaction();
+		$role_perm = $this->destroyRolePerm($role, $permission);
+		if(is_null($role_perm)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::commit();
 		return $this->success;
 	}
 }

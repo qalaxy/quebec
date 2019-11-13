@@ -29,6 +29,11 @@ class PermTableSeeder extends Seeder
 					array('name'=>'delete_roles', 'display_name'=>'Delete roles', 'description'=>''),
 					array('name'=>'view_role_permissions', 'display_name'=>'View role permissions', 'description'=>''),
 					array('name'=>'add_role_permission', 'display_name'=>'Add role permissions', 'description'=>''),
+					array('name'=>'delete_role_permissions', 'display_name'=>'Delete role permissions', 'description'=>''),
+					array('name'=>'view_users', 'display_name'=>'View users accounts', 'description'=>''),
+					array('name'=>'create_users', 'display_name'=>'Create users account', 'description'=>''),
+					array('name'=>'edit_users', 'display_name'=>'Edit users account', 'description'=>''),
+					array('name'=>'delete_users', 'display_name'=>'Delete users account', 'description'=>''),
 		);
 		
 		for($i = 0; $i < count($perms); $i++){

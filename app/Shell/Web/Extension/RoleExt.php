@@ -5,6 +5,7 @@ use Exception;
 use App\Role;
 use App\Permission;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 use App\Shell\Web\Base;
 use App\Shell\Data\RoleData;
@@ -96,7 +97,7 @@ class RoleExt extends Base{
 		return $permissions;
 	}
 	
-	public function getPaginatedRolePermissions($role){
+	public function getPaginatedRolePermissions(object $role){
 		try{
 			$permissions = $role->permission()->paginate($this->role_data->rows);
 			if(is_null($permissions)){
@@ -138,6 +139,48 @@ class RoleExt extends Base{
 		return Validator::make($data, $rules, $this->role_data->rolePermValidationMsgs);
 	}
 	
+	public function getPermNotInRole(object $role){
+		try{
+			$permissions = DB::table('permissions')
+								->whereNotIn('permissions.id', function($query) use($role){
+									$query->select(DB::raw('permission_id'))
+									->from('permission_role')
+									->whereRaw('permission_role.role_id='.$role->id);
+								})
+								->get();
+								
+			if(is_null($permissions)){
+				throw new Exception('Permissions have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $permissions;
+	}
+	
+	public function deleteRolePermission(object $role, object $perm){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete role\'s permission</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-8 w3-large">Your are about to delete a permission for the role \''.$role->display_name.'\':</p>
+						<p><strong>Name:</strong> '.$perm->display_name.'<br /> '.((strlen($perm->description) < 1) ? '' : '<br /><strong>Description:</strong> '.$perm->description).'</p>
+						
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<p class="w3-padding-8 w3-text-red">Are you sure you want to delete?</p>
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-role-permission').'/'.$role->uuid.'/'.$perm->uuid.'" title="Delete role permission">YES&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+								<button class="w3-button w3-large w3-theme w3-hover-light-blue" title="Dismiss" onclick="document.getElementById(\'delete\').style.display=\'none\'">NO&nbsp;</button>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
 }
 
 ?>

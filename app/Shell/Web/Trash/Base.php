@@ -4,8 +4,6 @@ namespace App\Shell\Web;
 use Illuminate\Support\Facades\Auth;
 class Base{
 
-	public $missing_view = array('indicator'=>'information', 'message'=>'The web application interface is missing');
-	
 	protected function checkUuid($uuid){
 		
 	}
@@ -35,7 +33,7 @@ class Base{
 			$new_record = array('sn'=>$data(count)+1,
 					'record' => $this->getRecord($record),
 					'datetime' => date('Y-m-d h:i:s'),
-					'user' => Auth::user()->uuid,
+					'user' => Auth::id(),
 				);
 			array_push($data, $new_record);
 			ftruncate($file, 0);
@@ -44,7 +42,7 @@ class Base{
 			$new_record = array('sn'=>1,
 						'record' => $this->getRecord($record),
 						'datetime' => date('Y-m-d h:i:s'),
-						'user' => Auth::user()->uuid,
+						'user' => Auth::id(),
 					);
 			array_push($data, $new_record);
 		}
@@ -64,7 +62,7 @@ class Base{
 				if($data[$i]['file'] == $record->uuid){
 					if($data[$i]['status'] != $status){
 						$data[$i]['status'] = $status;
-						$data[$i]['user'] = Auth::user()->uuid;
+						$data[$i]['user'] = Auth::id();
 						ftruncate($locker, 0);
 					}
 					fclose($locker);
@@ -95,50 +93,17 @@ class Base{
 		//
 	}
 	
-	protected function prepareSearchParam(array $request, array $keys){		
-		$params = array(); $data = array();
-		
-		if(session()->has('params')){
-			for($i = 0; $i < count($keys); $i++){
-				if(array_key_exists($keys[$i], $request))
-					$data[$keys[$i]] = $request[$keys[$i]];
-			}
-			if(empty($data))
-				$data = session('params');
-		}else{
-			$data = $request;
-		}
-		
+	protected function prepareSearchParam(array $data){
+		//get keys
+		$keys = array_keys($data);
+		//get data
 		for($i = 0; $i < count($keys); $i++){
-			if(array_key_exists($keys[$i], $data)){
-				if(is_null($data[$keys[$i]]))
-					continue;
-				else
-					array_push($params, [$keys[$i], $data[$keys[$i]]]);
-			}
+			if(is_null($data[$keys[$i]]))
+				unset($data[$keys[$i]]);
+			else
 		}
-		session()->flash('params', $data);
-		return $params;
-	}
-	
-	public function invalidDeletion(){
-		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
-					<header class="w3-container w3-theme"> 
-						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
-						class="w3-button w3-display-topright">&times;</span>
-						<h2>Invalid deletion</h2>
-					</header>
-					<div class="w3-container">
-						<p class="w3-padding-8 w3-large">Sorry, your deletion request is not valid</p>
-					</div>
-					<footer class="w3-container ">
-						<div class="w3-row w3-padding-16">
-							<div class="w3-col">
-								<button class="w3-button w3-large w3-theme w3-hover-light-blue" title="Dismiss" onclick="document.getElementById(\'delete\').style.display=\'none\'">OK&nbsp;</button>
-							</div>
-						</div>
-					</footer>
-				</div>';
+		//prepare data here
+		return $data;
 	}
 }
 

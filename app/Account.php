@@ -13,9 +13,9 @@ class Account extends Model
 	
     protected $table = 'accounts';
 	
-	protected $fillable = ['uuid', 'user_id', 'first_name', 'middle_name', 'last_name', 'p_number', 'gender'];
+	protected $fillable = ['uuid', 'user_id', 'first_name', 'middle_name', 'last_name', 'p_number'];
 	
-	public function user(){
+	public function owner(){
 		return $this->belongsTo('App\User', 'user_id');
 	}
 	
@@ -29,5 +29,9 @@ class Account extends Model
 	
 	public function email(){
 		return $this->belongsToMany('App\Email', 'account_email', 'account_id', 'email_id');
+	}
+	
+	public function user(){
+		return $this->belongsToMany('App\User', 'account_user', 'account_id', 'user_id');
 	}
 }

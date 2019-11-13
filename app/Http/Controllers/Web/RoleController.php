@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 
+
 use App\Shell\Web\Extension\RoleExt;
 use App\Shell\Web\Monitor\RoleMnt;
 
@@ -35,7 +36,7 @@ class RoleController extends Controller
 						return view('w3.index.roles')->with(compact('roles'));
 					else
 						return view('w3.index.roles')->with(compact('roles'))
-								->with('notification', array('indicator'=>'warning', 'message'=>'Roles not found'));
+								->with('notification', array('indicator'=>'warning', 'message'=>'Role(s) could not found'));
 				else{
 					return back()->with('notification', $this->ext->missing_view);
 				}
@@ -154,7 +155,7 @@ class RoleController extends Controller
 		if(Auth::user()->can('delete_roles')){
 			
 			$role = $this->ext->getRole($uuid);
-			if(is_object($role)){
+			if(!is_object($role)){
 				return $this->ext->deleteRole($role);
 			}else{
 				return $this->ext->invalidDeletion();
@@ -186,7 +187,7 @@ class RoleController extends Controller
 		}
 	}
 	
-	public function rolePermission(Request $request, $uuid){
+	public function rolePermissions(Request $request, $uuid){
 		if(Auth::user()->can('view_role_permissions')){
 			$role = $this->ext->getRole($uuid);
 			if(!is_object($role)){
@@ -219,7 +220,7 @@ class RoleController extends Controller
 		if(Auth::user()->can('add_role_permission')){
 			$role = $this->ext->getRole($uuid);
 			if(is_object($role)){
-				$permissions = $this->ext->getPermissions();
+				$permissions = $this->ext->getPermNotInRole($role);
 				if(is_object($permissions)){
 					if(View::exists('w3.create.role_permission')){
 						return view('w3.create.role_permission')->with(compact('role', 'permissions'));
@@ -245,7 +246,7 @@ class RoleController extends Controller
 							->withErrors($validation)
 							->withInput();
 			}
-			$permission = $this->ext->getPermission($request['permission']);
+			$permission = $this->ext->getPermission($request['permission']); //return $permission;
 			if(!is_object($permission)){
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$permission));
 			}
@@ -268,4 +269,44 @@ class RoleController extends Controller
 		}
 	}
 	
+	public function deleteRolePermission($role_uuid, $perm_uuid){
+		if(session()->has('params')) session()->reflash();
+		
+		if(Auth::user()->can('delete_role_permissions')){
+			$permission = $this->ext->getPermission($perm_uuid);
+			
+			$role = $this->ext->getRole($role_uuid);
+			if(is_object($permission) &&(is_object($role))){
+				return $this->ext->deleteRolePermission($role, $permission);
+				
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a role\'s permission'));
+		}
+	}
+	
+	public function destroyRolePermission($role_uuid, $perm_uuid){
+		if(Auth::user()->can('delete_roles')){
+			$role = $this->ext->getRole($role_uuid);
+			$permission = $this->ext->getPermission($perm_uuid);
+			if(is_object($role) && is_object($permission)){
+				$notification = $this->mnt->deleteRolePermission($role, $permission);
+				if(in_array('success', $notification)){
+					if(View::exists('w3.index.role_permissions')){
+						return redirect('role-permissions/'.$role->uuid)
+									->with(compact('notification'));
+					}else
+						return back()->with(compact('notification'));
+				}else{
+					return back()->with(compact('notification'));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $role));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a role\'s permission'));
+		}
+	}
 }

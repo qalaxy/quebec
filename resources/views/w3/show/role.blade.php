@@ -53,7 +53,7 @@
 					<a class="w3-button w3-theme" onclick="deleteRole('{{($role->uuid)?$role->uuid : null}}');">Delete</a>
 				</div>
 				<div class="w3-col s12 m12 l2 w3-left">
-					<a class="w3-button w3-theme" href="{{($role->uuid)? url('add-role-permission').'/'.$role->uuid:null}}">Add permission</a>
+					<a class="w3-button w3-theme" href="{{($role->uuid)? url('role-permissions').'/'.$role->uuid:null}}">Role's permissions</a>
 				</div>
 			</div>
 		</div>

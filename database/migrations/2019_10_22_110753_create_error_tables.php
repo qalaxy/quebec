@@ -84,8 +84,7 @@ class CreateErrorTables extends Migration
 
             $table->foreign('message_id')->references('id')->on('messages')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('response_id')->references('id')->on('messages')->onUpdate('cascade')->onDelete('cascade');
-
-            $table->primary(['message_id', 'response_id']);
+			
 		});
 		
 		Schema::create('notification_recipients', function (Blueprint $table) {

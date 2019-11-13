@@ -70,8 +70,6 @@ class CreateStaticDataTables extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('function_id')->references('id')->on('functions')
                 ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->primary(['product_id', 'function_id']);
 		});
 		
 		Schema::create('trackers', function (Blueprint $table) {

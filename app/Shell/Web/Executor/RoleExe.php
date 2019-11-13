@@ -3,6 +3,7 @@ namespace App\Shell\Web\Executor;
 
 use Exception;
 use App\Role;
+use App\PermissionRole;
 
 use App\Shell\Web\Base;
 use App\Shell\Data\RoleData;
@@ -72,11 +73,8 @@ class RoleExe extends Base{
 	
 	protected function storeRolePerm($role, $permission){
 		try{
-			$role->permission()->attach($permission);
-			$perm = $role->permission()->where($permission->id)->first();
-			
-			if($permission != $perm){
-				throw new Exception('Permission has been added to the role successfully');
+			if($role->permission()->attach($permission)){
+				throw new Exception('Permission has not been added to the role successfully');
 			}else{
 				$this->success = array('indicator'=>'success', 'message'=>'Permission has been added to the role successfully');
 			}
@@ -84,8 +82,22 @@ class RoleExe extends Base{
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
 			return null;
 		}
-		$perm;
+		return $role;
 	}
 	
+	protected function destroyRolePerm($role, $perm){
+		try{
+			$role_perm = $role->permission()->detach($perm);
+			if(is_null($role_perm)){
+				throw new Exception('Permission for the role '.$role->display_name.' has not been deleted successfully'.$role_perm);
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Permission has been deleted successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $role_perm;
+	}
 }
 ?>

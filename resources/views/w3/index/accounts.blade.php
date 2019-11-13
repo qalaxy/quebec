@@ -1,27 +1,27 @@
 @extends('w3.layout.app')
 
 @section('title')
-<title>Role permissions</title>
+<title>Accounts</title>
 @endsection
 
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Permissions for: {{($role)?$role->display_name:null}}</h1>
+  <h1 class="w3-xlarge">Accounts</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		<div class="w3-row">
-			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{($role)?url('/add-role-permission/'.$role->uuid):null}}" title="Add more permission">ADD</a>
-			<!--<button class="w3-button w3-blue w3-hover w3-hover-light-blue w3-right" onclick="document.getElementById('search').style.display='block'">SEARCH</button>-->
+			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{url('/create-account')}}">CREATE</a>
+			<button class="w3-button w3-blue w3-hover w3-hover-light-blue w3-right" onclick="document.getElementById('search').style.display='block'">SEARCH</button>
 		</div>
 		<div id="search" class="w3-modal">
 			<div class="w3-modal-content w3-animate-zoom w3-card-4">
 				<header class="w3-container w3-theme"> 
 					<span onclick="document.getElementById('search').style.display='none'" 
 					class="w3-button w3-display-topright">&times;</span>
-					<h2>Search roles</h2>
+					<h2>Search accounts</h2>
 				</header>
 				<div class="w3-container w3-padding-24">
-					<form class="w3-container" method="POST" action="{{url('/roles')}}">
+					<form class="w3-container" method="POST" action="{{url('/accounts')}}">
 						@csrf
 						<div class="w3-row">
 							<div class="w3-col s12 m6 l6">
@@ -63,7 +63,7 @@
 						</div>
 						<div class="w3-row">
 							<div class="w3-col w3-padding-small">
-								<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Search roles">Go&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
+								<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Search accounts">Go&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
 							</div>
 						</div>
 					</form>
@@ -74,19 +74,25 @@
 			
 		</div>
 		@include('w3.components.notification')
-		@isset($permissions)
+		@isset($accounts)
 		<div class="w3-responsive w3-white w3-padding-16 w3-text-dark-gray">
 			<table class="w3-table-all w3-hoverable">
 				<tr class="w3-theme w3-text-white">
 					<th>Name</th>
-					<th>Description</th>
-					<th></th>
+					<th>P Number</th>
+					<th>Status</th>
+					<th colspan="2"></th>
 				</tr>
-				@foreach($permissions as $permission)
+				@foreach($accounts as $account)
 				<tr>
-					<td><a href="{{url('permission/'.$permission->uuid)}}" style="text-decoration:none;">{{$permission->display_name}}</a></td>
-					<td><a href="{{url('permission/'.$permission->uuid)}}" style="text-decoration:none;">{{$permission->description}}</a></td>
-					<td><button class="w3-button" onclick="deleteRolePerm('{{$role->uuid}}', '{{$permission->uuid}}');" title="Delete {{$permission->display_name}}">
+					<td><a href="{{url('account/'.$account->uuid)}}" style="text-decoration:none;">
+							{{$account->first_name}} {{$account->middle_name}} {{$account->last_name}}
+						</a>
+					</td>
+					<td><a href="{{url('user/'.$account->uuid)}}" style="text-decoration:none;">{{$account->p_number}}</a></td>
+					<td><a href="{{url('user/'.$account->uuid)}}" style="text-decoration:none;">{{($account->user()->first()->status)?'Activated':'Inactive'}}</a></td>
+					<td><a class="w3-button" href="{{url('edit-user/'.$account->uuid)}}" title="Edit {{$account->first_name}}"><i class="fa fa-edit fa-lg"></i></a></td>
+					<td><button class="w3-button" onclick="deleteAccount('{{$account->uuid}}');" title="Delete {{$account->first_name}}">
 						<i class="fa fa-trash fa-lg"></i>
 						</button>
 					</td>
@@ -94,7 +100,7 @@
 				@endforeach
 			</table>
 		</div>
-		{{$permissions->links('vendor.pagination.paginator')}}
+		{{$accounts->links('vendor.pagination.paginator')}}
 		@endisset
 	</div>
 </div>
@@ -107,16 +113,15 @@
 @section('scripts')
 <script>
 
-document.getElementById('roles').className += " w3-text-blue";
+document.getElementById('accounts').className += " w3-text-blue";
 document.getElementById('menu-administration').className += " w3-text-blue";
 menuAcc('administration');
 w3_show_nav('menuQMS');
 
-function deleteRolePerm(role_uuid, perm_uuid){
-	//alert(perm_uuid);
+function deleteAccount(uuid){
 	let xhr = new XMLHttpRequest();
 	
-	xhr.open("GET", "{{url('delete-role-permission')}}/"+role_uuid+"/"+perm_uuid);
+	xhr.open("GET", "{{url('delete-account')}}/"+uuid);
 	xhr.send();
 	
 	xhr.onreadystatechange = function(){
@@ -126,8 +131,6 @@ function deleteRolePerm(role_uuid, perm_uuid){
 			
 		}
 	}
-	
-	
 }
 </script>
 

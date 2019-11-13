@@ -21,12 +21,9 @@
 								<option value="" disabled selected>Select a permission</option>
 								@if($permissions)
 									@foreach($permissions as $permission)
-										@php $role_perms = $role->permission()->get(); @endphp
-										@foreach($role_perms as $role_perm)
-											@if($role_perm->name != $permission->name)
-												<option value="{{$permission->uuid}}" {{(old('permission'))? 'selected':null}}>{{$permission->display_name}}</option>
-											@endif
-										@endforeach
+										
+										<option value="{{$permission->uuid}}" {{(old('permission'))? 'selected':null}}>{{$permission->display_name}}</option>
+											
 									@endforeach
 								@endif
 							 </select>

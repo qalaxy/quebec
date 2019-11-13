@@ -24,11 +24,22 @@ class CreateAccountTables extends Migration
 			$table->string('middle_name');
 			$table->string('last_name');
 			$table->string('p_number');
-			$table->string('gender');
+			//$table->string('gender');
             $table->timestamps();
 			$table->softDeletes();
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
+		
+		Schema::create('account_user',function(Blueprint $table){
+			$table->unsignedBigInteger('account_id');
+            $table->unsignedBigInteger('user_id');
+
+            $table->foreign('account_id')->references('id')->on('accounts')
+                ->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')->onDelete('cascade');
+				
+		});
 		
 		
 		Schema::create('stations', function (Blueprint $table) {
@@ -81,8 +92,6 @@ class CreateAccountTables extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('phone_num_id')->references('id')->on('phone_numbers')
                 ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->primary(['account_id', 'phone_num_id']);
 		});
 		
 		Schema::create('account_email',function(Blueprint $table){
@@ -93,8 +102,7 @@ class CreateAccountTables extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('email_id')->references('id')->on('emails')
                 ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->primary(['account_id', 'email_id']);
+				
 		});
 		
 		Schema::create('station_phone_num',function(Blueprint $table){
@@ -105,8 +113,6 @@ class CreateAccountTables extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('phone_num_id')->references('id')->on('phone_numbers')
                 ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->primary(['station_id', 'phone_num_id']);
 		});
 		
 		Schema::create('station_email',function(Blueprint $table){
@@ -117,8 +123,6 @@ class CreateAccountTables extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('email_id')->references('id')->on('emails')
                 ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->primary(['station_id', 'email_id']);
 		});
 		
 		Schema::create('station_function',function(Blueprint $table){
@@ -129,8 +133,6 @@ class CreateAccountTables extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('function_id')->references('id')->on('functions')
                 ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->primary(['station_id', 'function_id']);
 		});
 		
 		Schema::create('supervisors', function (Blueprint $table) {
@@ -167,6 +169,7 @@ class CreateAccountTables extends Migration
         Schema::dropIfExists('phone_numbers');
         Schema::dropIfExists('account_station');
         Schema::dropIfExists('stations');
+        Schema::dropIfExists('account_user');
         Schema::dropIfExists('accounts');
     }
 }

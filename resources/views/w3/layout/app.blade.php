@@ -61,14 +61,14 @@
 	Administration <i class="fa fa-caret-down"></i>
   </button>
   <div id="administration" class="w3-hide w3-white w3-card w3-margin-left w3-leftbar w3-border-gray w3-text-blue-gray">
-    <a id="permissions" href="{{url('/permissions')}}" class="w3-bar-item w3-button w3-hover-light-blue">Permissions</a>
+    <!--<a id="permissions" href="{{url('/permissions')}}" class="w3-bar-item w3-button w3-hover-light-blue">Permissions</a>-->
     <a id="roles" href="{{url('/roles')}}" class="w3-bar-item w3-button w3-hover-light-blue">Roles</a>
-    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Error status</a>
+    <!--<a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Error status</a>
     <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Offices</a>
-    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Stations</a>
-    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Products</a>
-    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Functions</a>
-    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Users</a>
+    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Stations</a>-->
+    <a href="{{url('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Products</a>
+    <a href="{{url('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Functions</a>
+    <a id="accounts" href="{{url('/accounts')}}" class="w3-bar-item w3-button w3-hover-light-blue">Users account</a>
   </div>
   <button id="menu-error" class="w3-button w3-block w3-left-align w3-hover-light-blue" onclick="menuAcc('error')">
 	Function errors <i class="fa fa-caret-down"></i>

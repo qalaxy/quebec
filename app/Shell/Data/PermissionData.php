@@ -2,7 +2,7 @@
 namespace App\Shell\Data;
 
 class PermissionData{
-	public $rows = 2;
+	public $rows = 5;
 	public $name_key = 'name';
 	public $display_name_key = 'display_name';
 	public $description_key = 'description';

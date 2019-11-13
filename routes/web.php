@@ -49,9 +49,17 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('update-role/{uuid}', 'Web\RoleController@updateRole');
 	Route::get('delete-role/{uuid}', 'Web\RoleController@deleteRole');
 	Route::get('destroy-role/{uuid}', 'Web\RoleController@destroyRole');
-	Route::any('role-permission/{uuid}', 'Web\RoleController@rolePermission');
+	Route::any('role-permissions/{uuid}', 'Web\RoleController@rolePermissions');
 	Route::get('add-role-permission/{uuid}', 'Web\RoleController@addRolePermission');
 	Route::post('store-role-permission/{uuid}', 'Web\RoleController@storeRolePermission');
+	Route::get('delete-role-permission/{role_uuid}/{perm_uuid}', 'Web\RoleController@deleteRolePermission');
+	Route::get('destroy-role-permission/{role_uuid}/{perm_uuid}', 'Web\RoleController@destroyRolePermission');
+	
+	Route::any('accounts', 'Web\AccountController@accounts');
+	Route::get('create-account', 'Web\AccountController@createAccount');
+	Route::post('store-account', 'Web\AccountController@storeAccount');
+	Route::get('account/{uuid}', 'Web\AccountController@showAccount');
+	Route::get('delete-account/{uuid}', 'Web\AccountController@deleteAccount');
 });
 
 
