@@ -155,7 +155,7 @@ class RoleController extends Controller
 		if(Auth::user()->can('delete_roles')){
 			
 			$role = $this->ext->getRole($uuid);
-			if(!is_object($role)){
+			if(is_object($role)){
 				return $this->ext->deleteRole($role);
 			}else{
 				return $this->ext->invalidDeletion();

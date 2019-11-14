@@ -184,7 +184,7 @@ class AccountController extends Controller
 	}
 	
 	/*To be done on individual user account*/ 
-	public function emails(){
+	public function emails(Request $request, $account_uuid){
 		if(Auth::user()->can('view_users')){
 			if(count($request->all())){
 				$emails = $this->ext->searchEmails($request->all());
@@ -229,23 +229,24 @@ class AccountController extends Controller
 		if(Auth::user()->can('create_users')){
 			$validation = $this->ext->validateEmailData($request->all());
 			if($validation->fails()){
-				return redirect('create-email')
+				return redirect('add-email/'.$uuid)
 							->withErrors($validation)
 							->withInput();
 			}
+			
 			$account = $this->ext->getAccount($uuid);
 			if(!is_object($account))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
 			
-			$notification = $this->mnt->createEmail($request->all(), $account);
+			$notification = $this->mnt->addEmail($request->all(), $account);
 			if(in_array('success', $notification)){
-				if(View::exists('w3.index.emails')){
-					return redirect('emails/'.$account_uuid)
+				if(View::exists('w3.show.account')){
+					return redirect('account/'.$uuid)
 								->with(compact('notification'));
 				}else
 					return back()->with(compact('notification'));
 			}else{
-				return redirect('create-email')
+				return redirect('add-email/'.$uuid)
 							->with(compact('notification'))
 							->withInput();
 			}
@@ -279,23 +280,24 @@ class AccountController extends Controller
 		if(Auth::user()->can('edit_users')){
 			$validation = $this->ext->validateEmailData($request->all());
 			if($validation->fails()){
-				return redirect('create-email')
+				return redirect('edit-email/'.$account_uuid.'/'.$email_uuid)
 							->withErrors($validation)
 							->withInput();
 			}
+			
 			$email = $this->ext->getEmail($email_uuid);
 			if(!is_object($email))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$email));
 			
 			$notification = $this->mnt->editEmail($request->all(), $email);
 			if(in_array('success', $notification)){
-				if(View::exists('w3.index.emails')){
-					return redirect('emails/'.$account_uuid)
+				if(View::exists('w3.show.account')){
+					return redirect('account/'.$account_uuid)
 								->with(compact('notification'));
 				}else
 					return back()->with(compact('notification'));
 			}else{
-				return redirect('create-email')
+				return redirect('add-email/'.$account_uuid)
 							->with(compact('notification'))
 							->withInput();
 			}
@@ -309,11 +311,11 @@ class AccountController extends Controller
 		
 		if(Auth::user()->can('delete_users')){
 			
-			$account = $this->ext->getAccount($account_uuid);
-			$email = $this->ext->getAccount($email_uuid);
-			
+			$account = $this->ext->getAccount($account_uuid); //return $account->uuid;
+			$email = $this->ext->getEmail($email_uuid); //return //$email->uuid;
+			//return '<p>'.$email_uuid.'</p>';
 			if(is_object($account) && is_object($email)){
-				return $this->ext->deleteAccount($account, $email);
+				return $this->ext->deleteEmail($account, $email);
 			}else{
 				return $this->ext->invalidDeletion();
 			}
@@ -322,14 +324,14 @@ class AccountController extends Controller
 		}
 	}
 	
-	public function destroyEmail($uuid){
+	public function destroyEmail($account_uuid, $email_uuid){
 		if(Auth::user()->can('delete_users')){
-			$email = $this->ext->getEmail($uuid);
+			$email = $this->ext->getEmail($email_uuid);
 			if(is_object($email)){
 				$notification = $this->mnt->deleteEmail($email);
 				if(in_array('success', $notification)){
-					if(View::exists('w3.index.emails')){
-						return redirect('emails')
+					if(View::exists('w3.show.account')){
+						return redirect('account/'.$account_uuid)
 									->with(compact('notification'));
 					}else
 						return back()->with(compact('notification'));

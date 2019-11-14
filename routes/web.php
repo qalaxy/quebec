@@ -60,6 +60,14 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('store-account', 'Web\AccountController@storeAccount');
 	Route::get('account/{uuid}', 'Web\AccountController@showAccount');
 	Route::get('delete-account/{uuid}', 'Web\AccountController@deleteAccount');
+	
+	Route::get('emails/{uuid}', 'Web\AccountController@addEmail');
+	Route::get('add-email/{uuid}', 'Web\AccountController@addEmail');
+	Route::post('store-email/{uuid}', 'Web\AccountController@storeEmail');
+	Route::get('edit-email/{account_uuid}/{email_uuid}', 'Web\AccountController@editEmail');
+	Route::post('update-email/{account_uuid}/{email_uuid}', 'Web\AccountController@updateEmail');
+	Route::get('delete-email/{account_uuid}/{email_uuid}', 'Web\AccountController@deleteEmail');
+	Route::get('destroy-email/{account_uuid}/{email_uuid}', 'Web\AccountController@destroyEmail');
 });
 
 

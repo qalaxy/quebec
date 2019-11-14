@@ -43,7 +43,7 @@ class AccountData{
 		'phone_number.digits'=>'Phone number should be numeric and have 10 digits',
 		'phone_number.starts_with'=>'Phone number should start with 07 or 08',
 		'email.required'=>'You have not entered email address',
-		'email.email'=>'Email address should have email format',
+		'email.email'=>'Email address should have correct email format',
 	];
 	
 }

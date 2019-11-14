@@ -4,6 +4,7 @@ namespace App\Shell\Web\Extension;
 use Exception;
 use App\Account;
 use App\Station;
+use App\Email;
 
 use Illuminate\Support\Facades\Validator;
 use App\Shell\Web\Base;
@@ -127,7 +128,7 @@ class AccountExt extends Base{
 		return $emails;
 	}
 	
-	public function validateEmailData(){
+	public function validateEmailData(array $data){
 		$rules = [$this->acc_data->email_key => $this->acc_data->email_req];
 		
 		return Validator::make($data, $rules, $this->acc_data->validation_msgs);
@@ -153,10 +154,10 @@ class AccountExt extends Base{
 						<h2>Delete user\' email</h2>
 					</header>
 					<div class="w3-container">
-						<p class="w3-padding-8 w3-large">Your are about to delete a user\'s email:</p>
+						<p class="w3-padding-middle w3-large">Your are about to delete a user\'s email:</p>
 						<p><strong>User\'s name:</strong> '.$account->first_name.' '
-						.((strlen($account->middle_name) < 1) ? '' : $role->description).' '.$account->last_name
-						.'<br /><strong>Email address:</strong> '.$email->address.'</p>
+						.((strlen($account->middle_name) < 1) ? '' : $account->middle_name).' '.$account->last_name
+						.'</p><p><strong>Email address:</strong> '.$email->address.'</p>
 					</div>
 					<footer class="w3-container ">
 						<div class="w3-row w3-padding-16">

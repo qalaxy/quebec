@@ -175,8 +175,8 @@ class AccountExe extends Base{
 			if(is_null($email)){
 				throw new Exception('Email has not been created successfully');
 			}else{
-				$account->email()->attch($email);
-				$this->success = array('indicator'=>'success', ''=>'Email has bee created successfully');
+				$account->email()->attach($email);
+				$this->success = array('indicator'=>'success', 'message'=>'Email has bee created successfully');
 			}
 		}catch(Exception $e){
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
@@ -193,7 +193,7 @@ class AccountExe extends Base{
 				throw new Exception('Email has not been updated successfully');
 			}
 			else{
-				$this->success = array('indicator'=>'warning', ''=>'Email has been updated successfully');
+				$this->success = array('indicator'=>'success', 'message'=>'Email has been updated successfully');
 			}
 		}catch(Exception $e){
 			$this->success = array('indicator'=>'warning', 'message'=>$e->getMessage());

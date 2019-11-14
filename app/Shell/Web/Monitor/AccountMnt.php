@@ -74,7 +74,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;		
 	}
 	
-	public function createEmail(array $data, object $account){
+	public function addEmail(array $data, object $account){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -83,7 +83,7 @@ class AccountMnt extends AccountExe{
 			DB::rollback();
 			return $this->error;
 		}
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 	
@@ -96,7 +96,7 @@ class AccountMnt extends AccountExe{
 			DB::rollback();
 			return $this->error;
 		}
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 	
