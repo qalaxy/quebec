@@ -60,7 +60,7 @@ class CreateAccountTables extends Migration
 			$table->unsignedBigInteger('station_id');
 			$table->unsignedBigInteger('account_id');
 			$table->dateTime('from');
-			$table->dateTime('to');
+			$table->dateTime('to')->nullable();
 			$table->boolean('status');
             $table->timestamps();
 			$table->softDeletes();

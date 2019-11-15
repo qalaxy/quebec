@@ -3,6 +3,7 @@ namespace App\Shell\Web\Executor;
 
 use Exception;
 use App\Account;
+use App\AccountStation;
 use App\Email;
 use App\PhoneNumber;
 use App\User;
@@ -215,6 +216,67 @@ class AccountExe extends Base{
 			return null;
 		}
 		return $email;
+	}
+	
+	protected function storeStation($account, $station){
+		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < today()))
+			$this->data[$this->acc_data->status_key] = false;
+		
+		try{
+			$station = AccountStation::firstOrCreate(array($this->acc_data->station_id_key => $station->id, 
+												$this->acc_data->account_id_key => $account->id),
+							array('uuid'=>Uuid::generate(),
+								$this->acc_data->station_id_key => $station->id,
+								$this->acc_data->account_id_key => $account->id,
+								$this->acc_data->from_key => $this->data[$this->acc_data->from_key],
+								$this->acc_data->to_key => $this->data[$this->acc_data->to_key],
+								$this->acc_data->status_key => $this->data[$this->acc_data->status_key])
+						);
+			if(is_null($station)){
+				throw new Exception('Station has not been added successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Station has been added successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $station;
+	}
+	
+	protected function updateAccountStation($stn){
+		try{
+			$stn = $stn->update(array($this->acc_data->station_id_key => $this->data[$this->acc_data->station_id_key],
+						$this->acc_data->from_id_key => $this->data[$this->acc_data->from_id_key],
+						$this->acc_data->to_id_key => $this->data[$this->acc_data->to_id_key],
+						$this->acc_data->status_id_key => $this->data[$this->acc_data->status_id_key],
+					));
+			if(is_null($stn)){
+				throw new Exception ('Account station has not been updated successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Account station has been updated successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $stn;
+	}
+	
+	protected function destroyAccountStation($stn){
+		try{
+			$stn = $stn->delete();
+			
+			if(is_null($stn)){
+				throw new Exception('Account station has not been deleted successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Account station has been deleted successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $stn;
 	}
 }
 

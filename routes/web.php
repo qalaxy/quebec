@@ -68,6 +68,15 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('update-email/{account_uuid}/{email_uuid}', 'Web\AccountController@updateEmail');
 	Route::get('delete-email/{account_uuid}/{email_uuid}', 'Web\AccountController@deleteEmail');
 	Route::get('destroy-email/{account_uuid}/{email_uuid}', 'Web\AccountController@destroyEmail');
+	
+	Route::get('add-station/{account_uuid}', 'Web\AccountController@addAccountStation');
+	Route::post('store-account-station/{account_uuid}', 'Web\AccountController@storeAccountStation');
+	Route::get('edit-account-station/{account_uuid}/{stn_uuid}', 'Web\AccountController@editAccountStation');
+	Route::post('update-account-station/{account_uuid}/{stn_uuid}', 'Web\AccountController@updateAccountStation');
+	Route::get('delete-account-station/{account_uuid}/{stn_uuid}', 'Web\AccountController@deleteAccountStation');
+	Route::get('destroy-account-station/{account_uuid}/{stn_uuid}', 'Web\AccountController@destroyAccountStation');
+	Route::get('account-station/{uuid}', 'Web\AccountController@getAccountStation');
+
 });
 
 

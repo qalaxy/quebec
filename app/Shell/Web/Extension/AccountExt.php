@@ -3,6 +3,7 @@ namespace App\Shell\Web\Extension;
 
 use Exception;
 use App\Account;
+use App\AccountStation;
 use App\Station;
 use App\Email;
 
@@ -89,7 +90,7 @@ class AccountExt extends Base{
 					<div class="w3-container">
 						<p class="w3-padding-8 w3-large">Your are about to delete a user\'s account:</p>
 						<p><strong>Name:</strong> '.$account->first_name.' '
-						.((strlen($account->middle_name) < 1) ? '' : $role->description).' '.$account->last_name
+						.((strlen($account->middle_name) < 1) ? '' : $account->description).' '.$account->last_name
 						.'<br /><strong>Personal Number:</strong> '.$account->p_number.'</p>
 					</div>
 					<footer class="w3-container ">
@@ -164,6 +165,90 @@ class AccountExt extends Base{
 							<div class="w3-col">
 								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-email').'/'.$account->uuid.'/'.$email->uuid.'" 
 								title="Delete user account">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
+	
+	public function validateAccountStationData(array $data){
+		$rules = [$this->acc_data->station_id_key => $this->acc_data->station_id_req,
+				$this->acc_data->from_key => $this->acc_data->from_req,
+				$this->acc_data->to_key => $this->acc_data->to_req,
+				$this->acc_data->status_key => $this->acc_data->status_req,
+		];
+		
+		return Validator::make($data, $rules, $this->acc_data->validation_msgs);
+	}
+	
+	public function getStation($uuid){
+		try{
+			$station = Station::withUuid($uuid)->first();
+			if(is_null($station)){
+				throw new Exception('Station could not be retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $station;
+	}
+	
+	public function getAccountStation($uuid){
+		try{
+			$acc_stn = AccountStation::withUuid($uuid)->first();
+			if(is_null($acc_stn)){
+				throw new Exception('Account station could not be retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $acc_stn;
+	}
+	
+	public function deleteAccountStation($account, $stn){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete user\' station</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-middle w3-large">Your are about to delete a user\'s station:</p>
+						<p><strong>User\'s name:</strong> '.$account->first_name.' '
+						.((strlen($account->middle_name) < 1) ? '' : $account->middle_name).' '.$account->last_name
+						.'</p><p><strong>Station:</strong> '.$stn->station()->distinct()->first()->name.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-account-station').'/'.$account->uuid.'/'.$stn->uuid.'" 
+								title="Delete user station">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
+	
+	public function showAccountStation(object $station){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-theme"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>User\' station</h2>
+					</header>
+					<div class="w3-container">
+						<p><strong>User\'s name:</strong> '.$station->account()->first()->first_name.' '
+						.((strlen($station->account()->first()->middle_name) < 1) ? '' : $station->account()->first()->middle_name).' '.$station->account()->first()->last_name
+						.'</p>
+						<p><strong>Station:</strong> '.$station->station()->distinct()->first()->name.'</p>
+						<p><strong>From:</strong> '.$station->from.'</p>
+						<p><strong>To:</strong> '.(($station->to)? $station->to: today()).'</p>
+						<p><strong>Status:</strong> '.(($station->status)? 'Active':'Inactive').'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<button class="w3-button w3-large w3-theme w3-hover-light-blue" title="Dismiss" onclick="document.getElementById(\'delete\').style.display=\'none\'">OK&nbsp;</button>
 							</div>
 						</div>
 					</footer>

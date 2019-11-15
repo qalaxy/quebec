@@ -112,6 +112,44 @@ class AccountMnt extends AccountExe{
 		DB::rollback();
 		return $this->success;
 	}
+	
+	public function addStation(array $data, object $account, object $station){
+		$this->data = $data;
+		
+		DB::beginTransaction();
+		$station = $this->storeStation($account, $station);
+		if(is_null($station)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function editAccountStation(array $data, object $station){
+		$this->data = $data;
+		DB::beginTransaction();
+		$stn = $this->updateAccountStation($station);
+		if(is_null($stn)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::rollback();
+		return $this->success;
+	}
+	
+	public function deleteAccountStation(object $stn){
+		DB::beginTransaction();
+		$stn = $this->destroyAccountStation($stn);
+		
+		if(is_null($stn)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::rollback();
+		return $this->success;
+	}
+	
 }
 
 ?>

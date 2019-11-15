@@ -18,6 +18,9 @@ class AccountData{
 	public $station_id_key = 'station_id';
 	public $user_id_key = 'user_id';
 	public $status_key = 'status';
+	public $from_key = 'from';
+	public $to_key = 'to';
+	public $account_id_key = 'account_id';
 	
 	public $name_req = 'required|regex:/[a-zA-Z\ \']/|min:3';
 	public $optional_name_req = 'nullable|regex:/[a-zA-Z\ \']/|min:3';
@@ -25,6 +28,9 @@ class AccountData{
 	public $station_id_req = 'required|uuid';
 	public $phone_number_req = 'required|digits:10|starts_with:07,08';
 	public $email_req = 'required|email';
+	public $from_req = 'required|date';
+	public $to_req = 'nullable|date|after_or_equal:from';
+	public $status_req = 'required|boolean';
 	
 	public $validation_msgs = [
 		'first_name.required'=>'You have not entered first name',
@@ -44,6 +50,13 @@ class AccountData{
 		'phone_number.starts_with'=>'Phone number should start with 07 or 08',
 		'email.required'=>'You have not entered email address',
 		'email.email'=>'Email address should have correct email format',
+		'from.required'=>'You have not enter the date officer begin being at the station',
+		'from.date'=>'From field should have a date entry',
+		'to.required'=>'You have not enter the date officer end being at the station',
+		'to.date'=>'To field should have a date entry',
+		'to.after_or_equal'=>'The date officer cease being in a station should be later than the date the officer joined the station',
+		'status.required'=>'You have not entered the status of user being in the station',
+		'status.boolean'=>'Status value should either be 1 or 2',
 	];
 	
 }

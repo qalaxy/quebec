@@ -216,7 +216,7 @@ class AccountController extends Controller
 			
 			if(View::exists('w3.create.email')){
 				return view('w3.create.email')->with(compact('account'))
-						->with(array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 			}else{
 				return back()->with('notification', $this->ext->missing_view);
 			}
@@ -311,9 +311,8 @@ class AccountController extends Controller
 		
 		if(Auth::user()->can('delete_users')){
 			
-			$account = $this->ext->getAccount($account_uuid); //return $account->uuid;
-			$email = $this->ext->getEmail($email_uuid); //return //$email->uuid;
-			//return '<p>'.$email_uuid.'</p>';
+			$account = $this->ext->getAccount($account_uuid);
+			$email = $this->ext->getEmail($email_uuid);
 			if(is_object($account) && is_object($email)){
 				return $this->ext->deleteEmail($account, $email);
 			}else{
@@ -369,4 +368,166 @@ class AccountController extends Controller
 	public function destroyPhoneNumber(){
 		//
 	}
+	
+	public function addAccountStation($uuid){
+		if(Auth::user()->can('create_users')){
+			$account = $this->ext->getAccount($uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$stations = $this->ext->getStations();
+			if(!is_object($stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			if(View::exists('w3.create.account-station')){
+				return view('w3.create.account-station')->with(compact('account', 'stations'))
+						->with(array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add user\'s station'));
+		}
+	}
+	
+	public function storeAccountStation(Request $request, $uuid){
+		if(Auth::user()->can('create_users')){			
+			$validation = $this->ext->validateAccountStationData($request->all());
+			if($validation->fails()){
+				return redirect('add-station/'.$uuid)
+							->withErrors($validation)
+							->withInput();
+			}
+			
+			$account = $this->ext->getAccount($uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$station = $this->ext->getStation($request->station_id); 
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
+			
+			$notification = $this->mnt->addStation($request->all(), $account, $station);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.account')){
+					return redirect('account/'.$uuid)
+								->with(compact('notification'));
+				}else
+					return back()->with(compact('notification'));
+			}else{
+				return redirect('add-station/'.$uuid)
+							->with(compact('notification'))
+							->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'warning', 'message'=>'You are not allowed to add user\'s station'));
+		}
+	}
+	
+	public function editAccountStation($account_uuid, $stn_uuid){
+		if(Auth::user()->can('edit_users')){
+			$account = $this->ext->getAccount($account_uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$stn = $this->ext->getAccountStation($stn_uuid);
+			if(!is_object($stn))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stn));
+			
+			if(View::exists('w3.edit.stn')){
+				return view('w3.edit.stn')->with(compact('account', 'stn'))
+						->with(array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to edit user\'s station'));
+		}
+	}
+	
+	public function updateAccountStation(Request $request, $account_uuid, $stn_uuid){
+		if(Auth::user()->can('edit_users')){
+			$validation = $this->ext->validateAccountStationData($request->all());
+			if($validation->fails()){
+				return redirect('edit-account-station/'.$account_uuid.'/'.$stn_uuid)
+							->withErrors($validation)
+							->withInput();
+			}
+			
+			$stn = $this->ext->getAccountStation($stn_uuid);
+			if(!is_object($stn))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stn));
+			
+			$notification = $this->mnt->editAccountStation($request->all(), $stn);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.account')){
+					return redirect('account/'.$account_uuid)
+								->with(compact('notification'));
+				}else
+					return back()->with(compact('notification'));
+			}else{
+				return redirect('edit-stn/'.$account_uuid.'/'.$stn_uuid)
+							->with(compact('notification'))
+							->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'warning', 'message'=>'You are not allowed to edit user\'s station'));
+		}
+	}
+	
+	public function deleteAccountStation($account_uuid, $stn_uuid){
+		if(session()->has('params')) session()->reflash();
+		
+		if(Auth::user()->can('delete_users')){
+			
+			$account = $this->ext->getAccount($account_uuid);
+			$stn = $this->ext->getAccountStation($stn_uuid);
+			if(is_object($account) && is_object($stn)){
+				return $this->ext->deleteAccountStation($account, $stn);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s station'));
+		}
+	}
+	
+	public function destroyAccountStation($account_uuid, $stn_uuid){
+		if(Auth::user()->can('delete_users')){
+			$stn = $this->ext->getAccountStation($stn_uuid);
+			if(is_object($stn)){
+				$notification = $this->mnt->deleteAccountStation($stn);
+				if(in_array('success', $notification)){
+					if(View::exists('w3.show.account')){
+						return redirect('account/'.$account_uuid)
+									->with(compact('notification'));
+					}else
+						return back()->with(compact('notification'));
+				}else{
+					return back()->with(compact('notification'));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $stn));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s station'));
+		}
+	}
+	
+	public function getAccountStation($uuid){
+		if(session()->has('params')) session()->reflash();
+		
+		if(Auth::user()->can('view_users')){
+			
+			$stn = $this->ext->getAccountStation($uuid);
+			if(is_object($stn)){
+				return $this->ext->showAccountStation($stn);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s station'));
+		}
+	}
+	
 }
