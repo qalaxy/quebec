@@ -117,6 +117,7 @@
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
 					  <a href="{{($account)?url('/add-station/'.$account->uuid):null}}" class="w3-bar-item w3-button">Add a station</a>
+					  <a href="{{($account)?url('/account-stations/'.$account->uuid):null}}" class="w3-bar-item w3-button">All stations</a>
 					</div>
 				  </div>
 			</div>
@@ -128,10 +129,10 @@
 					</div>
 					<div class="w3-col s12 m12 l10 w3-left">
 						@foreach($account->accountStation()->distinct()->get() as $station)
-							@if($station->status || (isset($station->to) && $station->to > today()))
+							@if(isset($station->to) && $station->to > date_format(today(),'Y-m-d') || $station->status)
 							<span class="w3-hover-text-blue" onmouseover="document.getElementById('{{$station->uuid}}').style.display='inline'; this.style.cursor='pointer';" 
 												onmouseout="document.getElementById('{{$station->uuid}}').style.display='none'">
-												<span onclick="loadAccountStation('{{$station->uuid}}')">{{$station->station()->first()->name}}</span>
+												<span onmousedown="loadAccountStation(event, '{{$station->uuid}}')" title="Press ALT + left click on station to view station">{{$station->station()->first()->name}}</span>
 								<span id="{{$station->uuid}}" style="display:none;">
 									<a href="{{url('/edit-account-station/'.$account->uuid.'/'.$station->uuid)}}" class="w3-hover-blue"><i class="fa fa-edit fa-lg"></i></a>
 									<a class="w3-hover-blue" onclick="deleteStation('{{$account->uuid}}', '{{$station->uuid}}');"><i class="fa fa-trash fa-lg"></i></a>
@@ -160,6 +161,23 @@ document.getElementById('menu-administration').className += " w3-text-blue";
 menuAcc('administration');
 w3_show_nav('menuQMS');
 
+
+
+function deleteAccount(uuid){
+	let xhr = new XMLHttpRequest();
+	
+	xhr.open("GET", "{{url('delete-account')}}/"+uuid);
+	xhr.send();
+	
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById("delete").innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block';
+			
+		}
+	}
+}
+
 function deleteEmail(account,email){ 
 	let xhr = new XMLHttpRequest();
 	
@@ -175,32 +193,35 @@ function deleteEmail(account,email){
 	}
 }
 
-function loadAccountStation(station){ 
-	let xhr = new XMLHttpRequest();
-	
-	xhr.open("GET", "{{url('account-station')}}/"+station);
-	xhr.send();
-	
-	xhr.onreadystatechange = function(){
-		if(xhr.readyState == 4 && xhr.status == 200){
-			document.getElementById("delete").innerHTML = xhr.responseText;
-			document.getElementById('delete').style.display='block'
-			
+function loadAccountStation(event, station){
+	if(event.altKey){
+		let xhr = new XMLHttpRequest();
+		xhr.open("GET", "{{url('account-station')}}/"+station);
+		xhr.send();
+		
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				document.getElementById("delete").innerHTML = xhr.responseText;
+				document.getElementById('delete').style.display='block'
+				
+			}
 		}
 	}
+	
 }
 
-function deleteAccount(uuid){
+function deleteStation(account, station){
 	let xhr = new XMLHttpRequest();
 	
-	xhr.open("GET", "{{url('delete-account')}}/"+uuid);
+	
+	//http://127.0.0.1/quebec/delete-account-station/94982c10-0888-11ea-b3bc-b15b68e88e82/9fef47b0-0888-11ea-b70f-458597f48fbd
+	xhr.open("GET", "{{url('delete-account-station')}}/"+account+"/"+station);
 	xhr.send();
 	
 	xhr.onreadystatechange = function(){
 		if(xhr.readyState == 4 && xhr.status == 200){
-			document.getElementById("delete").innerHTML = xhr.responseText;
-			document.getElementById('delete').style.display='block'
-			
+			document.getElementById('delete').innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block';
 		}
 	}
 }

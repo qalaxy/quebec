@@ -76,6 +76,7 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('delete-account-station/{account_uuid}/{stn_uuid}', 'Web\AccountController@deleteAccountStation');
 	Route::get('destroy-account-station/{account_uuid}/{stn_uuid}', 'Web\AccountController@destroyAccountStation');
 	Route::get('account-station/{uuid}', 'Web\AccountController@getAccountStation');
+	Route::get('account-stations/{uuid}', 'Web\AccountController@accountStations');
 
 });
 

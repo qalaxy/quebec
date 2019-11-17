@@ -192,6 +192,7 @@ class AccountExe extends Base{
 			$u_email = $email->update(array($this->acc_data->address_key => $this->data[$this->acc_data->email_key]));
 			if(is_null($u_email)){
 				throw new Exception('Email has not been updated successfully');
+			
 			}
 			else{
 				$this->success = array('indicator'=>'success', 'message'=>'Email has been updated successfully');
@@ -219,7 +220,7 @@ class AccountExe extends Base{
 	}
 	
 	protected function storeStation($account, $station){
-		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < today()))
+		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < date_format(today(), 'Y-m-d')))
 			$this->data[$this->acc_data->status_key] = false;
 		
 		try{
@@ -244,12 +245,14 @@ class AccountExe extends Base{
 		return $station;
 	}
 	
-	protected function updateAccountStation($stn){
+	protected function updateAccountStation($stn, $station){
+		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < date_format(today(), 'Y-m-d')))
+			$this->data[$this->acc_data->status_key] = false;
 		try{
-			$stn = $stn->update(array($this->acc_data->station_id_key => $this->data[$this->acc_data->station_id_key],
-						$this->acc_data->from_id_key => $this->data[$this->acc_data->from_id_key],
-						$this->acc_data->to_id_key => $this->data[$this->acc_data->to_id_key],
-						$this->acc_data->status_id_key => $this->data[$this->acc_data->status_id_key],
+			$stn = $stn->update(array($this->acc_data->station_id_key => $station->id,
+						$this->acc_data->from_key => $this->data[$this->acc_data->from_key],
+						$this->acc_data->to_key => $this->data[$this->acc_data->to_key],
+						$this->acc_data->status_key => $this->data[$this->acc_data->status_key],
 					));
 			if(is_null($stn)){
 				throw new Exception ('Account station has not been updated successfully');

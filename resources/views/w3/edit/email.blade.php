@@ -7,7 +7,7 @@
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Add email for: {{($account)?$account->first_name.' '.$account->middle_name.' '.$account->last_name:null}}</h1>
+  <h1 class="w3-xlarge">Edit email for: {{($account)?$account->first_name.' '.$account->middle_name.' '.$account->last_name:null}}</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		@include('w3.components.notification')
 		<form class="w3-container" method="POST" action="{{url('/update-email/'.$account->uuid.'/'.$email->uuid)}}">

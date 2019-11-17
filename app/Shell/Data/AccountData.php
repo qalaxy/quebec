@@ -28,7 +28,7 @@ class AccountData{
 	public $station_id_req = 'required|uuid';
 	public $phone_number_req = 'required|digits:10|starts_with:07,08';
 	public $email_req = 'required|email';
-	public $from_req = 'required|date';
+	public $from_req = 'required|date|before_or_equal:today';
 	public $to_req = 'nullable|date|after_or_equal:from';
 	public $status_req = 'required|boolean';
 	
@@ -52,6 +52,7 @@ class AccountData{
 		'email.email'=>'Email address should have correct email format',
 		'from.required'=>'You have not enter the date officer begin being at the station',
 		'from.date'=>'From field should have a date entry',
+		'from.before_or_equal'=>'The date officer is joining a station should be today before today',
 		'to.required'=>'You have not enter the date officer end being at the station',
 		'to.date'=>'To field should have a date entry',
 		'to.after_or_equal'=>'The date officer cease being in a station should be later than the date the officer joined the station',

@@ -35,6 +35,7 @@
 							<input class="w3-input w3-border {{($errors->has('email')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									name="email"
 									type="text"
+									autocomplete="off"
 									placeholder="Enter email username" 
 									value="{{old('email')}}" />
 							@if($errors->has('email'))
@@ -50,6 +51,7 @@
 							<input class="w3-input w3-border {{($errors->has('password')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									name="password"
 									type="password" 
+									autocomplete="off"
 									placeholder="Enter password" 
 									value="{{old('password')}}" />
 							@if($errors->has('password'))

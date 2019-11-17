@@ -237,12 +237,13 @@ class AccountExt extends Base{
 						<h2>User\' station</h2>
 					</header>
 					<div class="w3-container">
+						
 						<p><strong>User\'s name:</strong> '.$station->account()->first()->first_name.' '
 						.((strlen($station->account()->first()->middle_name) < 1) ? '' : $station->account()->first()->middle_name).' '.$station->account()->first()->last_name
 						.'</p>
 						<p><strong>Station:</strong> '.$station->station()->distinct()->first()->name.'</p>
-						<p><strong>From:</strong> '.$station->from.'</p>
-						<p><strong>To:</strong> '.(($station->to)? $station->to: today()).'</p>
+						<p><strong>From:</strong> '.date_format(date_create($station->from), 'd/m/Y').'</p>
+						<p><strong>To:</strong> '.(($station->to)? date_format(date_create($station->to), 'd/m/Y'): date_format(date_create(today()), 'd/m/Y')).'</p>
 						<p><strong>Status:</strong> '.(($station->status)? 'Active':'Inactive').'</p>
 					</div>
 					<footer class="w3-container ">
@@ -253,6 +254,33 @@ class AccountExt extends Base{
 						</div>
 					</footer>
 				</div>';
+	}
+	
+	public function searchAccountStations(array $data, object $account){
+		$data['station_id'] = (isset($data['station_id'])) ? $this->getStation($data['station_id']) : null;
+		
+		try{
+			$accounts = $account->accountStation()->where($this->prepareSearchParam($data, ['station_id', 'from', 'to', 'status']))->paginate($this->acc_data->rows);
+			if(is_null($accounts)){
+				throw new Exception('Account stations have not been retrieved successfully');
+			}
+			
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $accounts;
+	}
+	
+	public function getAccountStations(object $account){
+		try{
+			$stations = $account->accountStation()->paginate($this->acc_data->rows);
+			if(is_null($stations)){
+				throw new Exception('Account stations have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $stations;
 	}
 	
 }

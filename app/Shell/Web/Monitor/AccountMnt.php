@@ -126,15 +126,15 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function editAccountStation(array $data, object $station){
+	public function editAccountStation(array $data, object $stn, $station){
 		$this->data = $data;
 		DB::beginTransaction();
-		$stn = $this->updateAccountStation($station);
+		$stn = $this->updateAccountStation($stn, $station);
 		if(is_null($stn)){
 			DB::rollback();
 			return $this->error;
 		}
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 	
@@ -146,7 +146,7 @@ class AccountMnt extends AccountExe{
 			DB::rollback();
 			return $this->error;
 		}
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 	

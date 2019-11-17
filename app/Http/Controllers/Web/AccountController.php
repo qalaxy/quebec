@@ -369,6 +369,34 @@ class AccountController extends Controller
 		//
 	}
 	
+	public function accountStations(Request $request, $uuid){
+		if(Auth::user()->can('view_users')){
+			$account = $this->ext->getAccount($uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			if(count($request->all())){
+				$stns = $this->ext->searchAccountStations($account);
+			}else{
+				$stns = $this->ext->getAccountStations($account);
+			}
+			
+			if(!is_object($stns))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stns));
+			
+			if(View::exists('w3.index.account-stations')){
+				if(count($stns))
+						return view('w3.index.account-stations')->with(compact('account', 'stns'));
+					else
+						return view('w3.index.account-stations')->with(compact('account', 'stns'))
+								->with('notification', array('indicator'=>'warning', 'message'=>'Account station(s) not found'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view user\'s station'));
+		}
+	}
+	
 	public function addAccountStation($uuid){
 		if(Auth::user()->can('create_users')){
 			$account = $this->ext->getAccount($uuid);
@@ -381,7 +409,7 @@ class AccountController extends Controller
 			
 			if(View::exists('w3.create.account-station')){
 				return view('w3.create.account-station')->with(compact('account', 'stations'))
-						->with(array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+						->with('notification',array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 			}else{
 				return back()->with('notification', $this->ext->missing_view);
 			}
@@ -404,7 +432,7 @@ class AccountController extends Controller
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
 			
 			$station = $this->ext->getStation($request->station_id); 
-			if(!is_object($account))
+			if(!is_object($station))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
 			
 			$notification = $this->mnt->addStation($request->all(), $account, $station);
@@ -434,9 +462,16 @@ class AccountController extends Controller
 			if(!is_object($stn))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stn));
 			
-			if(View::exists('w3.edit.stn')){
-				return view('w3.edit.stn')->with(compact('account', 'stn'))
-						->with(array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+			$stn->from = date_format(date_create($stn->from), 'Y-m-d'); 
+			if(isset($stn->to)) $stn->to = date_format(date_create($stn->to), 'Y-m-d');
+			
+			$stations = $this->ext->getStations();
+			if(!is_object($stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			if(View::exists('w3.edit.account-station')){
+				return view('w3.edit.account-station')->with(compact('account', 'stn', 'stations'))
+						->with('notification',array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 			}else{
 				return back()->with('notification', $this->ext->missing_view);
 			}
@@ -458,7 +493,11 @@ class AccountController extends Controller
 			if(!is_object($stn))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stn));
 			
-			$notification = $this->mnt->editAccountStation($request->all(), $stn);
+			$station = $this->ext->getStation($request->station_id); 
+			if(!is_object($station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
+			
+			$notification = $this->mnt->editAccountStation($request->all(), $stn, $station);
 			if(in_array('success', $notification)){
 				if(View::exists('w3.show.account')){
 					return redirect('account/'.$account_uuid)
@@ -466,7 +505,7 @@ class AccountController extends Controller
 				}else
 					return back()->with(compact('notification'));
 			}else{
-				return redirect('edit-stn/'.$account_uuid.'/'.$stn_uuid)
+				return redirect('edit-account-station/'.$account_uuid.'/'.$stn_uuid)
 							->with(compact('notification'))
 							->withInput();
 			}

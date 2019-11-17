@@ -7,10 +7,10 @@
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Add station for: {{($account)?$account->first_name:null}}</h1>
+  <h1 class="w3-xlarge">Edit station for: {{($account)?$account->first_name:null}}</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		@include('w3.components.notification')
-		<form class="w3-container" method="POST" action="{{url('/store-account-station/'.$account->uuid)}}">
+		<form class="w3-container" method="POST" action="{{url('/update-account-station/'.$account->uuid.'/'.$stn->uuid)}}">
 			@csrf
 			<div class="w3-row">
 				<div class="w3-col s12 m6 l6">
@@ -18,11 +18,15 @@
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Station<span class="w3-text-red">*</span></label>
 							<select class="w3-select w3-border {{($errors->has('station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" name="station_id">
-								<option value="" disabled selected>Select a station</option>
+								<option value="" disabled>Select a station</option>
 								@if($stations)
+									@php $selected = null; @endphp
 									@foreach($stations as $station)
-										
-										<option value="{{$station->uuid}}" {{(old('station_id') == $station->uuid)? 'selected':null}}>{{$station->name}}</option>
+										<option value="{{$station->uuid}}" 
+										@if(old('station_id') == $station->uuid) @php $selected = 'selected'; @endphp {{$selected}}
+											@elseif(is_null($selected) && $stn->station_id == $station->id) @php $selected = 'selected'; @endphp {{$selected}}
+										@endif
+										>{{$station->name}}</option>
 											
 									@endforeach
 								@endif
@@ -38,9 +42,18 @@
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Status<span class="w3-text-red">*</span></label>
 							<select class="w3-select w3-border {{($errors->has('status')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" name="status">
-								<option value="" disabled selected>Select the status of officer at the station</option>
-								<option value="0" {{(old('status') == '0')? 'selected':null}}>Inactive</option>
-								<option value="1" {{(old('status') == '1')? 'selected':null}}>Active</option>
+								<option value="" disabled>Select user status at the station</option>
+								@php $selected = null; @endphp
+								<option value="0" 
+									@if(old('status') == '0') @php $selected = 'selected'; @endphp {{$selected}}
+											@elseif(is_null($selected) && $stn->status == '0') @php $selected = 'selected'; @endphp {{$selected}}
+										@endif
+								>Inactive</option>
+								<option value="1" 
+								@if(old('status') == '1') @php $selected = 'selected'; @endphp {{$selected}}
+											@elseif(is_null($selected) && $stn->status == '1') @php $selected = 'selected'; @endphp {{$selected}}
+										@endif
+								>Active</option>
 							 </select>
 							@if($errors->has('status'))
 								<span class="w3-small w3-text-red">{{$errors->first('status')}}</span>
@@ -59,7 +72,7 @@
 									type="date"
 									autocomplete="off"
 									placeholder="Enter start date"
-									value="{{old('from')}}" />
+									value="{{(old('from'))?old('from'):$stn->from}}" />
 							@if($errors->has('from'))
 								<span class="w3-small w3-text-red">{{$errors->first('from')}}</span>
 							@else
@@ -75,7 +88,7 @@
 									type="date"
 									autocomplete="off"
 									placeholder="Enter date officer left the station" 
-									value="{{old('to')}}" />
+									value="{{(old('to'))?old('to'):$stn->to}}" />
 							@if($errors->has('to'))
 								<span class="w3-small w3-text-red">{{$errors->first('to')}}</span>
 							@else
@@ -87,7 +100,7 @@
 			</div>
 			<div class="w3-row">
 				<div class="w3-col w3-padding-small">
-					<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Add account station">Add&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
+					<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Update account station">Update&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
 				</div>
 			</div>
 		</form>
