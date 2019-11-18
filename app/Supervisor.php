@@ -14,7 +14,7 @@ class Supervisor extends Model
 	
 	protected $table = 'supervisors';
 	
-	protected $fillable = ['uuid', 'station_id', 'user_id', 'from', 'to', 'status'];
+	protected $fillable = ['uuid', 'station_id', 'account_id', 'from', 'to', 'status'];
 	
 	public function station(){
 		return $this->belongsTo('App\Station', 'station_id');
@@ -22,5 +22,9 @@ class Supervisor extends Model
 	
 	public function user(){
 		return $this->belongsTo('App\User', 'user_id');
+	}
+	
+	public function account(){
+		return $this->belongsTo('App\Account', 'account_id');
 	}
 }

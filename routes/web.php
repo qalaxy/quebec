@@ -59,7 +59,12 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('create-account', 'Web\AccountController@createAccount');
 	Route::post('store-account', 'Web\AccountController@storeAccount');
 	Route::get('account/{uuid}', 'Web\AccountController@showAccount');
+	Route::get('edit-account/{uuid}', 'Web\AccountController@editAccount');
+	Route::post('update-account/{uuid}', 'Web\AccountController@updateAccount');
 	Route::get('delete-account/{uuid}', 'Web\AccountController@deleteAccount');
+	Route::get('destroy-account/{uuid}', 'Web\AccountController@destroyAccount');
+	Route::get('first-login/{uuid}', 'Web\AccountController@accountFirstLogin');
+	Route::post('first-auth/{uuid}', 'Web\AccountController@accountFirstAuth');
 	
 	Route::get('emails/{uuid}', 'Web\AccountController@addEmail');
 	Route::get('add-email/{uuid}', 'Web\AccountController@addEmail');
@@ -76,7 +81,17 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('delete-account-station/{account_uuid}/{stn_uuid}', 'Web\AccountController@deleteAccountStation');
 	Route::get('destroy-account-station/{account_uuid}/{stn_uuid}', 'Web\AccountController@destroyAccountStation');
 	Route::get('account-station/{uuid}', 'Web\AccountController@getAccountStation');
-	Route::get('account-stations/{uuid}', 'Web\AccountController@accountStations');
+	Route::any('account-stations/{uuid}', 'Web\AccountController@accountStations');
+	
+	
+	Route::get('account-supervisory/{uuid}', 'Web\AccountController@accountSupervisory');
+	Route::get('add-account-supervisory/{uuid}', 'Web\AccountController@addAccountSupervisory');
+	Route::post('store-account-supervisory/{uuid}', 'Web\AccountController@storeAccountSupervisory');
+	Route::get('edit-account-supervisory/{account_uuid}/{sup_uuid}', 'Web\AccountController@editAccountSupervisory');
+	Route::post('update-account-supervisory/{account_uuid}/{sup_uuid}', 'Web\AccountController@updateAccountSupervisory');
+	Route::get('delete-account-supervisory/{account_uuid}/{sup_uuid}', 'Web\AccountController@deleteAccountSupervisory');
+	Route::get('destroy-account-supervisory/{account_uuid}/{sup_uuid}', 'Web\AccountController@destroyAccountSupervisory');
+	Route::get('account-supervisories/{account_uuid}', 'Web\AccountController@accountSupervisories');
 
 });
 

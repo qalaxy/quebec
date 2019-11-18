@@ -5,16 +5,28 @@ use Illuminate\Support\Facades\DB;
 use App\Shell\Web\Executor\AccountExe;
 
 class AccountMnt extends AccountExe{
-	public function createAccount(array $data){
+	public function createFirstLogin(array $data, $user){
 		$this->data = $data;
 		DB::beginTransaction();
-		$user = $this->storeUser();
+		$user = $this->updateFirstLogin($user);
 		if(is_null($user)){
 			DB::rollback();
 			return $this->error;
 		}
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function createAccount(array $data){
+		$this->data = $data;
+		DB::beginTransaction();
+		$acc_user = $this->storeUser();
+		if(is_null($acc_user)){
+			DB::rollback();
+			return $this->error;
+		}
 		
-		$account = $this->storeAccount($user);
+		$account = $this->storeAccount($acc_user);
 		if(is_null($account)){
 			DB::rollback();
 			return $this->error;
@@ -70,7 +82,7 @@ class AccountMnt extends AccountExe{
 			return $this->error;
 		}
 		
-		DB::rollback();
+		DB::commit();
 		return $this->success;		
 	}
 	
@@ -150,6 +162,41 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
+	public function addAccountSupervisory(array $data, object $account, object $station){
+		$this->data = $data;
+		
+		DB::beginTransaction();
+		$supervisory = $this->storeAccountSupervisory($account, $station);
+		if(is_null($supervisory)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function editAccountSupervisory(array $data, object $supervisory, object $station){
+		$this->data = $data;
+		DB::beginTransaction();
+		$supervisory = $this->updateAccountSupervisory($supervisory, $station);
+		if(is_null($supervisory)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function deleteAccountSupervisory(object $supervisory){
+		DB::beginTransaction();
+		$supervisory = $this->destroyAccountSupervisory($supervisory);
+		if(is_null($supervisory)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::commit();
+		return $this->success;
+	}
 }
 
 ?>

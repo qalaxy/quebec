@@ -5,9 +5,14 @@ use Exception;
 use App\Account;
 use App\AccountStation;
 use App\Station;
+use App\Supervisor;
 use App\Email;
+use App\User;
 
+use App\Mail\FirstLogin;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use App\Shell\Web\Base;
 use App\Shell\Data\AccountData;
 
@@ -16,6 +21,40 @@ class AccountExt extends Base{
 	
 	public function __construct(){
 		$this->acc_data = new AccountData();
+	}
+	
+	public function sendFirstLoginEmail($uuid){
+		try{
+			$user = $this->getAccount($uuid)->user()->first();
+			$email = Mail::to($user->email)->send(new FirstLogin($user));
+			if($email){
+				throw new Exception('First login email has not been sent successfully');
+			}
+			
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $email;
+	}
+	
+	public function getUser($uuid){
+		try{
+			$user = User::withUuid($uuid)->first();
+			if(is_null($user)){
+				throw new Exception('User could not be found');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $user;
+	}
+	
+	public function validateFirstLoginData(array $data){
+		
+		return Validator::make($data, [
+            'email' => ['required', 'string', 'email', 'max:255',Rule::unique('users')->ignore(User::withUuid($data['uuid'])->first())],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
 	}
 	
 	public function searchAccounts(array $data){
@@ -60,9 +99,8 @@ class AccountExt extends Base{
 				$this->acc_data->first_name_key => $this->acc_data->name_req,
 				$this->acc_data->middle_name_key => $this->acc_data->optional_name_req,
 				$this->acc_data->last_name_key => $this->acc_data->name_req,
-				$this->acc_data->p_number_key => $this->acc_data->p_number_req,
-				$this->acc_data->phone_number_key => $this->acc_data->phone_number_req,
-				$this->acc_data->email_key => $this->acc_data->email_req,
+				$this->acc_data->p_number_key => ['required', 'digits:9', 
+							(isset($data['account_id'])?Rule::unique('accounts')->ignore(Account::withUuid($data['account_id'])->first()):'unique:accounts')],
 		];
 		
 		return Validator::make($data, $rules, $this->acc_data->validation_msgs);
@@ -178,7 +216,7 @@ class AccountExt extends Base{
 				$this->acc_data->status_key => $this->acc_data->status_req,
 		];
 		
-		return Validator::make($data, $rules, $this->acc_data->validation_msgs);
+		return Validator::make($data, $rules, $this->acc_data->station_validation_msgs);
 	}
 	
 	public function getStation($uuid){
@@ -281,6 +319,107 @@ class AccountExt extends Base{
 			return $e->getMessage();
 		}
 		return $stations;
+	}
+	
+	public function validateAccountSupervisoryData(array $data){
+		$rules = [$this->acc_data->station_id_key => $this->acc_data->station_id_req,
+				$this->acc_data->from_key => $this->acc_data->from_req,
+				$this->acc_data->to_key => $this->acc_data->to_req,
+				$this->acc_data->status_key => $this->acc_data->status_req,
+		];
+		
+		return Validator::make($data, $rules, $this->acc_data->supervisory_validation_msgs);
+	}
+	
+	public function getAccountSupervisory($uuid){
+		try{
+			$supervisory = Supervisor::withUuid($uuid)->first();
+			if(is_null($supervisory)){
+				throw new Exception('Supervisory has not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $supervisory;
+	}
+	
+	public function showAccountSupervisory($supervisory){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-theme"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>User\' station in supervision</h2>
+					</header>
+					<div class="w3-container">
+						
+						<p><strong>User\'s name:</strong> '.$supervisory->account()->first()->first_name.' '
+						.((strlen($supervisory->account()->first()->middle_name) < 1) ? '' : $supervisory->account()->first()->middle_name)
+						.' '.$supervisory->account()->first()->last_name.'</p>
+						<p><strong>Station:</strong> '.$supervisory->station()->distinct()->first()->name.'</p>
+						<p><strong>From:</strong> '.date_format(date_create($supervisory->from), 'd/m/Y').'</p>
+						<p><strong>To:</strong> '.(($supervisory->to)? date_format(date_create($supervisory->to), 'd/m/Y'): date_format(date_create(today()), 'd/m/Y')).'</p>
+						<p><strong>Status:</strong> '.(($supervisory->status)? 'Active':'Inactive').'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<button class="w3-button w3-large w3-theme w3-hover-light-blue" title="Dismiss" onclick="document.getElementById(\'delete\').style.display=\'none\'">OK&nbsp;</button>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
+	
+	public function deleteAccountSupervisory(object $account, object $supervisory){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete user\' station in supervision</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-middle w3-large">Your are about to delete a user\'s station in supervision:</p>
+						<p><strong>User\'s name:</strong> '.$account->first_name.' '
+						.((strlen($account->middle_name) < 1) ? '' : $account->middle_name).' '.$account->last_name
+						.'</p><p><strong>Station:</strong> '.$supervisory->station()->distinct()->first()->name.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-account-supervisory').'/'.$account->uuid.'/'.$supervisory->uuid.'" 
+								title="Delete user station">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
+	
+	public function searchAccountSupervisories(array $data, object $account){
+		$data['station_id'] = (isset($data['station_id'])) ? $this->getStation($data['station_id']) : null;
+		
+		try{
+			$supervisories = $account->supervisor()->where($this->prepareSearchParam($data, ['station_id', 'from', 'to', 'status']))->paginate($this->acc_data->rows);
+			if(is_null($supervisories)){
+				throw new Exception('Account stations in supervision have not been retrieved successfully');
+			}
+			
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $supervisories;
+	}
+	
+	public function getAccountSupervisories($account){
+		try{
+			$supervisories = $account->supervisor()->paginate($this->acc_data->rows);
+			
+			if(is_null($supervisories)){
+				throw new Exception('Account stations in supervision have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $supervisories;
 	}
 	
 }

@@ -1,16 +1,16 @@
 @extends('w3.layout.app')
 
 @section('title')
-<title>Accounts</title>
+<title>Account stations in supervision</title>
 @endsection
 
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Accounts</h1>
+  <h1 class="w3-xlarge">Stations in supervision for: {{($account)?$account->first_name:null}}</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		<div class="w3-row">
-			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{url('/create-account')}}">CREATE</a>
+			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{url('/add-account-supervisory/'.$account->uuid)}}">ADD</a>
 			<button class="w3-button w3-blue w3-hover w3-hover-light-blue w3-right" onclick="document.getElementById('search').style.display='block'">SEARCH</button>
 		</div>
 		<div id="search" class="w3-modal">
@@ -74,25 +74,24 @@
 			
 		</div>
 		@include('w3.components.notification')
-		@isset($accounts)
+		@isset($supervisories)
 		<div class="w3-responsive w3-white w3-padding-16 w3-text-dark-gray">
 			<table class="w3-table-all w3-hoverable">
 				<tr class="w3-theme w3-text-white">
-					<th>Name</th>
-					<th>P Number</th>
+					<th>Station</th>
+					<th>From</th>
+					<th>To</th>
 					<th>Status</th>
 					<th colspan="2"></th>
 				</tr>
-				@foreach($accounts as $account)
+				@foreach($supervisories as $supervisory)
 				<tr>
-					<td><a href="{{url('account/'.$account->uuid)}}" style="text-decoration:none;">
-							{{$account->first_name}} {{$account->middle_name}} {{$account->last_name}}
-						</a>
-					</td>
-					<td><a href="{{url('user/'.$account->uuid)}}" style="text-decoration:none;">{{$account->p_number}}</a></td>
-					<td><a href="{{url('user/'.$account->uuid)}}" style="text-decoration:none;">{{($account->user()->first()->status)?'Activated':'Inactive'}}</a></td>
-					<td><a class="w3-button" href="{{url('edit-account/'.$account->uuid)}}" title="Edit {{$account->first_name}}"><i class="fa fa-edit fa-lg"></i></a></td>
-					<td><button class="w3-button" onclick="deleteAccount('{{$account->uuid}}');" title="Delete {{$account->first_name}}">
+					<td>{{$supervisory->station()->first()->name}}</td>
+					<td>{{date_format(date_create($supervisory->from), 'd/m/Y')}}</td>
+					<td>{{(isset($supervisory->to)?date_format(date_create($supervisory->from), 'd/m/Y'):date_format(date_create(today()), 'd/m/Y'))}}</td>
+					<td>{{($supervisory->status)?'Active':'Inactive'}}</td>
+					<td><a class="w3-button" href="{{url('edit-account-supervisory/'.$account->uuid.'/'.$supervisory->uuid)}}" title="Edit {{$supervisory->station()->first()->name}}"><i class="fa fa-edit fa-lg"></i></a></td>
+					<td><button class="w3-button" onclick="deleteSupervisory('{{$account->uuid}}', '{{$supervisory->uuid}}');" title="Delete {{$supervisory->station()->first()->name}}">
 						<i class="fa fa-trash fa-lg"></i>
 						</button>
 					</td>
@@ -100,7 +99,7 @@
 				@endforeach
 			</table>
 		</div>
-		{{$accounts->links('vendor.pagination.paginator')}}
+		{{$supervisories->links('vendor.pagination.paginator')}}
 		@endisset
 	</div>
 </div>
@@ -132,6 +131,37 @@ function deleteAccount(uuid){
 		}
 	}
 }
+
+function deleteStation(account, station){
+	let xhr = new XMLHttpRequest();
+	
+	
+	//http://127.0.0.1/quebec/delete-account-station/94982c10-0888-11ea-b3bc-b15b68e88e82/9fef47b0-0888-11ea-b70f-458597f48fbd
+	xhr.open("GET", "{{url('delete-account-station')}}/"+account+"/"+station);
+	xhr.send();
+	
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById('delete').innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block';
+		}
+	}
+}
+
+function deleteSupervisory(account, supervisory){
+	let xhr = new XMLHttpRequest();
+
+	xhr.open("GET", "{{url('delete-account-supervisory')}}/"+account+"/"+supervisory);
+	xhr.send();
+	
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById('delete').innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block';
+		}
+	}
+}
+
 </script>
 
 

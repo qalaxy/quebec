@@ -43,6 +43,7 @@ class AccountData{
 		'last_name.min'=>'Last name should not have less than 3 characters',
 		'p_number.required'=>'You have not entered personal number',
 		'p_number.digits'=>'Personal number should be numeric and have 9 digits',
+		'p_number.unique'=>'Personal number has already been entered for another user',
 		'station_id.required'=>'You have not selected station',
 		'station_id.uuid'=>'Station value should be a UUID',
 		'phone_number.required'=>'You have not entered phone number',
@@ -57,7 +58,33 @@ class AccountData{
 		'to.date'=>'To field should have a date entry',
 		'to.after_or_equal'=>'The date officer cease being in a station should be later than the date the officer joined the station',
 		'status.required'=>'You have not entered the status of user being in the station',
-		'status.boolean'=>'Status value should either be 1 or 2',
+		'status.boolean'=>'Status value should either be 1 or 0',
+	];
+	
+	public $station_validation_msgs = [
+		'station_id.required'=>'You have not selected station',
+		'station_id.uuid'=>'Station value should be a UUID',
+		'from.required'=>'You have not enter the date officer begin being at the station',
+		'from.date'=>'From field should have a date entry',
+		'from.before_or_equal'=>'The date officer is joining a station should be today before today',
+		'to.required'=>'You have not enter the date officer end being at the station',
+		'to.date'=>'To field should have a date entry',
+		'to.after_or_equal'=>'The date officer cease being in a station should be later than the date the officer joined the station',
+		'status.required'=>'You have not selected the status of user being in the station',
+		'status.boolean'=>'Status value should either be 1 or 0',
+	];
+	
+	public $supervisory_validation_msgs = [
+		'station_id.required'=>'You have not selected station',
+		'station_id.uuid'=>'Station value should be a UUID',
+		'from.required'=>'You have not enter the date officer became a supervisor at the station',
+		'from.date'=>'From field should have a date entry',
+		'from.before_or_equal'=>'The date officer became a supervisor should be today before today',
+		'to.required'=>'You have not enter the date officer end being a supervisor',
+		'to.date'=>'To field should have a date entry',
+		'to.after_or_equal'=>'The date officer cease being a supervisor should be later than the date the officer became a supervisor',
+		'status.required'=>'You have not selected the status of officer being a supervisor at the station',
+		'status.boolean'=>'Status value should either be 1 or 0',
 	];
 	
 }

@@ -34,4 +34,8 @@ class Account extends Model
 	public function user(){
 		return $this->belongsToMany('App\User', 'account_user', 'account_id', 'user_id');
 	}
+	
+	public function supervisor(){
+		return $this->hasMany('App\Supervisor', 'account_id');
+	}
 }

@@ -18,13 +18,17 @@
 				<div class="w3-dropdown-hover w3-right w3-white">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
-					  <a href="{{url('/')}}" class="w3-bar-item w3-button">Edit</a>
-					  <a href="{{url('/')}}" class="w3-bar-item w3-button">Delete</a>
+					  <a href="{{url('/edit-account/'.$account->uuid)}}" class="w3-bar-item w3-button">Edit</a>
+					  <a href="javascript:void(0)" onclick="deleteAccount('{{$account->uuid}}');" class="w3-bar-item w3-button">Delete</a>
+					  @if(is_null($account->user()->first()->role()->get()))
 					  <a href="{{url('/add-')}}" class="w3-bar-item w3-button">Roles</a>
+						@endif
 					  @if(!$account->accountStation()->get())
 						<a href="{{url('/add-station/'.$account->uuid)}}" class="w3-bar-item w3-button">Station</a>
 					  @endif
-					  <a href="{{url('/add-supervisory/'.$account->uuid)}}" class="w3-bar-item w3-button">Supervisory</a>
+					  @if(!$account->supervisor()->get())
+					  <a href="{{url('/add-account-supervisory/'.$account->uuid)}}" class="w3-bar-item w3-button">Supervisory</a>
+						@endif
 					</div>
 				  </div>
 			</div>
@@ -144,6 +148,38 @@
 				</div>
 				@endif
 			</div>
+			<div class="w3-row ">
+				<div class="w3-dropdown-hover w3-right w3-white">
+					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
+					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
+					  <a href="{{($account)?url('/add-account-supervisory/'.$account->uuid):null}}" class="w3-bar-item w3-button">Add a station to supervise</a>
+					  <a href="{{($account)?url('/account-supervisories/'.$account->uuid):null}}" class="w3-bar-item w3-button">All stations in supervision</a>
+					</div>
+				  </div>
+			</div>
+			<div class="w3-light-gray w3-topbar w3-border-gray">
+				@if($account)
+				<div class="w3-row w3-padding-small">
+					<div class="w3-col s12 m12 l2 w3-left">
+						<span class=""><strong>Supervising station(s): </strong></span>
+					</div>
+					<div class="w3-col s12 m12 l10 w3-left">
+						@foreach($account->supervisor()->distinct()->get() as $supervisor)
+							@if(isset($supervisor->to) && $supervisor->to > date_format(today(),'Y-m-d') || $supervisor->status)
+							<span class="w3-hover-text-blue" onmouseover="document.getElementById('{{$supervisor->uuid}}').style.display='inline'; this.style.cursor='pointer';" 
+												onmouseout="document.getElementById('{{$supervisor->uuid}}').style.display='none'">
+												<span onmousedown="loadAccountSupervisory(event, '{{$supervisor->uuid}}')" title="Press ALT + left click on station to view station in supervision">{{$supervisor->station()->first()->name}}</span>
+								<span id="{{$supervisor->uuid}}" style="display:none;">
+									<a href="{{url('/edit-account-supervisory/'.$account->uuid.'/'.$supervisor->uuid)}}" class="w3-hover-blue"><i class="fa fa-edit fa-lg"></i></a>
+									<a class="w3-hover-blue" onclick="deleteSupervisory('{{$account->uuid}}', '{{$supervisor->uuid}}');"><i class="fa fa-trash fa-lg"></i></a>
+								</span>,
+							</span>
+							@endif
+						@endforeach
+					</div>
+				</div>
+				@endif
+			</div>
 		</div>
 	</div>
 </div>
@@ -213,8 +249,6 @@ function loadAccountStation(event, station){
 function deleteStation(account, station){
 	let xhr = new XMLHttpRequest();
 	
-	
-	//http://127.0.0.1/quebec/delete-account-station/94982c10-0888-11ea-b3bc-b15b68e88e82/9fef47b0-0888-11ea-b70f-458597f48fbd
 	xhr.open("GET", "{{url('delete-account-station')}}/"+account+"/"+station);
 	xhr.send();
 	
@@ -226,6 +260,36 @@ function deleteStation(account, station){
 	}
 }
 
+function loadAccountSupervisory(event, supervisory){
+	if(event.altKey){
+		let xhr = new XMLHttpRequest();
+		xhr.open("GET", "{{url('account-supervisory')}}/"+supervisory);
+		xhr.send();
+		
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				document.getElementById("delete").innerHTML = xhr.responseText;
+				document.getElementById('delete').style.display='block'
+				
+			}
+		}
+	}
+	
+}
+
+function deleteSupervisory(account, supervisory){
+	let xhr = new XMLHttpRequest();
+
+	xhr.open("GET", "{{url('delete-account-supervisory')}}/"+account+"/"+supervisory);
+	xhr.send();
+	
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById('delete').innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block';
+		}
+	}
+}
 </script>
 
 

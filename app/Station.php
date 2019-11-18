@@ -54,4 +54,8 @@ class Station extends Model
 	public function systemError(){
 		return $this->hasMany('App\SystemError', 'station_id');
 	}
+	
+	public function supervisor(){
+		return $this->hasMany('App\Supervisor', 'station_id');
+	}
 }

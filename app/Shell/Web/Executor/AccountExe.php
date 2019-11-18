@@ -6,6 +6,7 @@ use App\Account;
 use App\AccountStation;
 use App\Email;
 use App\PhoneNumber;
+use App\Supervisor;
 use App\User;
 use Uuid;
 
@@ -22,15 +23,30 @@ class AccountExe extends Base{
 	public function __construct(){
 		$this->acc_data = new AccountData();
 	}
-	
+	protected function updateFirstLogin($user){
+		try{
+			$user = $user->update(array($this->acc_data->email_key => $this->data[$this->acc_data->email_key],
+						$this->acc_data->password_key => Hash::make($this->data[$this->acc_data->password_key]),
+						$this->acc_data->status_key=>1,
+				));
+			if(is_null($user)){
+				throw new Exception('Your credentials have not been updated successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Your credentials have been updated succesfsfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+		}
+		return $user;
+	}
 	protected function storeUser(){
 		try{
-			$user = User::firstOrCreate(array($this->acc_data->email_key=>$this->data[$this->acc_data->email_key]), 
+			$user = User::firstOrCreate(array($this->acc_data->email_key=>$this->data[$this->acc_data->email_key], 'deleted_at' => null), 
 						array('uuid'=>Uuid::generate(),
 							$this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key],
 							$this->acc_data->email_key=>$this->data[$this->acc_data->email_key],
-							$this->acc_data->password_key=>Hash::make(Str::random(8)),
-							$this->acc_data->status_key=>1,
+							$this->acc_data->password_key=>Hash::make(Str::random(8)),//Send a login link to the email
+							$this->acc_data->status_key=>0,
 						));
 						
 			if(is_null($user)){
@@ -43,9 +59,9 @@ class AccountExe extends Base{
 		return $user;
 	}
 	
-	protected function storeAccount($user){
+	protected function storeAccount($acc_user){
 		try{
-			$account = Account::firstOrCreate(array($this->acc_data->p_number_key => $this->data[$this->acc_data->p_number_key]), 
+			$account = Account::firstOrCreate(array($this->acc_data->p_number_key => $this->data[$this->acc_data->p_number_key], 'deleted_at' => null), 
 							array('uuid'=>Uuid::generate(),
 									$this->acc_data->user_id_key => Auth::id(),
 									$this->acc_data->first_name_key => $this->data[$this->acc_data->first_name_key],
@@ -57,7 +73,8 @@ class AccountExe extends Base{
 			if(is_null($account)){
 				throw new Exception('Account has not been created successfully');
 			}else{
-				$user->account()->attach($account);
+				//$user->account()->attach($account);
+				$account->user()->attach($acc_user->id);
 			}
 		}catch(Exception $e){
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
@@ -68,7 +85,7 @@ class AccountExe extends Base{
 	
 	protected function storePhoneNumber($account){
 		try{
-			$phone_number = PhoneNumber::firstOrCreate(array($this->acc_data->number_key=>$this->data[$this->acc_data->phone_number_key]), 
+			$phone_number = PhoneNumber::firstOrCreate(array($this->acc_data->number_key=>$this->data[$this->acc_data->phone_number_key], 'deleted_at' => null), 
 						array('uuid'=>Uuid::generate(),
 								$this->acc_data->number_key => $this->data[$this->acc_data->phone_number_key]
 							)
@@ -87,7 +104,7 @@ class AccountExe extends Base{
 	
 	protected function storeEmail($account){
 		try{
-			$email = Email::firstOrCreate(array($this->acc_data->address_key=>$this->data[$this->acc_data->email_key]), 
+			$email = Email::firstOrCreate(array($this->acc_data->address_key=>$this->data[$this->acc_data->email_key], 'deleted_at' => null), 
 						array('uuid'=>Uuid::generate(),
 								$this->acc_data->address_key => $this->data[$this->acc_data->email_key],
 							)
@@ -108,7 +125,7 @@ class AccountExe extends Base{
 	
 	protected function updateUser($account){
 		try{
-			$user = $account->update(array($this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key]));
+			$user = $account->user()->first()->update(array($this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key]));
 			if(is_null($user)){
 				throw new Exception('User has not been edited successfully');
 			}
@@ -170,7 +187,7 @@ class AccountExe extends Base{
 	
 	protected function saveEmail($account){
 		try{
-			$email = Email::firstOrCreate(array($this->acc_data->address_key => $this->data[$this->acc_data->email_key]), 
+			$email = Email::firstOrCreate(array($this->acc_data->address_key => $this->data[$this->acc_data->email_key], 'deleted_at' => null), 
 						array($this->acc_data->address_key => $this->data[$this->acc_data->email_key])
 					);
 			if(is_null($email)){
@@ -225,7 +242,8 @@ class AccountExe extends Base{
 		
 		try{
 			$station = AccountStation::firstOrCreate(array($this->acc_data->station_id_key => $station->id, 
-												$this->acc_data->account_id_key => $account->id),
+												$this->acc_data->account_id_key => $account->id,
+												'deleted_at' => null),
 							array('uuid'=>Uuid::generate(),
 								$this->acc_data->station_id_key => $station->id,
 								$this->acc_data->account_id_key => $account->id,
@@ -280,6 +298,70 @@ class AccountExe extends Base{
 			return null;
 		}
 		return $stn;
+	}
+	
+	protected function storeAccountSupervisory($account, $station){
+		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < date_format(today(), 'Y-m-d')))
+			$this->data[$this->acc_data->status_key] = false;
+		
+		try{
+			$supervisory = Supervisor::firstOrCreate(array($this->acc_data->station_id_key => $station->id, 
+												$this->acc_data->account_id_key => $account->id,
+												'deleted_at' => null),
+							array('uuid'=>Uuid::generate(),
+								$this->acc_data->station_id_key => $station->id,
+								$this->acc_data->account_id_key => $account->id,
+								$this->acc_data->from_key => $this->data[$this->acc_data->from_key],
+								$this->acc_data->to_key => $this->data[$this->acc_data->to_key],
+								$this->acc_data->status_key => $this->data[$this->acc_data->status_key])
+						);
+			if(is_null($supervisory)){
+				throw new Exception('Supervisory has not been added successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Supervisory has been added successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $supervisory;
+	}
+	
+	protected function updateAccountSupervisory($supervisory, $station){
+		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < date_format(today(), 'Y-m-d')))
+			$this->data[$this->acc_data->status_key] = false;
+		try{
+			$supervisory = $supervisory->update(array($this->acc_data->station_id_key => $station->id,
+						$this->acc_data->from_key => $this->data[$this->acc_data->from_key],
+						$this->acc_data->to_key => $this->data[$this->acc_data->to_key],
+						$this->acc_data->status_key => $this->data[$this->acc_data->status_key],
+					));
+			if(is_null($supervisory)){
+				throw new Exception ('Account supervisory has not been updated successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Account supervisory has been updated successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $supervisory;
+	}
+	
+	protected function destroyAccountSupervisory($supervisory){
+		try{
+			$supervisory = $supervisory->delete();
+			
+			if(is_null($supervisory)){
+				throw new Exception('Account supervisory has not been deleted successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Account supervisory has been deleted successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $supervisory;
 	}
 }
 

@@ -20,6 +20,43 @@ class AccountController extends Controller
 		$this->mnt = new AccountMnt();
 	}
 	
+	public function accountFirstLogin($uuid){
+		$user = $this->ext->getUser(decrypt($uuid));
+		if(is_object($user)){
+			if($user->status == 1)
+				abort(403);
+			
+			if(View::exists('auth.passwords.first')){
+				return view('auth.passwords.first')->with(compact('user'));
+			}
+		}else{
+			abort(403);
+		}
+	}
+	
+	
+	public function accountFirstAuth(Request $request, $uuid){
+		$request['uuid'] = decrypt($uuid);
+		$validation = $this->ext->validateFirstLoginData($request->all());
+		if($validation->fails()){
+			return redirect('first-login/'.$uuid)
+					->withErrors($validation)
+					->withInput();
+		}
+		$user = $this->ext->getUser(decrypt($uuid)); 
+		if(!is_object($user)) return $user;
+		
+		$notification = $this->mnt->createFirstLogin($request->all(), $user); 
+		
+		if(in_array('success', $notification)){
+			$credentials = $request->only('email', 'password');
+			if (Auth::attempt($credentials)) {
+				return redirect()->intended('/')->with(compact('notification'));
+			}
+		}
+		
+	}
+	
     public function accounts(Request $request){
 		if(Auth::user()->can('view_users')){
 			if(count($request->all())){
@@ -65,8 +102,13 @@ class AccountController extends Controller
 							->withErrors($validation)
 							->withInput();
 			}
-			$notification = $this->mnt->createAccount($request->all()); //return var_dump($notification['uuid']);
+			$notification = $this->mnt->createAccount($request->all()); 
 			if(in_array('success', $notification)){
+				//Send email to user to log in for the first time
+				$first_login = $this->ext->sendFirstLoginEmail($notification['uuid']);
+				
+				if(is_string($first_login)) $notification['message'] .= '. '.$first_login;
+				
 				if(View::exists('w3.show.account')){
 					return redirect('account/'.$notification['uuid'])
 								->with(compact('notification'));
@@ -118,9 +160,10 @@ class AccountController extends Controller
 	
 	public function updateAccount(Request $request, $uuid){
 		if(Auth::user()->can('edit_users')){
+			$request['account_id'] = $uuid;
 			$validation = $this->ext->validateAccountData($request->all());
 			if($validation->fails()){
-				return redirect('create-account')
+				return redirect('edit-account/'.$uuid)
 							->withErrors($validation)
 							->withInput();
 			}
@@ -136,7 +179,7 @@ class AccountController extends Controller
 				}else
 					return back()->with(compact('notification'));
 			}else{
-				return redirect('create-account')
+				return redirect('edit-account/'.$uuid)
 							->with(compact('notification'))
 							->withInput();
 			}
@@ -375,7 +418,7 @@ class AccountController extends Controller
 			if(!is_object($account))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
 			if(count($request->all())){
-				$stns = $this->ext->searchAccountStations($account);
+				$stns = $this->ext->searchAccountStations($request->all(), $account);
 			}else{
 				$stns = $this->ext->getAccountStations($account);
 			}
@@ -566,6 +609,207 @@ class AccountController extends Controller
 			}
 		}else{
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s station'));
+		}
+	}
+	
+	public function accountSupervisories(Request $request, $uuid){
+		if(Auth::user()->can('view_users')){
+			$account = $this->ext->getAccount($uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			if(count($request->all())){
+				$supervisories = $this->ext->searchAccountSupervisories($request->all(), $account);
+			}else{
+				$supervisories = $this->ext->getAccountSupervisories($account);
+			}
+			
+			if(!is_object($supervisories))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$supervisories));
+			
+			if(View::exists('w3.index.account-supervisories')){
+				if(count($supervisories))
+						return view('w3.index.account-supervisories')->with(compact('account', 'supervisories'));
+					else
+						return view('w3.index.account-supervisories')->with(compact('account', 'supervisories'))
+								->with('notification', array('indicator'=>'warning', 'message'=>'Account station(s) not found'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view user\'s stations in supervision'));
+		}
+	}
+	
+	public function addAccountSupervisory($uuid){
+		if(Auth::user()->can('create_users')){
+			$account = $this->ext->getAccount($uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$stations = $this->ext->getStations();
+			if(!is_object($stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			if(View::exists('w3.create.account-supervisory')){
+				return view('w3.create.account-supervisory')->with(compact('account', 'stations'))
+						->with('notification',array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add user\'s supervisory'));
+		}
+	}
+	
+	public function storeAccountSupervisory(Request $request, $uuid){
+		if(Auth::user()->can('create_users')){			
+			$validation = $this->ext->validateAccountSupervisoryData($request->all());
+			if($validation->fails()){
+				return redirect('add-account-supervisory/'.$uuid)
+							->withErrors($validation)
+							->withInput();
+			}
+			
+			$account = $this->ext->getAccount($uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$station = $this->ext->getStation($request->station_id); 
+			if(!is_object($station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
+			
+			$notification = $this->mnt->addAccountSupervisory($request->all(), $account, $station);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.account')){
+					return redirect('account/'.$uuid)
+								->with(compact('notification'));
+				}else
+					return back()->with(compact('notification'));
+			}else{
+				return redirect('add-station/'.$uuid)
+							->with(compact('notification'))
+							->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'warning', 'message'=>'You are not allowed to add user\'s station'));
+		}
+	}
+	
+	public function editAccountSupervisory($account_uuid, $sup_uuid){
+		if(Auth::user()->can('edit_users')){
+			$account = $this->ext->getAccount($account_uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$supervisory = $this->ext->getAccountSupervisory($sup_uuid);
+			if(!is_object($supervisory))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$supervisory));
+			
+			$supervisory->from = date_format(date_create($supervisory->from), 'Y-m-d'); 
+			if(isset($supervisory->to)) $supervisory->to = date_format(date_create($supervisory->to), 'Y-m-d');
+			
+			$stations = $this->ext->getStations();
+			if(!is_object($stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			if(View::exists('w3.edit.account-supervisory')){
+				return view('w3.edit.account-supervisory')->with(compact('account', 'supervisory', 'stations'))
+						->with('notification',array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to edit user\'s supervisory'));
+		}
+	}
+	
+	public function updateAccountSupervisory(Request $request, $account_uuid, $sup_uuid){
+		if(Auth::user()->can('edit_users')){
+			$request['account_id'] = $account_uuid;
+			$validation = $this->ext->validateAccountSupervisoryData($request->all());
+			if($validation->fails()){
+				return redirect('edit-account-supervisory/'.$account_uuid.'/'.$sup_uuid)
+							->withErrors($validation)
+							->withInput();
+			}
+			
+			$supervisory = $this->ext->getAccountSupervisory($sup_uuid);
+			if(!is_object($supervisory))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$supervisory));
+			
+			$station = $this->ext->getStation($request->station_id); 
+			if(!is_object($station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
+			
+			$notification = $this->mnt->editAccountSupervisory($request->all(), $supervisory, $station);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.account')){
+					return redirect('account/'.$account_uuid)
+								->with(compact('notification'));
+				}else
+					return back()->with(compact('notification'));
+			}else{
+				return redirect('edit-account-supervisory/'.$account_uuid.'/'.$sup_uuid)
+							->with(compact('notification'))
+							->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'warning', 'message'=>'You are not allowed to edit user\'s supervisory'));
+		}
+	}
+	
+	public function accountSupervisory($uuid){
+		if(session()->has('params')) session()->reflash();
+		
+		if(Auth::user()->can('view_users')){
+			
+			$supervisory = $this->ext->getAccountSupervisory($uuid);
+			if(is_object($supervisory)){
+				return $this->ext->showAccountSupervisory($supervisory);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s supervisory'));
+		}
+	}
+	
+	public function deleteAccountSupervisory($account_uuid, $sup_uuid){
+		if(session()->has('params')) session()->reflash();
+		
+		if(Auth::user()->can('delete_users')){
+			
+			$account = $this->ext->getAccount($account_uuid);
+			$supervisory = $this->ext->getAccountSupervisory($sup_uuid);
+			if(is_object($account) && is_object($supervisory)){
+				return $this->ext->deleteAccountSupervisory($account, $supervisory);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s supervisory'));
+		}
+	}
+	
+	public function destroyAccountSupervisory($account_uuid, $sup_uuid){
+		if(Auth::user()->can('delete_users')){
+			$supervisory = $this->ext->getAccountSupervisory($sup_uuid);
+			if(is_object($supervisory)){
+				$notification = $this->mnt->deleteAccountSupervisory($supervisory);
+				if(in_array('success', $notification)){
+					if(View::exists('w3.show.account')){
+						return redirect('account/'.$account_uuid)
+									->with(compact('notification'));
+					}else
+						return back()->with(compact('notification'));
+				}else{
+					return back()->with(compact('notification'));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $supervisory));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s supervisory'));
 		}
 	}
 	

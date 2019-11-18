@@ -139,14 +139,14 @@ class CreateAccountTables extends Migration
             $table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->unsignedBigInteger('station_id');
-			$table->unsignedBigInteger('user_id');
+			$table->unsignedBigInteger('account_id');
 			$table->dateTime('from');
-			$table->dateTime('to');
+			$table->dateTime('to')->nullable();
 			$table->boolean('status');
             $table->timestamps();
 			$table->softDeletes();
 			$table->foreign('station_id')->references('id')->on('stations')->onUpdate('cascade')->onDelete('cascade');
-			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('account_id')->references('id')->on('accounts')->onUpdate('cascade')->onDelete('cascade');
         });
 		
 		DB::commit();
