@@ -27,6 +27,10 @@ class PermTableSeeder extends Seeder
 					array('name'=>'create_users', 'display_name'=>'Create users account', 'description'=>'', 'level'=>'admin'),
 					array('name'=>'edit_users', 'display_name'=>'Edit users account', 'description'=>'', 'level'=>'admin'),
 					array('name'=>'delete_users', 'display_name'=>'Delete users account', 'description'=>'', 'level'=>'admin'),
+					array('name'=>'view_errors', 'display_name'=>'View errors', 'description'=>'', 'level'=>'super_user'),
+					array('name'=>'create_errors', 'display_name'=>'Create errors', 'description'=>'', 'level'=>'super_user'),
+					array('name'=>'edit_errors', 'display_name'=>'Edit errors', 'description'=>'', 'level'=>'super_user'),
+					array('name'=>'delete_errors', 'display_name'=>'Delete errors', 'description'=>'', 'level'=>'super_user'),
 		);
 		$levels = Level::all();
 		for($i = 0; $i < count($perms); $i++){

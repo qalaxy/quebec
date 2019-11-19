@@ -105,7 +105,8 @@ class AccountController extends Controller
 			$notification = $this->mnt->createAccount($request->all()); 
 			if(in_array('success', $notification)){
 				//Send email to user to log in for the first time
-				$first_login = $this->ext->sendFirstLoginEmail($notification['uuid']);
+				//$first_login = $this->ext->sendFirstLoginEmail($notification['uuid']);
+				$first_login = null;
 				
 				if(is_string($first_login)) $notification['message'] .= '. '.$first_login;
 				

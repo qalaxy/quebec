@@ -27,7 +27,13 @@ Route::get('uuid', function(){
 })->middleware('auth');
 
 Route::group(['middleware'=>['auth', 'web']], function(){
-	Route::get('create-error', 'Web\FuncErrorController@createError')->name('error');
+	//Route::get('create-error', 'Web\FuncErrorController@createError')->name('error');
+	
+	/*
+	 * ======================================================================================================
+	 * Permission routes
+	 * 
+	 */
 	Route::get('create-permission', 'Web\AdminController@createPermission');
 	Route::post('store-permission', 'Web\AdminController@storePermission');
 	Route::any('permissions', 'Web\AdminController@permissions')
@@ -40,6 +46,12 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('edit-permission/{uuid}', 'Web\AdminController@editPermission')
 				->middleware('tracker:Attempt to edit a permission', 'guardian');
 	Route::post('update-permission/{uuid}', 'Web\AdminController@updatePermission');
+	
+	/*
+	 * =====================================================================================================
+	 * Role routes
+	 *
+	 */
 	
 	Route::any('roles', 'Web\RoleController@roles');
 	Route::get('create-role', 'Web\RoleController@createRole');
@@ -55,6 +67,11 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('delete-role-permission/{role_uuid}/{perm_uuid}', 'Web\RoleController@deleteRolePermission');
 	Route::get('destroy-role-permission/{role_uuid}/{perm_uuid}', 'Web\RoleController@destroyRolePermission');
 	
+	/*
+	 * =========================================================================================================
+	 * User account routes
+	 * 
+	 */
 	Route::any('accounts', 'Web\AccountController@accounts');
 	Route::get('create-account', 'Web\AccountController@createAccount');
 	Route::post('store-account', 'Web\AccountController@storeAccount');
@@ -92,6 +109,23 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('delete-account-supervisory/{account_uuid}/{sup_uuid}', 'Web\AccountController@deleteAccountSupervisory');
 	Route::get('destroy-account-supervisory/{account_uuid}/{sup_uuid}', 'Web\AccountController@destroyAccountSupervisory');
 	Route::get('account-supervisories/{account_uuid}', 'Web\AccountController@accountSupervisories');
+	
+	/*
+	 * ======================================================================================================================
+	 * Error routes
+	 *
+	 * It routes the request to error controller
+	 * User should be authenticated first before accessing the request
+	 *
+	 */	
+	Route::any('errors', 'Web\ErrorController@errors');
+	Route::get('create-error', 'Web\ErrorController@createError');
+	Route::post('store-error', 'Web\ErrorController@storeError');
+	Route::get('error/{uuid}', 'Web\ErrorController@showError');
+	Route::get('edit-error/{uuid}', 'Web\ErrorController@editError');
+	Route::post('update-error/{uuid}', 'Web\ErrorController@updateError');
+	Route::get('delete-error/{uuid}', 'Web\ErrorController@deleteError');
+	Route::get('destroy-error/{uuid}', 'Web\ErrorController@destroyError');
 
 });
 

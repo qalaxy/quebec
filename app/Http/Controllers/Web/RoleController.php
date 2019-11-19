@@ -223,7 +223,11 @@ class RoleController extends Controller
 				$permissions = $this->ext->getPermNotInRole($role);
 				if(is_object($permissions)){
 					if(View::exists('w3.create.role_permission')){
-						return view('w3.create.role_permission')->with(compact('role', 'permissions'));
+						if(count($permissions))
+							return view('w3.create.role_permission')->with(compact('role', 'permissions'));
+						else
+							return view('w3.create.role_permission')->with(compact('role', 'permissions'))
+										->with('notification', array('indicator'=>'information', 'message'=>'All permissions have been added. No permission to add now'));
 					}else{
 						return back()->with('notification', $this->ext->missing_view);
 					}

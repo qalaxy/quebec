@@ -100,7 +100,12 @@ class AccountExt extends Base{
 				$this->acc_data->middle_name_key => $this->acc_data->optional_name_req,
 				$this->acc_data->last_name_key => $this->acc_data->name_req,
 				$this->acc_data->p_number_key => ['required', 'digits:9', 
-						(isset($data['account_id'])?Rule::unique('accounts')->ignore(Account::withUuid($data['account_id'])->where('deleted_at', null)->first()):'unique:accounts')],
+						(isset($data['account_id'])? Rule::unique('accounts')
+						->where(function($query) use($data){ 
+									$query->where('uuid', '<>',$data['account_id'])->whereNull('deleted_at');//Magical query
+								}) : Rule::unique('accounts')->where(function($query){
+																	$query->whereNull('deleted_at');
+																}))],
 				$this->acc_data->phone_number_key => (isset($data['account_id'])?'':$this->acc_data->phone_number_req),
 				$this->acc_data->email_key => (isset($data['account_id'])?'':$this->acc_data->email_req),
 		];
@@ -297,7 +302,7 @@ class AccountExt extends Base{
 	}
 	
 	public function searchAccountStations(array $data, object $account){
-		$data['station_id'] = (isset($data['station_id'])) ? $this->getStation($data['station_id']) : null;
+		$data['station_id'] = (isset($data['station_id'])) ? $this->getStation($data['station_id'])->id : null;
 		
 		try{
 			$accounts = $account->accountStation()->where($this->prepareSearchParam($data, ['station_id', 'from', 'to', 'status']))->paginate($this->acc_data->rows);
@@ -397,7 +402,7 @@ class AccountExt extends Base{
 	}
 	
 	public function searchAccountSupervisories(array $data, object $account){
-		$data['station_id'] = (isset($data['station_id'])) ? $this->getStation($data['station_id']) : null;
+		$data['station_id'] = (isset($data['station_id'])) ? $this->getStation($data['station_id'])->id : null;
 		
 		try{
 			$supervisories = $account->supervisor()->where($this->prepareSearchParam($data, ['station_id', 'from', 'to', 'status']))->paginate($this->acc_data->rows);
