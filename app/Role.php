@@ -14,7 +14,7 @@ class Role extends EntrustRole
 	
 	protected $table = 'roles';
 	
-	protected $fillable = ['uuid', 'name', 'display_name', 'description'];
+	protected $fillable = ['uuid', 'name', 'display_name', 'description', 'level_id'];
 	
 	public function user(){
 		return $this->belongsToMany('App\User', 'role_user', 'role_id', 'user_id');
@@ -22,5 +22,9 @@ class Role extends EntrustRole
 	
 	public function permission(){
 		return $this->belongsToMany('App\Permission', 'permission_role', 'role_id', 'permission_id');
+	}
+	
+	public function level(){
+		return $this->belongsTo('App\Level', 'level_id');
 	}
 }

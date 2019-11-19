@@ -22,8 +22,10 @@ class EntrustSetupTables extends Migration
             $table->string('name');
             $table->string('display_name')->nullable();
             $table->string('description')->nullable();
+			$table->unsignedBigInteger('level_id');
             $table->timestamps();
 			$table->softDeletes();
+			$table->foreign('level_id')->references('id')->on('levels')->onUpdate('cascade')->onDelete('cascade');
         });
 
         // Create table for associating roles to users (Many-to-Many)
@@ -46,8 +48,10 @@ class EntrustSetupTables extends Migration
             $table->string('name');
             $table->string('display_name')->nullable();
             $table->string('description')->nullable();
+			$table->unsignedBigInteger('level_id');
             $table->timestamps();
 			$table->softDeletes();
+			$table->foreign('level_id')->references('id')->on('levels')->onUpdate('cascade')->onDelete('cascade');
         });
 
         // Create table for associating permissions to roles (Many-to-Many)

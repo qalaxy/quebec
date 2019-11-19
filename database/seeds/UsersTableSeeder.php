@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use App\User;
-//use Uuid;
+use App\Level;
 
 class UsersTableSeeder extends Seeder
 {
@@ -13,24 +13,27 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-		$users = array(array('name'=>'Elias','email'=>'elias@email', 'password'=>'12345678', 'status'=>1),
-					array('name'=>'Jared','email'=>'jared@email', 'password'=>'12345678', 'status'=>1),
-					array('name'=>'Seth','email'=>'seth@email', 'password'=>'12345678', 'status'=>1),
-					array('name'=>'Kibet','email'=>'kibeliask@gmail.com', 'password'=>'12345678', 'status'=>1),
-					array('name'=>'Korir','email'=>'ekorir@kcaa.or.ke', 'password'=>'12345678', 'status'=>1),
-					array('name'=>'John','email'=>'jnjoroge@kcaa.or.ke', 'password'=>'12345678', 'status'=>1),
+		$users = array(array('name'=>'Elias','email'=>'ekorir@kcaa.or.ke', 'password'=>'12345678', 'status'=>1, 'level'=>'system_admin'),
+					array('name'=>'Kibet','email'=>'kibeliask@gmail.com', 'password'=>'12345678', 'status'=>1, 'level'=>'super_admin'),
+					array('name'=>'John','email'=>'jnjoroge@kcaa.or.ke', 'password'=>'12345678', 'status'=>1, 'level'=>'super_admin'),
 				);
-				
+		
+		$levels = Level::all();
+		
 		for($i = 0; $i < count($users); $i++){
-			User::firstOrCreate(['email' => $users[$i]['email']],
-			[
-				'uuid' => Uuid::generate(),
-				'name' => $users[$i]['name'],
-				'email' => $users[$i]['email'],
-				'password' => Hash::make($users[$i]['password']),
-				'status' => $users[$i]['status'],
-			]);
+			foreach($levels as $level){
+				if($users[$i]['level'] == $level->name){
+					User::firstOrCreate(['email' => $users[$i]['email']],
+					[
+						'uuid' => Uuid::generate(),
+						'name' => $users[$i]['name'],
+						'email' => $users[$i]['email'],
+						'password' => Hash::make($users[$i]['password']),
+						'status' => $users[$i]['status'],
+						'level_id' => $level->id,
+					]);
+				}
+			}
 		}
-        
     }
 }

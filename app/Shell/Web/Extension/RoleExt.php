@@ -6,6 +6,7 @@ use App\Role;
 use App\Permission;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 use App\Shell\Web\Base;
 use App\Shell\Data\RoleData;
@@ -147,6 +148,9 @@ class RoleExt extends Base{
 									->from('permission_role')
 									->whereRaw('permission_role.role_id='.$role->id);
 								})
+								->join('levels', 'permissions.level_id', '=', 'levels.id')
+								->where('levels.order', '>=', Auth::user()->level()->first()->order)
+								->select('permissions.*')
 								->get();
 								
 			if(is_null($permissions)){

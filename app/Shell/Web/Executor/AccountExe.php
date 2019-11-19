@@ -5,6 +5,7 @@ use Exception;
 use App\Account;
 use App\AccountStation;
 use App\Email;
+use App\Level;
 use App\PhoneNumber;
 use App\Supervisor;
 use App\User;
@@ -47,6 +48,7 @@ class AccountExe extends Base{
 							$this->acc_data->email_key=>$this->data[$this->acc_data->email_key],
 							$this->acc_data->password_key=>Hash::make(Str::random(8)),//Send a login link to the email
 							$this->acc_data->status_key=>0,
+							$this->acc_data->level_id_key=>Level::where('order', Level::max('order'))->first()->id,
 						));
 						
 			if(is_null($user)){

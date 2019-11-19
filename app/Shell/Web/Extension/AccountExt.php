@@ -100,7 +100,9 @@ class AccountExt extends Base{
 				$this->acc_data->middle_name_key => $this->acc_data->optional_name_req,
 				$this->acc_data->last_name_key => $this->acc_data->name_req,
 				$this->acc_data->p_number_key => ['required', 'digits:9', 
-							(isset($data['account_id'])?Rule::unique('accounts')->ignore(Account::withUuid($data['account_id'])->first()):'unique:accounts')],
+						(isset($data['account_id'])?Rule::unique('accounts')->ignore(Account::withUuid($data['account_id'])->where('deleted_at', null)->first()):'unique:accounts')],
+				$this->acc_data->phone_number_key => (isset($data['account_id'])?'':$this->acc_data->phone_number_req),
+				$this->acc_data->email_key => (isset($data['account_id'])?'':$this->acc_data->email_req),
 		];
 		
 		return Validator::make($data, $rules, $this->acc_data->validation_msgs);

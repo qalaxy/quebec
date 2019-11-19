@@ -21,6 +21,7 @@ class AccountData{
 	public $from_key = 'from';
 	public $to_key = 'to';
 	public $account_id_key = 'account_id';
+	public $level_id_key = 'level_id';
 	
 	public $name_req = 'required|regex:/[a-zA-Z\ \']/|min:3';
 	public $optional_name_req = 'nullable|regex:/[a-zA-Z\ \']/|min:3';

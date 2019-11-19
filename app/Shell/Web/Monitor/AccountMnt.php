@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use App\Shell\Web\Executor\AccountExe;
 
 class AccountMnt extends AccountExe{
+	
 	public function createFirstLogin(array $data, $user){
 		$this->data = $data;
 		DB::beginTransaction();
