@@ -23,9 +23,11 @@ class EntrustSetupTables extends Migration
             $table->string('display_name')->nullable();
             $table->string('description')->nullable();
 			$table->unsignedBigInteger('level_id');
+			$table->unsignedBigInteger('owner_id');
             $table->timestamps();
 			$table->softDeletes();
 			$table->foreign('level_id')->references('id')->on('levels')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('owner_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
 
         // Create table for associating roles to users (Many-to-Many)

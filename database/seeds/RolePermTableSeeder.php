@@ -13,7 +13,7 @@ class RolePermTableSeeder extends Seeder
      */
     public function run()
     {
-       $role_perm = array(/*array('role'=>'super_admin', 'perm'=>'view_permissions'),
+       $role_perm = array(array('role'=>'super_admin', 'perm'=>'view_permissions'),
 						array('role'=>'super_admin', 'perm'=>'create_permissions'),
 						array('role'=>'super_admin', 'perm'=>'edit_permissions'),
 						array('role'=>'super_admin', 'perm'=>'delete_permissions'),
@@ -32,7 +32,7 @@ class RolePermTableSeeder extends Seeder
 						array('role'=>'super_admin', 'perm'=>'view_users'),
 						array('role'=>'super_admin', 'perm'=>'create_users'),
 						array('role'=>'super_admin', 'perm'=>'edit_users'),
-						array('role'=>'super_admin', 'perm'=>'delete_users'),*/
+						array('role'=>'super_admin', 'perm'=>'delete_users'),
 						
 						array('role'=>'super_admin', 'perm'=>'view_errors'),
 						array('role'=>'super_admin', 'perm'=>'create_errors'),

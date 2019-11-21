@@ -13,7 +13,7 @@ class Func extends Model
 	
 	protected $table = 'functions';
 	
-	protected $fillble = ['uuid','name','description'];
+	protected $fillble = ['uuid','name', 'abbreviation', 'description'];
 	
 	public function product(){
 		return $this->belongsToMany('App\Product', 'function_product', 'function_id', 'product_id');

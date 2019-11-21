@@ -2,25 +2,25 @@
 
 namespace App\Mail;
 
-use App\User;
+use App\Error;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class FirstLogin extends Mailable
+class ErrorNotificationEmail extends Mailable
 {
     use Queueable, SerializesModels;
-	
-	public $user;
+
+	public $error;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(Error $error)
     {
-        $this->user = $user;
+        $this->error = $error;
     }
 
     /**
@@ -30,8 +30,6 @@ class FirstLogin extends Mailable
      */
     public function build()
     {
-        return $this->from('ekorir@kcaa.or.ke')
-					->subject('AIM System login')
-					->view('w3.email.first-login');
+        return $this->view('w3.email.error-notification')->subject('Error tracking');
     }
 }

@@ -108,4 +108,8 @@ class User extends Authenticatable
 	public function level(){
 		return $this->belongsTo('App\Level', 'level_id');
 	}
+	
+	public function roleOwn(){
+		return $this->hasMany('App\Role', 'owner_id');
+	}
 }

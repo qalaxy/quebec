@@ -18,4 +18,8 @@ class ErrorStatus extends Model
 	public function systemError(){
 		return $this->hasMany('App\SystemError', 'error_status_id');
 	}
+	
+	public function error(){
+		return $this->hasMany('App\Error', 'error_status_id');
+	}
 }

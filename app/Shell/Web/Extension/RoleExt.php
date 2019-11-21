@@ -20,7 +20,8 @@ class RoleExt extends Base{
 	
 	public function searchRoles(array $data){
 		try{
-			$roles = Role::where($this->prepareSearchParam($data, ['name', 'display_name']))
+			$roles = Role::where('owner_id',Auth::id())
+							->where($this->prepareSearchParam($data, ['name', 'display_name']))
 							->paginate($this->role_data->rows);
 			if(is_null($roles)){
 				throw new Exception('Roles have not been retrieved successfully');
@@ -33,7 +34,7 @@ class RoleExt extends Base{
 	
 	public function getPaginatedRoles(){
 		try{
-			$roles = Role::paginate($this->role_data->rows);
+			$roles = Role::where('owner_id',Auth::id())->paginate($this->role_data->rows);
 			if(is_null($roles)){
 				throw new Exception('Roles have not been retrieved successfully');
 			}
