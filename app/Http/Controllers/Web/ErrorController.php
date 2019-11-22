@@ -82,27 +82,28 @@ class ErrorController extends Controller
 			
 			$function = $this->ext->getFunction($request['function_id']);
 			if(!is_object($function))
-				return back()->with('notification', array('indicator'=>'warning', 'message'=>$function));
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$function)); 
 			
 			$station = $this->ext->getStation($request['station_id']);
 			if(!is_object($station))
-				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations)); 
 			
 			$recipients = $this->ext->getNotificationRecipients($station);
 			if(!is_object($recipients))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$recipients));
 			
-			$number = $this->ext->getErrorNumber($station->id, $function->id);
+			$number = $this->ext->getErrorNumber($station->id, $function->id); 
 			if(is_null($number))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$number));
 			else
 				$request['number'] = $number;
 				
-			$notification = $this->mnt->createError($request->all(), $function, $station, $recipients);
+			$notification = $this->mnt->createError($request->all(), $function, $station, $recipients); 
 			if(in_array('success', $notification)){
-				
-				$error_email = $this->ext->sendErrorNotificationEmail($notification['uuid'], $recipients);
-				if(is_string($error_email)) $notification['message'] .= '. '.$error_email;
+				if($request['responsibility'] == 0){
+					$error_email = $this->ext->sendErrorNotificationEmail($notification['uuid'], $recipients); 
+					if(is_string($error_email)) $notification['message'] .= '. '.$error_email;
+				}			
 					
 				if(View::exists('w3.show.error'))
 					return redirect('error/'.$notification['uuid'])->with(compact('notification'));
@@ -116,10 +117,10 @@ class ErrorController extends Controller
 		}
 	}
 	
-	public function showError($uuid){
+	public function showError($error_uuid){ 
 		if(Auth::user()->can('view_errors')){//4471f490-0ab2-11ea-aa54-1746b95626cb 8+1+4+1+4+1+4+1+12=36
-			if(strlen($uuid) > 36)
-				$uuid = decrypt($uuid);
+		
+			$uuid = (strlen($error_uuid) > 36)? decrypt($error_uuid): $error_uuid;
 			
 			$error = $this->ext->getError($uuid);
 			if(!is_object($error)){
@@ -131,12 +132,12 @@ class ErrorController extends Controller
 			if(View::exists('w3.show.error')){
 				return view('w3.show.error')->with(compact('error'));
 			}else{
-				if(strlen($uuid) > 36)
-					return redirect('/')->with('notification', $this->missing_view);
-				else return redirect('/')->with('notification', $this->missing_view);
+				if(strlen($error_uuid) > 36)
+					return redirect('/')->with('notification', $this->ext->missing_view);
+				else return back()->with('notification', $this->ext->missing_view);
 			}
 		}else{
-			if(strlen($uuid) > 36)
+			if(strlen($error_uuid) > 36)
 				return redirect('/')->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view errors'));
 			else 
 				return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view errors'));
@@ -170,6 +171,23 @@ class ErrorController extends Controller
 			
 		}else{
 			
+		}
+	}
+	
+	public function addErrorProduct($uuid){
+		if(Auth::user()->can('create_errors')){
+			$func_error = $this->ext->getError($uuid);
+			if(!is_object($func_error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$func_error));
+			
+			if(View::exists('w3.create.affected-product')){
+				return view('w3.create.affected-product')->with(compact('func_error'))
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
+			}else{
+				return back()->with('notification', $this->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add affected products for the errors'));
 		}
 	}
 	

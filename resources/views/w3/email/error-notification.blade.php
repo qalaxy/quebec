@@ -15,7 +15,9 @@
 			<h2 class="w3-blue">Error tracking</h2>
 			<p class="w3-leftbar">An error has been raised by <strong>{{$error->user()->first()->name}}</strong> in AIM System.</p>
 			<p class="w3-leftbar">Click on the link below to respond to the error</p>
-			<a class="w3-button w3-blue" href="{{config('app.url').'/error/'.encrypt($error->uuid)}}">Login<a>
+			<a class="w3-button w3-blue" href="{{config('app.url').'/error/'.encrypt($error->uuid)}}">
+				Error number: {{$error->station()->first()->abbreviation}}/{{$error->func()->first()->abbreviation}}/{{$error->number}}/{{date_format(date_create($error->date_time_created), 'y')}}
+			<a>
 		</div>
 	</body>
 </html>

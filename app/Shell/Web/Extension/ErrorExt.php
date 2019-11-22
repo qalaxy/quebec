@@ -144,7 +144,10 @@ class ErrorExt extends Base{
 	public function getErrorNumber($station_id, $function_id){
 		try{
 			$number = Error::withTrashed()->where($this->error_data->function_id_key, $function_id)
-								->where($this->error_data->station_id_key, $station_id)->count();
+								->where($this->error_data->station_id_key, $station_id)
+								->where('created_at', '>=', date_create(date('Y').'-01-01 00:00:00'))
+								->where('created_at', '<', date_create(date('Y', strtotime(' + 1 year')).'-01-01 00:00:00'))
+								->count();
 			if(is_null($number)){
 				throw new Exception('Number of functional error could not be retrieved successfully');
 			}else{
@@ -160,31 +163,33 @@ class ErrorExt extends Base{
 		$error = $this->getError($uuid);
 		if(!is_object($error)) return $error;
 		
-		$addresses = $this->prepareRecipientEmails($recipients);
+		$addresses = $this->prepareRecipientEmails($recipients, $error);
 		
-		for($i = 0; $i < count($addresses); $i++){
-			try{
-				$email = Mail::to($addresses[$i])->send(new ErrorNotificationEmail($error));
-				if($email){
-					throw new Exception('Email to '.$addresses[$i].' has not been sent successfully');
-				}
-			}catch(Exception $e){
-				return $e->getMessage();
-			}	
+		if($error->station()->first()->email()->first()){
+			array_push($addresses, $error->station()->first()->email()->first()->address);
 		}
-		return $email;
+		
+		if(count($addresses)){
+			for($i = 0; $i < count($addresses); $i++){
+				try{
+					$email = Mail::to($addresses[$i])->send(new ErrorNotificationEmail($error));
+					if($email){
+						throw new Exception('Email to '.$addresses[$i].' has not been sent successfully');
+					}
+				}catch(Exception $e){
+					return $e->getMessage();
+				}	
+			}
+		}else return 'Addressees for email notification could not be found';
+		
 	}
 	
-	private function prepareRecipientEmails($recipients){
+	private function prepareRecipientEmails($recipients, $error){
 		$addresses = array();
 		foreach($recipients as $recipient){
 			foreach($recipient->user()->first()->account()->first()->email()->get() as $email){
-				array_push($email->address, $addresses);
+				array_push($addresses, $email->address);
 			}
-		}
-		
-		foreach($recipients->station()->first()->email()->get() as $email){
-			array_push($email->address, $addresses);
 		}
 		
 		return $addresses;

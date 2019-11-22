@@ -5,6 +5,7 @@ use App\Error;
 use App\ErrorNotification;
 use App\ErrorStatus;
 use App\Message;
+use App\NotificationRecipient;
 use Uuid;
 
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,10 @@ class ErrorExe extends Base{
 	
 	protected function storeError($function, $station){
 		try{
-			$func_error = Error::firstOrCreate(array($this->error_data->number_key => $this->data[$this->error_data->number_key]), 
+			$func_error = Error::firstOrCreate(array($this->error_data->number_key => $this->data[$this->error_data->number_key],
+							$this->error_data->function_id_key => $function->id,
+							$this->error_data->station_id_key => $station->id,
+						), 
 					array('uuid'=>Uuid::generate(),
 						$this->error_data->user_id_key => Auth::id(),
 						$this->error_data->function_id_key => $function->id,
@@ -85,7 +89,7 @@ class ErrorExe extends Base{
 	
 	protected function storeRecepients($notification, $recipient){
 		try{
-			$notification_recipient = NotificationRecipient::firstOrCreate(array(),
+			$notification_recipient = NotificationRecipient::firstOrCreate(array($this->error_data->error_notification_id_key => $notification->id),
 								array($this->error_data->error_notification_id_key => $notification->id,
 								$this->error_data->user_id_key => $recipient->user()->first()->id)
 							);

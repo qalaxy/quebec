@@ -81,17 +81,18 @@
 					<th>Number</th>
 					<th>Station</th>
 					<th>Description</th>
-					<th>Date created</th>
+					<th>Date time created</th>
 					<th colspan="2"></th>
 				</tr>
 				@foreach($errors as $error)
 				<tr>
 					<td><a href="{{url('error/'.$error->uuid)}}" style="text-decoration:none;">
-		{{$error->station()->first()->abbreviation}}/{{$error->function()->first()->abbreviation}}/{{$error->number}}/{{date_format(date_create($error->date_time_created), 'y')}}
+		{{$error->station()->first()->abbreviation}}/{{$error->func()->first()->abbreviation}}/{{$error->number}}/{{date_format(date_create($error->date_time_created), 'y')}}
 						</a>
 					</td>
-					<td><a href="{{url('error/'.$error->uuid)}}" style="text-decoration:none;">{{$error->station()->first()->name}}</a></td>
-					<td><a href="{{url('error/'.$error->uuid)}}" style="text-decoration:none;">{{$error->description}}</a></td>
+					<td>{{$error->station()->first()->name}}</td>
+					<td>{{$error->description}}</td>
+					<td>{{date_format(date_create($error->date_time_created), 'd/m/Y H:i:s')}}</td>
 					<td><a class="w3-button" href="{{url('edit-error/'.$error->uuid)}}"><i class="fa fa-edit fa-lg"></i></a></td>
 					<td><button class="w3-button" onclick="deleteError('{{$error->uuid}}');">
 						<i class="fa fa-trash fa-lg"></i>
@@ -114,9 +115,9 @@
 @section('scripts')
 <script>
 
-document.getElementById('accounts').className += " w3-text-blue";
-document.getElementById('menu-administration').className += " w3-text-blue";
-menuAcc('administration');
+document.getElementById('errors').className += " w3-text-blue";
+document.getElementById('menu-error').className += " w3-text-blue";
+menuAcc('error');
 w3_show_nav('menuQMS');
 
 function deleteAccount(uuid){

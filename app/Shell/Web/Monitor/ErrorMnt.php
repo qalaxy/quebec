@@ -17,7 +17,7 @@ class ErrorMnt extends ErrorExe{
 			return $this->error;
 		}
 		
-		if(!$func_error->responsibility){
+		if($func_error->responsibility == 0){
 			$notification = $this->storeErrorNotification($func_error, $station);
 			if(is_null($notification)){
 				DB::rollback();
@@ -40,7 +40,7 @@ class ErrorMnt extends ErrorExe{
 			}
 		}		
 		
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 }

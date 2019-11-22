@@ -24,5 +24,8 @@ class DatabaseSeeder extends Seeder
         $this->call(FunctionsTableSeeder::class);
         $this->call(FunctionProductTableSeeder::class);
         $this->call(StationFunctionTableSeeder::class);
+        $this->call(EmailsTableSeeder::class);
+        $this->call(StationEmailTableSeeder::class);
+        $this->call(RecipientTableSeeder::class);
     }
 }

@@ -23,7 +23,7 @@ class CreateErrorTables extends Migration
 			$table->unsignedBigInteger('function_id');
 			$table->unsignedBigInteger('station_id');
 			$table->integer('number');
-			$table->date('date_time_created');
+			$table->dateTime('date_time_created');
 			$table->string('description');
 			$table->string('impact');
 			$table->string('remarks')->nullable();
