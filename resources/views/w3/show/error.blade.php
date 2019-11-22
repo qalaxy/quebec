@@ -23,7 +23,7 @@
 						  <a href="{{url('/edit-error/'.$error->uuid)}}" class="w3-bar-item w3-button">Edit</a>
 						  <a href="javascript:void(0)" onclick="deleteError('{{$error->uuid}}');" class="w3-bar-item w3-button">Delete</a>
 						  <a href="{{url('/corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button">Corrective action</a>
-						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button">Add affected product</a>
+						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button">Affected product</a>
 						
 						</div>
 					  </div>
