@@ -1,6 +1,7 @@
 <?php 
 namespace App\Shell\Web\Executor;
 
+use App\AffectedProduct;
 use App\Error;
 use App\ErrorNotification;
 use App\ErrorStatus;
@@ -101,6 +102,25 @@ class ErrorExe extends Base{
 			return null;
 		}
 		return $notification_recipient;
+	}
+	
+	protected function storeErrorProduct($error, $product){
+		try{
+			$error_product = AffectedProduct::firstOrCreate(array($this->error_data->product_id_key => $product->id), 
+					array($this->error_data->product_id_key => $product->id,
+						$this->error_data->user_id_key => Auth::id(),
+						$this->error_data->error_id_key => $error->id,
+						$this->error_data->product_identification_key => $this->data[$this->error_data->product_identification_key],));
+			if(is_null($error_product)){
+				throw new Exception('Affected product has not been created successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Affected product has been created successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $error_product;
 	}
 	
 }

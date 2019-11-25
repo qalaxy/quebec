@@ -128,6 +128,9 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('destroy-error/{uuid}', 'Web\ErrorController@destroyError');
 	
 	Route::get('add-error-affected-product/{uuid}', 'Web\ErrorController@addErrorProduct');
+	Route::post('store-error-affected-product/{uuid}', 'Web\ErrorController@storeErrorProduct');
+	
+	Route::get('error-corrective-action/{uuid}', 'Web\ErrorController@correctiveAction');
 
 });
 

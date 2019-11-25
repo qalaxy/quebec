@@ -54,7 +54,7 @@ class User extends Authenticatable
 	}
 	
 	public function owner(){
-		return $this->hasOne('App\Account', 'user_id');
+		return $this->hasMany('App\Account', 'user_id');
 	}
 	
 	public function account(){
@@ -111,5 +111,16 @@ class User extends Authenticatable
 	
 	public function roleOwn(){
 		return $this->hasMany('App\Role', 'owner_id');
+	}
+	
+	public function aioError(){
+		return $this->hasMany('App\AioError', 'user_id');
+	}
+	
+	public function aioErrorOriginator(){
+		return $this->hasMany('App\AioError', 'originator_id');
+	}
+	public function externalError(){
+		return $this->hasMany('App\ExternalError', 'user_id');
 	}
 }

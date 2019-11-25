@@ -22,8 +22,10 @@
 						<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
 						  <a href="{{url('/edit-error/'.$error->uuid)}}" class="w3-bar-item w3-button">Edit</a>
 						  <a href="javascript:void(0)" onclick="deleteError('{{$error->uuid}}');" class="w3-bar-item w3-button">Delete</a>
-						  <a href="{{url('/corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button">Corrective action</a>
+						  <a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button">Corrective action</a>
+						  @if(is_null($error->affectedProduct()->first()))
 						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button">Affected product</a>
+							@endif
 						
 						</div>
 					  </div>
@@ -123,6 +125,39 @@
 					</div>
 					@endif
 				</div>
+				<div class="w3-row">
+					<div class="w3-dropdown-hover w3-right w3-white">
+						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
+						<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
+						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button">Add a product</a>						
+						</div>
+					  </div>
+				</div>
+				<div class="w3-light-gray w3-topbar w3-border-gray">
+					@if($error)
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Affected product(s): </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l9 w3-left">
+							@foreach($error->affectedProduct()->distinct()->get() as $affected_product)
+							<span class="w3-hover-text-blue" 
+									onmouseover="document.getElementById('{{$affected_product->uuid}}').style.display='inline'; this.style.cursor='pointer';" 
+												onmouseout="document.getElementById('{{$affected_product->uuid}}').style.display='none'">
+												<span onclick="loadAffectedProduct('{{$affected_product->uuid}}');">{{$affected_product->product()->first()->name}}</span>
+								<span id="{{$affected_product->uuid}}" style="display:none;">
+								<a class="w3-hover-blue" 
+									onclick="deleteAffectedProduct('{{$error->uuid}}', '{{$affected_product->uuid}}');"
+									title="Remove {{$affected_product->product()->first()->name}}">
+									<i class="fa fa-close fa-lg"></i>
+								</a>
+								</span>,
+							</span>
+						@endforeach
+						</div>
+					</div>
+					@endif
+				</div>
 			</div>
 		</div>
 			
@@ -159,7 +194,11 @@ function deleteError(uuid){
 		}
 	}
 }
+
+
 </script>
+
+<script src="{{url('public/js/error.js')}}"></script>
 
 
 @endsection

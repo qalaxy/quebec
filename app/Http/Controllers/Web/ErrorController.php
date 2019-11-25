@@ -129,6 +129,8 @@ class ErrorController extends Controller
 				else return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
 			}
 			
+			
+			
 			if(View::exists('w3.show.error')){
 				return view('w3.show.error')->with(compact('error'));
 			}else{
@@ -180,6 +182,10 @@ class ErrorController extends Controller
 			if(!is_object($func_error))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$func_error));
 			
+			/*foreach($func_error->affectedProduct()->get() as $affected_product){
+				var_dump($affected_product->product()->first()->uuid);
+			}return;*/
+			
 			if(View::exists('w3.create.affected-product')){
 				return view('w3.create.affected-product')->with(compact('func_error'))
 						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
@@ -189,6 +195,42 @@ class ErrorController extends Controller
 		}else{
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add affected products for the errors'));
 		}
+	}
+	public function storeErrorProduct(Request $request, $uuid){
+		if(Auth::user()->can('create_errors')){
+			$validation = $this->ext->validateErrorProductData($request->all());
+			if($validation->fails()){
+				return redirect('add-error-affected-product/'.$uuid)
+							->withErrors($validation)
+							->withInput()
+							->with('notification', array('indicator'=>'warning', 'message'=>'Do appropriate correction on the data before you submit'));
+			}
+			
+			
+			$error = $this->ext->getError($uuid); //return var_dump($error->description);
+			if(!is_object($error)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error)); 
+			
+			$product = $this->ext->getProduct($request['product_id']); //return var_dump($product->name);
+			if(!is_object($product)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$product));
+			
+			$notification = $this->mnt->createErrorProduct($request->all(), $error, $product);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.error'))
+					return redirect('error/'.$uuid)->with(compact('notification'));
+				else 
+					return back()->with('notification', $this->ext->missing_view)->withInput();
+			}else{
+				return redirect('add-error-affected-product/'.$uuid)->with(compact('notification'))->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add affected products for the errors'));
+		}
+	}
+	
+	public function correctiveAction(){
+		
 	}
 	
 }

@@ -20,3 +20,7 @@ function showMessageInput(responsibility){
 	console.log(msg_div.children[0]);
 	
 }
+
+function loadAffectedProduct(affected_product){
+	alert('View: '+affected_product);
+}

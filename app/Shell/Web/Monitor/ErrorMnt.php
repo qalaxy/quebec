@@ -7,7 +7,7 @@ use App\Shell\Web\Executor\AccountExe;
 use App\Shell\Web\Executor\ErrorExe;
 
 class ErrorMnt extends ErrorExe{
-	public function createError(array $data, $function, $station, $recipients){
+	public function createError(array $data, object $function, object $station, array $recipients){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -39,6 +39,20 @@ class ErrorMnt extends ErrorExe{
 				}
 			}
 		}		
+		
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function createErrorProduct(array $data, object $error, object $product){
+		$this->data = $data;
+		
+		DB::beginTransaction();
+		$error_product = $this->storeErrorProduct($error, $product);
+		if(is_null($error_product)){
+			DB::rollback();
+			return $this->error;
+		}
 		
 		DB::commit();
 		return $this->success;

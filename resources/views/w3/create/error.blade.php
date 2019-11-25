@@ -114,7 +114,7 @@
 							<label class="w3-text-dark-gray">Responsibility<span class="w3-text-red">*</span></label>
 							<select class="w3-select w3-border {{($errors->has('responsibility')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									name="responsibility" onchange="showMessageInput(this.value);">
-								<option value="" disabled selected>Are you responsible for the error?</option>
+								<option value="" disabled selected>Are you giving corrective action to the error?</option>
 								<option value="0" {{(old('responsibility') == '0')? 'selected':null}}>No</option>
 								<option value="1" {{(old('responsibility') == '1')? 'selected':null}}>Yes</option>
 							 </select>

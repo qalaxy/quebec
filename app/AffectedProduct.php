@@ -21,10 +21,10 @@ class AffectedProduct extends Model
 	}
 	
 	public function product(){
-		return $this->belongsTo('App\Product', 'user_id');
+		return $this->belongsTo('App\Product', 'product_id');
 	}
 	
 	public function error(){
-		return $this->belongsTo('App\Error', 'user_id');
+		return $this->belongsTo('App\Error', 'error_id');
 	}
 }

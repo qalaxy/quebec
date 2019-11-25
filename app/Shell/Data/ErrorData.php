@@ -19,6 +19,8 @@ class ErrorData{
 	public $text_key = 'text';
 	public $number_key = 'number';
 	public $notification_message_key = 'notification_message';
+	public $product_id_key = 'product_id';
+	public $product_identification_key = 'product_identification';
 	
 	public $function_id_req = 'required|uuid';
 	public $station_id_req = 'required|uuid';
@@ -30,6 +32,8 @@ class ErrorData{
 	public $responsibility_req = 'required|boolean';
 	public $message_req = 'nullable|max:255';
 	public $notification_message_req = 'sometimes|required|max:255';
+	public $product_id_req = 'required|uuid';
+	public $product_identification_req = 'nullable|max:255';
 	
 	public $error_data_validation_msgs = [
 		'function_id.required'=>'You have not selected functional unit',
@@ -55,6 +59,13 @@ class ErrorData{
 		
 		'notification_message.required'=>'You have not entered notification message',
 		'notification_message.max'=>'Characters in message should not be more than 255',
+	];
+	
+	public $error_product_validation_msgs = [
+		'product_id.required'=>'You have not selected the product affected',
+		'product_id.uuid'=>'Value for the product affected should be uuid type',
+		
+		'product_identification.max'=>'Identification of affected product should not have more tha 255 characters',
 	];
 }
 ?>

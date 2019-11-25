@@ -5,6 +5,7 @@ use Exception;
 use App\Error;
 use App\ErrorStatus;
 use App\Func;
+use App\Product;
 use App\Station;
 
 use Illuminate\Support\Str;
@@ -205,6 +206,27 @@ class ErrorExt extends Base{
 			return $e->getMessage();
 		}
 		return $error;
+	}
+	
+	public function validateErrorProductData(array $data){
+		$rules = [
+			$this->error_data->product_id_key => $this->error_data->product_id_req,
+			$this->error_data->product_identification_key => $this->error_data->product_identification_req,
+		];
+		
+		return Validator::make($data, $rules, $this->error_data->error_product_validation_msgs);
+	}
+	
+	public function getProduct($uuid){
+		try{
+			$product = Product::withUuid($uuid)->first();
+			if(is_null($product)){
+				throw new Exception('Product has not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $product;
 	}
 }
 ?>

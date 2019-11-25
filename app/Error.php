@@ -28,7 +28,7 @@ class Error extends Model
 	}
 	
 	public function affectedProduct(){
-		return $this->hasMany('App\AffectedProduct', 'user_id');
+		return $this->hasMany('App\AffectedProduct', 'error_id');
 	}
 	
 	public function errorNotification(){
@@ -41,5 +41,13 @@ class Error extends Model
 	
 	public function errorStatus(){
 		return $this->belongsTo('App\ErrorStatus', 'error_status_id');
+	}
+	
+	public function aioError(){
+		return $this->hasOne('App\AioError', 'error_id');
+	}
+	
+	public function externalError(){
+		return $this->hasOne('App\ExternalError', 'error_id');
 	}
 }

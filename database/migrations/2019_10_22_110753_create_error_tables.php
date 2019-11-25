@@ -103,7 +103,6 @@ class CreateErrorTables extends Migration
 			$table->uuid('uuid');
 			$table->unsignedBigInteger('error_id');
 			$table->unsignedBigInteger('user_id');
-			$table->unsignedBigInteger('originator_id');
 			$table->unsignedBigInteger('station_id');
 			$table->date('date_created');
 			$table->time('time_created');
@@ -114,9 +113,34 @@ class CreateErrorTables extends Migration
 			$table->softDeletes();
 			$table->foreign('error_id')->references('id')->on('errors')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
-			$table->foreign('originator_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('station_id')->references('id')->on('stations')->onUpdate('cascade')->onDelete('cascade');
         });
+		
+		Schema::create('aio_errors', function(Blueprint $table){
+			$table->bigIncrements('id');
+			$table->uuid('uuid');
+			$table->unsignedBigInteger('error_id');
+			$table->unsignedBigInteger('user_id');
+			$table->unsignedBigInteger('originator_id');
+			$table->timestamps();
+			$table->softDeletes();
+			$table->foreign('error_id')->references('id')->on('errors')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('originator_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+			
+		});
+		
+		Schema::create('external_errors', function(Blueprint $table){
+			$table->bigIncrements('id');
+			$table->uuid('uuid');
+			$table->unsignedBigInteger('error_id');
+			$table->unsignedBigInteger('user_id');
+			$table->string('description');
+			$table->timestamps();
+			$table->softDeletes();
+			$table->foreign('error_id')->references('id')->on('errors')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+		});
 		
 		Schema::create('recipients', function (Blueprint $table) {
             $table->bigIncrements('id');
@@ -140,6 +164,8 @@ class CreateErrorTables extends Migration
     public function down()
     {
         Schema::dropIfExists('recipients');
+        Schema::dropIfExists('external_errors');
+        Schema::dropIfExists('aio_errors');
         Schema::dropIfExists('error_corrections');
         Schema::dropIfExists('notification_recipients');
         Schema::dropIfExists('message_response');
