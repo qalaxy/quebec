@@ -13,7 +13,7 @@ class ErrorCorrection extends Model
 	
 	protected $table = 'error_corrections';
 	
-	protected $fillable = ['uuid', 'error_id', 'user_id', 'originator_id', 'station_id', 'date_created', 'time_created', 'corrective_action', 'cause', 'remarks'];
+	protected $fillable = ['uuid', 'error_id', 'user_id', 'originator_id', 'station_id', 'source', 'date_time_created', 'corrective_action', 'cause', 'remarks'];
 	
 	public function error(){
 		return $this->belongsTo('App\Error', 'error_id');

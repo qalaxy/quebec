@@ -22,10 +22,13 @@
 						<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
 						  <a href="{{url('/edit-error/'.$error->uuid)}}" class="w3-bar-item w3-button">Edit</a>
 						  <a href="javascript:void(0)" onclick="deleteError('{{$error->uuid}}');" class="w3-bar-item w3-button">Delete</a>
+						  <a href="{{url('error-pdf/'.$error->uuid)}}"  target="_blank" class="w3-bar-item w3-button">PDF format</a>
+						  @if(is_null($error->errorCorrection()->first()))
 						  <a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button">Corrective action</a>
+							@endif
 						  @if(is_null($error->affectedProduct()->first()))
 						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button">Affected product</a>
-							@endif
+						@endif
 						
 						</div>
 					  </div>
@@ -133,8 +136,9 @@
 						</div>
 					  </div>
 				</div>
+				@if($error->affectedProduct()->get())
 				<div class="w3-light-gray w3-topbar w3-border-gray">
-					@if($error)
+					
 					<div class="w3-row w3-padding">
 						<div class="w3-col s12 m12 l2 w3-left">
 							<span class=""><strong>Affected product(s): </strong></span>
@@ -156,8 +160,102 @@
 						@endforeach
 						</div>
 					</div>
+					
+				</div>
+				@endif
+				@if($error->errorCorrection()->first())
+				<div class="w3-row">
+					
+					<div class="w3-dropdown-hover w3-right w3-white">
+						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
+						<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">						
+						  <a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button">Edit</a>						
+						  <span class="w3-bar-item w3-button" onclick="">Delete</span>						
+						</div>
+					  </div>
+				</div>
+				<div class="w3-light-gray w3-topbar w3-border-gray">
+					@if($error->errorCorrection()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Cause: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{$error->errorCorrection()->first()->cause}}</span>
+						</div>
+					</div>
+					@endif
+					@if($error->errorCorrection()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Corrective action: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{$error->errorCorrection()->first()->corrective_action}}</span>
+						</div>
+					</div>
+					@endif
+					@if($error->errorCorrection()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Station: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{$error->errorCorrection()->first()->station()->first()->name}}</span>
+						</div>
+					</div>
+					@endif
+					@if($error->errorCorrection()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Officer: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{$error->errorCorrection()->first()->user()->first()->name}}</span>
+						</div>
+					</div>
+					@endif
+					
+					@if($error->aioError()->first() || $error->externalError()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Source: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							@if($error->aioError()->first())
+								<span class="">
+								{{$error->aioError()->first()->errorOriginator()->first()->account()->first()->first_name}} 
+								{{$error->aioError()->first()->errorOriginator()->first()->account()->first()->middle_name}} 
+								{{$error->aioError()->first()->errorOriginator()->first()->account()->first()->last_name}}
+								</span>
+							@elseif($error->externalError()->first())
+								<span class="">{{$error->externalError()->first()->description}}</span>
+							@endif
+						</div>
+					</div>
+					@endif
+					@if($error->errorCorrection()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Remarks: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{$error->errorCorrection()->first()->remarks}}</span>
+						</div>
+					</div>
+					@endif
+					@if($error->errorCorrection()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Date of response: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{date_format(date_create($error->errorCorrection()->first()->date_time_created), 'd/m/Y H:i:s')}}</span>
+						</div>
+					</div>
 					@endif
 				</div>
+				@endif
 			</div>
 		</div>
 			

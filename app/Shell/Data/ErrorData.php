@@ -21,6 +21,13 @@ class ErrorData{
 	public $notification_message_key = 'notification_message';
 	public $product_id_key = 'product_id';
 	public $product_identification_key = 'product_identification';
+	public $corrective_action_key = 'corrective_action';
+	public $cause_key = 'cause';
+	public $originator_id_key = 'originator_id';
+	public $originator_key = 'originator';
+	public $error_origin_key = 'error_origin';
+	public $source_key = 'source';
+	public $aio_key = 'aio';
 	
 	public $function_id_req = 'required|uuid';
 	public $station_id_req = 'required|uuid';
@@ -34,6 +41,34 @@ class ErrorData{
 	public $notification_message_req = 'sometimes|required|max:255';
 	public $product_id_req = 'required|uuid';
 	public $product_identification_req = 'nullable|max:255';
+	public $corrective_action_req = 'required|max:255';
+	public $cause_req = 'required|max:255';
+	public $originator_id_req = 'sometimes|required|uuid';
+	public $originator_req = 'sometimes|required|max:255';
+	public $error_origin_req = 'required|boolean';
+	
+	public $corrective_action_validation_msgs = [
+		'corrective_action.required' => 'You have not entered corrective action to the error',
+		'corrective_action.max' => 'Corrective action should not have more than 255 characters',
+		
+		'cause.required' => 'You have not entered the cause of the error',
+		'cause.max' => 'The cause of the error should not have more than 255 characters',
+		
+		'remarks.max'=>'Remarks should not have more than 255 characters',
+		
+		'date_time_created.required' => 'You have not entered the date and time the corrective action was done',
+		'date_time_created.date' => 'Date of responding value should have a date format',
+		'date_time_created.before' => 'The date ? should be before ?',
+		
+		'originator_id.required'=>'You have not selected the officer who caused the error',
+		'originator_id.uuid'=>'The value should be uuid',
+		
+		'originator.required'=>'You have not described the entity that caused error',
+		'originator.max'=>'The description of originator should not have more than 255 characters',
+		
+		'error_origin.required'=>'You have not said whether the error originated from teh station or not',
+		'error_origin.boolean'=>'Value should be either 0 or 1',
+	];
 	
 	public $error_data_validation_msgs = [
 		'function_id.required'=>'You have not selected functional unit',

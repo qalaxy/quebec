@@ -10,8 +10,16 @@
   <h1 class="w3-xlarge">Errors</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		<div class="w3-row">
-			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{url('/create-error')}}">CREATE</a>
-			<button class="w3-button w3-blue w3-hover w3-hover-light-blue w3-right" onclick="document.getElementById('search').style.display='block'">SEARCH</button>
+			<div class="w3-dropdown-hover w3-right w3-white">
+				<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
+				<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
+					<a class="w3-bar-item w3-button  w3-hover-light-blue" href="{{url('/create-error')}}">Create</a>
+					<button href="javascript:void(0)" class="w3-bar-item w3-button  w3-hover-light-blue" 
+									onclick="document.getElementById('search').style.display='block'">Search</button>
+					<a href="{{url('/errors-pdf')}}"  target="_blank" class="w3-bar-item w3-button  w3-hover-light-blue">PDF format</a>
+						
+				</div>
+			</div>
 		</div>
 		<div id="search" class="w3-modal">
 			<div class="w3-modal-content w3-animate-zoom w3-card-4">

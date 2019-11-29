@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
+use PDF;
 
 use App\Shell\Web\Extension\ErrorExt;
 use App\Shell\Web\Monitor\ErrorMnt;
@@ -197,6 +198,7 @@ class ErrorController extends Controller
 		}
 	}
 	public function storeErrorProduct(Request $request, $uuid){
+		//return var_dump($request->all());
 		if(Auth::user()->can('create_errors')){
 			$validation = $this->ext->validateErrorProductData($request->all());
 			if($validation->fails()){
@@ -229,8 +231,127 @@ class ErrorController extends Controller
 		}
 	}
 	
-	public function correctiveAction(){
+	public function addCorrectiveAction(Request $request, $uuid){
+		if(Auth::user()->can('create_errors')){
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error)); 
+			
+			$stations = $this->ext->getStations();
+			if(!is_object($stations)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			if(View::exists('w3.create.corrective-action')){
+				return view('w3.create.corrective-action')->with(compact('error', 'stations'))
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view)->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add affected products for the errors'));
+		}
+	}
+	
+	public function getAccountStation($uuid){
+		if(Auth::user()->can('create_errors')){
+			
+			$station = $this->ext->getStation($uuid);
+			if(!is_object($station))
+				return response()->json(array(['id'=>null, 'name'=>'Error occurred. Sorry']));
+			
+			return response()->json($this->ext->getJsonStationAccounts($station));
+			
+			
+		}else{
+			return response()->json(array(['id'=>null, 'name'=>'You are not allowed to give corrective action to errors']));
+		}
+	}
+	
+	public function storeCorrectiveAction(Request $request, $uuid){
+		if(Auth::user()->can('create_errors')){
+			$validation = $this->ext->validateCorrectiveActionData($request->all());
+			if($validation->fails()){
+				return redirect('error-corrective-action/'.$uuid)
+						->withErrors($validation)
+						->withInput()
+						->with('notification', array('indicator'=>'warning', 'message'=>'Correct the input fields appropriately'));
+			}
+			
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error))->withInput();
+			
+			if(isset($request['originator_id'])){
+				$account = $this->ext->getAccount($request['originator_id']);
+				if(!is_object($error)) 
+					return back()->with('notification', array('indicator'=>'warning', 'message'=>$account))->withInput();
+				$request['aio'] = $account->user()->first()->id;
+			}
+			
+			$notification = $this->mnt->createCorrectiveAction($request->all(), $error); 
+			if(in_array('success', $notification)){
+				//Send email to the aio who caused the error
+				if(View::exists('w3.show.error'))
+					return redirect('error/'.$uuid)->with(compact('notification'));
+				else 
+					return back()->with('notification', $this->ext->missing_view)->withInput();
+			}else{
+				return redirect('error-corrective-action/'.$uuid)->with(compact('notification'))->withInput();
+			}
+			
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide corrective action for the errors'));
+		}
+	}
+	
+	public function pdfError($uuid){
 		
+		if(Auth::user()->can('view_errors')){
+			$error = $this->ext->getError($uuid); //return var_dump($error);
+			if(!is_object($error)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error))->withInput();
+			//return var_dump($this->ext->pdfError($error));
+			return response($this->ext->pdfError($error))
+					->header('Content-Type', 'application/pdf');
+		}else{
+			
+		}
+	}
+	
+	public function errorPdf($uuid){
+		if(Auth::user()->can('view_errors')){
+			$error = $this->ext->getError($uuid); //return var_dump($error);
+			if(!is_object($error)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error))->withInput();
+			
+			$data = $this->ext->errorPdfData($error); //return var_dump($data);
+			
+			$pdf = PDF::loadView('w3.pdf.error', $data);
+			return $pdf->stream();
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view errors'));
+		}
+	}
+	
+	public function errorsPdf(Request $request){
+		if(Auth::user()->can('view_errors')){
+			if(count($request->all())){
+				$errors = $this->ext->searchErrorsPdf(json_decode($request->all()));
+			}else{				
+				$errors = $this->ext->getErrors();
+			}
+			
+			if(is_object($errors)){
+				$data = $this->ext->errorsPdfData($errors);
+				
+				$pdf = PDF::loadView('w3.pdf.errors', $data)->setPaper('a4', 'landscape');
+				return $pdf->stream();
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$errors));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view errors'));
+		}
 	}
 	
 }

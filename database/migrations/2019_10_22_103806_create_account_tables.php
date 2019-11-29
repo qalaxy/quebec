@@ -21,7 +21,7 @@ class CreateAccountTables extends Migration
 			$table->uuid('uuid');
 			$table->unsignedBigInteger('user_id');
 			$table->string('first_name');
-			$table->string('middle_name');
+			$table->string('middle_name')->nullable();
 			$table->string('last_name');
 			$table->string('p_number');
 			//$table->string('gender');

@@ -43,7 +43,7 @@ class CreateErrorTables extends Migration
 			$table->unsignedBigInteger('user_id');
 			$table->unsignedBigInteger('error_id');
 			$table->unsignedBigInteger('product_id');
-			$table->unsignedBigInteger('product_identification')->nullable();
+			$table->string('product_identification')->nullable();
 			$table->string('remarks')->nullable();
             $table->timestamps();
 			$table->softDeletes();
@@ -104,8 +104,8 @@ class CreateErrorTables extends Migration
 			$table->unsignedBigInteger('error_id');
 			$table->unsignedBigInteger('user_id');
 			$table->unsignedBigInteger('station_id');
-			$table->date('date_created');
-			$table->time('time_created');
+			$table->boolean('source');
+			$table->dateTime('date_time_created');
 			$table->string('corrective_action');
 			$table->string('cause');
 			$table->string('remarks')->nullable();

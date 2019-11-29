@@ -118,10 +118,13 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	 * User should be authenticated first before accessing the request
 	 *
 	 */	
+	Route::any('errors-pdf', 'Web\ErrorController@errorsPdf');
 	Route::any('errors', 'Web\ErrorController@errors');
 	Route::get('create-error', 'Web\ErrorController@createError');
 	Route::post('store-error', 'Web\ErrorController@storeError');
 	Route::get('error/{uuid}', 'Web\ErrorController@showError');
+	Route::get('pdf-error/{uuid}', 'Web\ErrorController@pdfError');
+	Route::get('error-pdf/{uuid}', 'Web\ErrorController@errorPdf');
 	Route::get('edit-error/{uuid}', 'Web\ErrorController@editError');
 	Route::post('update-error/{uuid}', 'Web\ErrorController@updateError');
 	Route::get('delete-error/{uuid}', 'Web\ErrorController@deleteError');
@@ -130,7 +133,9 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('add-error-affected-product/{uuid}', 'Web\ErrorController@addErrorProduct');
 	Route::post('store-error-affected-product/{uuid}', 'Web\ErrorController@storeErrorProduct');
 	
-	Route::get('error-corrective-action/{uuid}', 'Web\ErrorController@correctiveAction');
+	Route::get('error-corrective-action/{uuid}', 'Web\ErrorController@addCorrectiveAction');
+	Route::get('get-account-station/{uuid}', 'Web\ErrorController@getAccountStation');
+	Route::post('store-error-corrective-action/{uuid}', 'Web\ErrorController@storeCorrectiveAction');
 
 });
 

@@ -2,9 +2,12 @@
 namespace App\Shell\Web\Executor;
 
 use App\AffectedProduct;
+use App\AioError;
 use App\Error;
+use App\ErrorCorrection;
 use App\ErrorNotification;
 use App\ErrorStatus;
+use App\ExternalError;
 use App\Message;
 use App\NotificationRecipient;
 use Uuid;
@@ -14,7 +17,7 @@ use App\Shell\Web\Base;
 use App\Shell\Data\ErrorData;
 
 class ErrorExe extends Base{
-	private $error_data;
+	protected $error_data;
 	protected $data = array();
 	
 	public function __construct(){
@@ -106,7 +109,8 @@ class ErrorExe extends Base{
 	
 	protected function storeErrorProduct($error, $product){
 		try{
-			$error_product = AffectedProduct::firstOrCreate(array($this->error_data->product_id_key => $product->id), 
+			$error_product = AffectedProduct::firstOrCreate(array($this->error_data->error_id_key => $error->id,
+							$this->error_data->product_id_key => $product->id, ), 
 					array($this->error_data->product_id_key => $product->id,
 						$this->error_data->user_id_key => Auth::id(),
 						$this->error_data->error_id_key => $error->id,
@@ -121,6 +125,65 @@ class ErrorExe extends Base{
 			return null;
 		}
 		return $error_product;
+	}
+	
+	protected function storeErrorCorrection($error){
+		try{
+			$correction = ErrorCorrection::firstOrCreate(array($this->error_data->error_id_key => $error->id), 
+					array('uuid' => Uuid::generate(),
+							$this->error_data->error_id_key => $error->id,
+							$this->error_data->user_id_key => Auth::id(),
+							$this->error_data->station_id_key => $error->station()->first()->id,
+							$this->error_data->source_key => $this->data[$this->error_data->error_origin_key],
+							$this->error_data->date_time_created_key => $this->data[$this->error_data->date_time_created_key],
+							$this->error_data->corrective_action_key => $this->data[$this->error_data->corrective_action_key],
+							$this->error_data->cause_key => $this->data[$this->error_data->cause_key],
+							$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
+						));
+			if(is_null($correction)){
+				throw new Exception('Error corrective action has not been created successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Error corrective action has been created successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $correction;
+	}
+	
+	protected function storeAioError($error, $correction){
+		try{
+			$aio_error = AioError::firstOrCreate(array($this->error_data->error_id_key => $error->id), 
+						array('uuid' => Uuid::generate(),
+							$this->error_data->error_id_key => $error->id,
+							$this->error_data->user_id_key => Auth::id(),
+							$this->error_data->originator_id_key => $this->data[$this->error_data->aio_key]));
+			if(is_null($aio_error)){
+				throw new Exception('Aio error has not been created successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $aio_error;
+	}
+	
+	protected function storeOtherError($error, $correction){
+		try{
+			$external_error = ExternalError::firstOrCreate(array($this->error_data->error_id_key => $error->id), 
+					array('uuid' => Uuid::generate(),
+							$this->error_data->error_id_key => $error->id,
+							$this->error_data->user_id_key => Auth::id(),
+							$this->error_data->description_key => $this->data[$this->error_data->originator_key]));
+			if(is_null($external_error)){
+				throw new Exception('External source has not been created successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $external_error;
 	}
 	
 }

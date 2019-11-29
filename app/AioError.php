@@ -15,7 +15,7 @@ class AioError extends Model
 	
 	protected $fillable = ['uuid', 'error_id', 'user_id', 'originator_id'];
 	
-	public function(){
+	public function error(){
 		return $this->belongsTo('App\Error', 'error_id');
 	}
 	

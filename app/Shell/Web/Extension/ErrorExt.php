@@ -2,6 +2,7 @@
 namespace App\Shell\Web\Extension;
 
 use Exception;
+use App\Account;
 use App\Error;
 use App\ErrorStatus;
 use App\Func;
@@ -14,15 +15,22 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Shell\Web\pdf\fpdf\FPDF;
+use App\Shell\Web\pdf\cellfit\FPDF_CellFit;
 
 use App\Shell\Web\Base;
 use App\Shell\Data\ErrorData;
 
 class ErrorExt extends Base{
 	private $error_data;
+	private $pdf;
+	private $cellfit;
+	private $total_rows;
 	
 	public function __construct(){
 		$this->error_data = new ErrorData();
+		$this->pdf = new FPDF();
+		$this->cellfit = new FPDF_CellFit();
 	}
 	
 	public function searchErrors(array $data){
@@ -43,6 +51,18 @@ class ErrorExt extends Base{
 			$errors = Error::paginate($this->error_data->rows);
 			if(is_null($errors)){
 				throw new Exception('Erros could not be retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $errors;
+	}
+	
+	public function getErrors(){
+		try{
+			$errors = Error::all();
+			if(is_null($errors)){
+				throw new Exception('Errors have not been retrieved successfully');
 			}
 		}catch(Exception $e){
 			return $e->getMessage();
@@ -189,7 +209,7 @@ class ErrorExt extends Base{
 		$addresses = array();
 		foreach($recipients as $recipient){
 			foreach($recipient->user()->first()->account()->first()->email()->get() as $email){
-				array_push($addresses, $email->address);
+				//array_push($addresses, $email->address);
 			}
 		}
 		
@@ -228,5 +248,363 @@ class ErrorExt extends Base{
 		}
 		return $product;
 	}
+	
+	public function getJsonStationAccounts(object $station){
+		$accounts = array();
+		foreach($station->accountStation()->get() as $account_station){
+			array_push($accounts, 
+					['id'=>$account_station->account()->first()->uuid, 
+					'name'=>$account_station->account()->first()->first_name.' '
+					.$account_station->account()->first()->middle_name.' '
+					.$account_station->account()->first()->last_name]);
+		}
+		return $accounts;
+	}
+	
+	public function validateCorrectiveActionData(array $data){
+		$rules = [
+			$this->error_data->corrective_action_key => $this->error_data->corrective_action_req,
+			$this->error_data->cause_key => $this->error_data->cause_req,
+			$this->error_data->error_origin_key => $this->error_data->error_origin_req,
+			$this->error_data->remarks_key => $this->error_data->remarks_req,
+			$this->error_data->date_time_created_key => $this->error_data->date_time_created_req,
+			$this->error_data->originator_id_key => $this->error_data->originator_id_req,
+			$this->error_data->originator_key => $this->error_data->originator_req,
+		];
+		
+		$this->error_data->corrective_action_validation_msgs['date_time_created.before'] = Str::replaceArray('?', 
+								[date_format(date_create($data[$this->error_data->date_time_created_key]), 'd/m/Y H:i:s'), 
+								date('d/m/Y H:i:s', strtotime(strval(today()).' + 1days'))],
+								$this->error_data->corrective_action_validation_msgs['date_time_created.before']);
+								
+		return Validator::make($data, $rules, $this->error_data->corrective_action_validation_msgs);
+	}
+	
+	public function getAccount($uuid){
+		try{
+			$account = Account::withUuid($uuid)->first();
+			if(is_null($account)){
+				throw new Exception('Account has not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $account;
+	}
+	
+	public function pdfError(object $error){
+		
+		$this->pdf->AddPage();
+		$this->pdf->SetMargins(20, 10, 10);
+		$this->Header();
+		
+		$this->pdf->SetFont('Arial','B',16);
+		$this->getPdfReportedError($error);
+		if($error->affectedProduct()->get())
+			$this->getPdfErrorProducts(['Product', 'Identification'], $error);
+		
+		if($error->errorCorrection()->first())
+			$this->getPdfErrorCorrection($error);
+		
+		//$this->Footer();
+		$this->pdf->Output('I', 'name', true);
+		
+	}
+	
+	protected function getTextWidth(array $string, array $cellwidth, float $cellheight){
+		$str_lenght = array(); $cell_width = array(); $rows = array();
+		
+		foreach($string as $str){
+			/*$pix = imageftbbox($size, 0, dirname(__FILE__).'/../pdf/font/arial.ttf', $str);
+			$width = $pix[2] - $pix[0];
+			*/
+			
+			$width = $this->pdf->GetStringWidth($str);
+			array_push($str_lenght, $width);
+		}
+		
+		//return $str_lenght;
+		/*
+		foreach($cellwidth as $w){
+			$cell_px = $w/0.264583333;
+			array_push($cell_width, $cell_px);
+		}*/
+		for($i = 0; $i < count($str_lenght); $i++){
+			$r = $str_lenght[$i]/$cellwidth[$i];
+			array_push($rows, $r);
+		}
+		$this->total_rows = ceil((max($rows) + 1) * $cellheight);
+		
+		return $rows;
+		
+	}
+	
+	private function Header()
+	{
+		
+		// Logo
+		$this->pdf->Image(asset('public/images/logo/kcaa.png'),15,6,30);
+		// Arial bold 15
+		$this->pdf->SetFont('Arial','B',20);
+		// Move to the right
+		$this->pdf->Cell(80);
+		// Title
+		$this->pdf->Cell(30,10,'AIM Non-CONFORMITY REPORT',0,0,'C');
+		// Line break
+		$this->pdf->Ln(20);
+	}
+	
+	private function Footer(){
+		// Position at 1.5 cm from bottom
+		$this->pdf->SetY(-15);
+		// Arial italic 8
+		$this->pdf->SetFont('Arial','I',8);
+		// Page number
+		$this->pdf->Cell(0,10,'Page '.$this->pdf->PageNo().'/{nb}',0,0,'C');
+	}
+	
+	private function getPdfReportedError($error){
+		$this->pdf->SetFont('Arial','B',17);
+		$this->pdf->Cell(100, 10, 'Reported error', 0, 0, 'L');
+		$this->pdf->Ln();
+		
+		$this->pdf->SetFont('Arial','',15);
+		if(isset($error->number)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Number: ', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(80, 6, 
+			$error->station()->first()->abbreviation.'/'
+				.$error->func()->first()->abbreviation.'/'
+				.$error->number.'/'
+				.date_format(date_create($error->date_time_created), 'y'), 0);
+			$this->pdf->Ln();
+		}
+		if(isset($error->function_id)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Function: ', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(80, 6, $error->func()->first()->name, 0);
+			$this->pdf->Ln();
+		}
+		
+		if(isset($error->description)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Description:', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(120, 6, $error->description, 0);
+			$this->pdf->Ln();
+		}
+		
+		if(isset($error->impact)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Impact:', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(120, 6, $error->impact, 0);
+			$this->pdf->Ln();
+		}
+		
+		if(isset($error->station_id)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Station of Origin:', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(120, 6, $error->station()->first()->name, 0);
+			$this->pdf->Ln();
+		}
+		
+		if(isset($error->date_time_created)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Date reported:', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(120, 6, date_format(date_create($error->date_time_created), 'd/m/Y H:i:s'), 0);
+			$this->pdf->Ln();
+		}
+		
+		if(isset($error->responsibility)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Responsibility:', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(120, 6, ($error->responsibility == 1)? $error->user()->first()->name : $error->station()->first()->name, 0);
+			$this->pdf->Ln();
+		}
+		if(isset($error->user_id)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Reported by:', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(120, 6, $error->user()->first()->name, 0);
+			$this->pdf->Ln();
+		}
+		if(isset($error->remarks)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Remarks:', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(120, 6, $error->remarks, 0);
+			$this->pdf->Ln();
+		}
+		
+	}
+	
+	private function getPdfErrorProducts(array $header, object $error)
+	{
+		
+		$this->pdf->Ln();
+		if(count($error->affectedProduct()->get())){
+
+			$this->pdf->SetFont('Arial','B',17);
+			$this->pdf->Cell(100, 10, 'Affected products', 0, 0, 'L');
+			$this->pdf->Ln();
+			
+			// Column widths
+			$w = array(60, 110);
+			// Header
+			$this->pdf->SetFont('Arial','',15);
+			for($i=0;$i<count($header);$i++)
+				$this->pdf->Cell($w[$i],7,$header[$i],1,0,'L');
+			$this->pdf->Ln();
+			
+			// Data
+			$start_x = $this->pdf->GetX();
+			$current_y = $this->pdf->GetY();
+			$current_x = $this->pdf->GetX();
+			
+			$this->pdf->SetFont('Arial','',13);
+			foreach($error->affectedProduct()->get() as $row){
+				$rows = $this->getTextWidth([$row->product()->first()->name, $row->product_identification], $w, 6);
+				
+				$this->pdf->MultiCell($w[0],$this->total_rows/((ceil($rows[0]) < 1)? 1 :ceil($rows[0])),$row->product()->first()->name,'LRB', 'L');
+				$current_x += $w[0];
+				$this->pdf->SetXY($current_x, $current_y);
+				
+				$this->pdf->MultiCell($w[1],$this->total_rows/((ceil($rows[1]) < 1)? 1 :ceil($rows[1])),$row->product_identification,'RB');
+				
+				$current_x = $start_x;
+				$current_y += $this->total_rows;
+			}
+		}else{
+			$this->pdf->SetFont('Arial','B',17);
+			$this->pdf->Cell(60, 10, 'Affected products: ', 0, 0, 'L');
+			$this->pdf->SetFont('Arial','',13);
+			$this->pdf->Cell(100, 10, 'Nill', 0, 0, 'L');
+			$this->pdf->Ln();
+		}
+		
+	}
+	
+	private function getPdfErrorCorrection(object $error){
+		$this->pdf->Ln();
+		$this->pdf->SetFont('Arial','B',17);
+		$this->pdf->Cell(100, 10, 'Error correction', 0, 0, 'L');
+		$this->pdf->Ln();
+		
+		$this->pdf->SetFont('Arial','',15);
+		
+		if(isset($error->errorCorrection()->first()->cause)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Cause of error: ', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(80, 6, $error->errorCorrection()->first()->cause, 0);
+			$this->pdf->Ln();
+		}
+		if(isset($error->errorCorrection()->first()->corrective_action)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Corrective action: ', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(80, 6, $error->errorCorrection()->first()->corrective_action, 0);
+			$this->pdf->Ln();
+		}
+		if(isset($error->errorCorrection()->first()->station()->first()->name)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Station: ', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(80, 6, $error->errorCorrection()->first()->station()->first()->name, 0);
+			$this->pdf->Ln();
+		}
+		if(isset($error->errorCorrection()->first()->remarks)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Remarks: ', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(80, 6, $error->errorCorrection()->first()->remarks, 0);
+			$this->pdf->Ln();
+		}
+		if($error->aioError()->first() || $error->externalError()->first()){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Error source: ', 0);
+			$this->pdf->SetFontSize(13);
+			if($error->aioError()->first())
+				$this->pdf->MultiCell(80, 6, 
+						$error->aioError()->first()->errorOriginator()->first()->account()->first()->first_name.' '
+						.$error->aioError()->first()->errorOriginator()->first()->account()->first()->middle_name.' '
+						.$error->aioError()->first()->errorOriginator()->first()->account()->first()->last_name,0);
+			else if($error->externalError()->first())
+				$this->pdf->MultiCell(80, 6, $error->externalError()->first()->description, 0);
+			$this->pdf->Ln();
+		}
+		if(isset($error->date_time_created)){
+			$this->pdf->SetFontSize(16);
+			$this->pdf->Cell(50, 6, 'Date of response:', 0);
+			$this->pdf->SetFontSize(13);
+			$this->pdf->MultiCell(120, 6, date_format(date_create($error->errorCorrection()->first()->date_time_created), 'd/m/Y H:i:s'), 0);
+			$this->pdf->Ln();
+		}
+	}
+	
+	public function errorPdfData($error){
+		$products = array(); $correction = array(); $reported_error = array();
+		
+		$reported_error = [
+				'number' => $error->station()->first()->abbreviation.'/'
+					.$error->func()->first()->abbreviation.'/'
+					.$error->number.'/'
+					.date_format(date_create($error->date_time_created), 'y'), 
+				
+				'function' => $error->func()->first()->name,
+				'description' => $error->description,
+				'impact' => $error->impact,
+				'station' => $error->station()->first()->name,
+				'date_reported' => date_format(date_create($error->date_time_created), 'd/m/Y H:i:s'),
+				'responsibility' => ($error->responsibility)?$error->user()->first()->name:null,
+				'user' => $error->user()->first()->name,
+				'remarks' => $error->remarks,
+		];
+		
+		foreach($error->affectedProduct()->get() as $product){
+			array_push($products, ['product'=>$product->product()->first()->name, 'identification'=>$product->product_identification]);
+		}
+		
+		if($error->errorCorrection()->first()){
+			if($error->aioError()->first()){
+				$source = $error->aioError()->first()->errorOriginator()->first()->account()->first()->first_name.' '
+				.$error->aioError()->first()->errorOriginator()->first()->account()->first()->middle_name.' '
+				.$error->aioError()->first()->errorOriginator()->first()->account()->first()->last_name;
+			}else if($error->externalError()->first()){
+				$source = $error->externalError()->first()->description;
+			}
+			$correction = [
+				'cause'=>$error->errorCorrection()->first()->cause,
+				'corrective_action'=>$error->errorCorrection()->first()->corrective_action,
+				'remarks'=>$error->errorCorrection()->first()->remarks,
+				'source'=>$source,
+				'date_responded' =>date_format(date_create($error->errorCorrection()->first()->date_time_created), 'd/m/Y H:i:s'),
+				'corrector'=>$error->errorCorrection()->first()->user()->first()->name,
+			];
+		}
+		
+		return [
+			'reported_error' => $reported_error,
+			'products' => $products,
+			'correction' => $correction,
+		];
+	}
+	
+	public function errorsPdfData($errors){
+		$data = array();
+		foreach($errors as $error){
+			
+			array_push($data, $this->errorPdfData($error));
+		}
+		
+		return ['errors' => $data];
+	}
+
 }
 ?>

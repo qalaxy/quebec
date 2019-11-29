@@ -7,7 +7,7 @@ use App\Shell\Web\Executor\AccountExe;
 use App\Shell\Web\Executor\ErrorExe;
 
 class ErrorMnt extends ErrorExe{
-	public function createError(array $data, object $function, object $station, array $recipients){
+	public function createError(array $data, object $function, object $station, object $recipients){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -54,6 +54,33 @@ class ErrorMnt extends ErrorExe{
 			return $this->error;
 		}
 		
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function createCorrectiveAction(array $data, object $error){
+		$this->data = $data;
+		//return $this->error_data->source_key;
+		DB::beginTransaction();
+		$correction = $this->storeErrorCorrection($error);
+		if(is_null($correction)){
+			DB::rollback();
+			return $this->error;
+		}
+		
+		if(isset($data[$this->error_data->originator_id_key])){
+			$origin = $this->storeAioError($error, $correction);
+			if(is_null($origin)){
+				DB::rollback();
+				return $this->error;
+			}
+		}else if(isset($data[$this->error_data->originator_key])){
+			$origin = $this->storeOtherError($error, $correction);
+			if(is_null($origin)){
+				DB::rollback();
+				return $this->error;
+			}
+		}
 		DB::commit();
 		return $this->success;
 	}

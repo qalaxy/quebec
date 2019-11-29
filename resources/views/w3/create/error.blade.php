@@ -41,7 +41,7 @@
 										placeholder="Describe the error"
 										name="description"
 										rows="4">{{old('description')}}</textarea>
-							@if($errors->has('function_id'))
+							@if($errors->has('description'))
 								<span class="w3-small w3-text-red">{{$errors->first('description')}}</span>
 							@else
 								<span>&nbsp;</span>
@@ -106,7 +106,11 @@
 									placeholder="Give your remarks" 
 									name="remarks" 
 									rows="2">{{old('remarks')}}</textarea>
-							<span class="w3-small w3-text-dark-gray">&nbsp;</span>
+							@if($errors->has('remarks'))
+								<span class="w3-small w3-text-red">{{$errors->first('remarks')}}</span>
+							@elseif($errors->has('remarks'))
+								<span class="w3-small w3-text-red">{{$errors->first('remarks')}}</span>
+							@endif
 						</div>
 					</div>
 					<div class="w3-row w3-padding-small">
@@ -125,9 +129,9 @@
 							@endif
 						</div>
 					</div>
-					<div class="w3-row w3-padding-small" id="message" style="display:{{(old('message') || (old('responsibility') == '0'))?'inline':'none'}};">
+					<div class="w3-row w3-padding-small" id="message" style="display:{{(old('notification_message') || (old('responsibility') == '0'))?'inline':'none'}};">
 						<div class="w3-col s12 m10 l10 w3-left">
-							@if(old('message') || (old('responsibility') == '0'))
+							@if(old('notification_message') || (old('responsibility') == '0'))
 								<label class="w3-text-dark-gray">Notification message<span class="w3-text-red">*</span></label>
 								<textarea class="w3-input w3-border {{($errors->has('notification_message')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="Write a notification message to persons giving corrective action to the error" 
