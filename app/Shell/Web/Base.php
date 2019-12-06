@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Auth;
 class Base{
 
 	public $missing_view = array('indicator'=>'information', 'message'=>'The web application interface is missing');
+	public $under_construction = array('indicator'=>'information', 'message'=>'The page is under construction');
+	public $validation = array('indicator'=>'warning', 'message'=>'Correct the flagged input fields appropriately');
 	
 	protected function checkUuid($uuid){
 		

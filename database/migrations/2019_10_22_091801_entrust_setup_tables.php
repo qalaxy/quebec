@@ -22,13 +22,14 @@ class EntrustSetupTables extends Migration
             $table->string('name');
             $table->string('display_name')->nullable();
             $table->string('description')->nullable();
-			$table->unsignedBigInteger('level_id');
+			$table->boolean('global');
 			$table->unsignedBigInteger('owner_id');
             $table->timestamps();
 			$table->softDeletes();
-			$table->foreign('level_id')->references('id')->on('levels')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('owner_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
+		
+		
 
         // Create table for associating roles to users (Many-to-Many)
         Schema::create('role_user', function (Blueprint $table) {
@@ -42,6 +43,16 @@ class EntrustSetupTables extends Migration
 
             $table->primary(['user_id', 'role_id']);
         });
+		
+		Schema::create('levels', function(Blueprint $table){
+			$table->bigIncrements('id');
+			$table->uuid('uuid');
+			$table->string('name');
+			$table->integer('order');
+			$table->timestamps();
+			$table->softDeletes();
+		});
+		
 
         // Create table for storing permissions
         Schema::create('permissions', function (Blueprint $table) {
@@ -81,6 +92,7 @@ class EntrustSetupTables extends Migration
     {
         Schema::dropIfExists('permission_role');
         Schema::dropIfExists('permissions');
+        Schema::dropIfExists('levels');
         Schema::dropIfExists('role_user');
         Schema::dropIfExists('roles');
     }

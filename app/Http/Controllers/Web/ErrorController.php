@@ -354,4 +354,48 @@ class ErrorController extends Controller
 		}
 	}
 	
+	public function errorNotifications(){
+		if(Auth::user()->can('view_errors')){
+			$account_stations = $this->ext->getAccountStations(); 
+			if(!is_object($account_stations)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account_stations));
+			
+			if(count($account_stations)){
+				$error_notifications = $this->ext->getPaginatedNotifiedErrors($account_stations); 
+				if(!is_object($error_notifications)){
+					return back()->with('notification', array('indicator'=>'warning', 'message'=>$error_notifications));
+				}
+				
+				if(View::exists('w3.index.errors')){
+					if(count($error_notifications))
+						return view('w3.index.error_notifications')->with(compact('error_notifications'));
+					else
+						return view('w3.index.error_notifications')->with(compact('error_notifications'))
+							->with('notification', array('indicator'=>'warning', 'message'=>'Notified error(s) could not be found'));	
+				}
+				
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'You have not been assigned to any station in the system'));
+			}
+			
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view errors'));
+		}
+	}
+	
+	public function countErrorNotifications(){
+		$account_stations = $this->ext->getAccountStations();
+		if(!is_object($account_stations)) 
+				return '<span class="w3-text-red">Error!</span>';
+		
+		if(count($account_stations)){
+			$error_notifications = $this->ext->getNotifiedErrors($account_stations); 
+			if(!is_object($error_notifications)){
+				return '<span class="w3-text-red">Error!</span>';
+			}
+			
+			return $this->ext->countErrorNotifications($error_notifications);
+		}
+	}
+	
 }

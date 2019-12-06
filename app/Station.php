@@ -58,4 +58,8 @@ class Station extends Model
 	public function supervisor(){
 		return $this->hasMany('App\Supervisor', 'station_id');
 	}
+	
+	public function role(){
+		return $this->belongdToMany('App\Role', 'role_station', 'station_id', 'role_id');
+	}
 }

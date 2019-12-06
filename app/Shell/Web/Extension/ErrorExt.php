@@ -4,6 +4,7 @@ namespace App\Shell\Web\Extension;
 use Exception;
 use App\Account;
 use App\Error;
+use App\ErrorNotification;
 use App\ErrorStatus;
 use App\Func;
 use App\Product;
@@ -36,6 +37,7 @@ class ErrorExt extends Base{
 	public function searchErrors(array $data){
 		try{
 			$errors = Error::where($this->prepareSearchParam($data, ['user_id', 'function_id', 'station_id', 'date_created', 'time_created', 'responsibility']))
+								->orderBy('id', 'desc')
 								->paginate($this->error_data->rows);
 			if(is_null($errors)){
 				throw new Exception('Errors could not be retrieved successfully');
@@ -48,7 +50,7 @@ class ErrorExt extends Base{
 	
 	public function getPaginatedErrors(){
 		try{
-			$errors = Error::paginate($this->error_data->rows);
+			$errors = Error::orderBy('id', 'desc')->paginate($this->error_data->rows);
 			if(is_null($errors)){
 				throw new Exception('Erros could not be retrieved successfully');
 			}
@@ -605,6 +607,74 @@ class ErrorExt extends Base{
 		
 		return ['errors' => $data];
 	}
-
+	
+	public function getAccountStations(){
+		try{
+			$account_stations = Auth::user()->account()->first()->accountStation()->get();
+			if(is_null($account_stations)){
+				throw new Exception('Account stations cannot be retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $account_stations;
+	}
+	
+	private function prepareNotificationErrorQuery($account_stations){
+		$num = count($account_stations); $query = ''; $i = 0;
+		
+		if($num > 1){
+			foreach($account_stations as $account_station){ 
+				$i++;
+				$query .= ($i == $num)? 'error_notifications.station_id='.$account_station->station()->first()->id
+									:'error_notifications.station_id='.$account_station->station()->first()->id.' OR ';
+			}
+		}else{
+			$query .= 'error_notifications.station_id='.$account_stations->first()->id;
+		}
+		return $query;
+	}
+	
+	public function getPaginatedNotifiedErrors($account_stations){
+		
+		try{			
+			$error_notification = ErrorNotification::whereRaw($this->prepareNotificationErrorQuery($account_stations))->orderBy('id', 'desc')->paginate($this->error_data->rows);
+			if(is_null($error_notification)){
+				throw new Exception('Notified errors have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $error_notification;
+	}
+	
+	public function getNotifiedErrors($account_stations){
+		try{			
+			$error_notification = ErrorNotification::whereRaw($this->prepareNotificationErrorQuery($account_stations))->orderBy('id', 'desc')->get();
+			if(is_null($error_notification)){
+				throw new Exception('Notified errors have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $error_notification;
+	}
+	
+	public function countErrorNotifications($error_notifications){
+		
+		$i = 0;
+		foreach($error_notifications as $error_notification){
+			if($error_notification->error()->first()->errorStatus()->first()->code == '1')
+				$i++;
+		}
+		
+		return $i;
+	}
+	
+	public function searchErrorNotificationsPdf(array $data){
+		//
+	}
+	
+	
 }
 ?>

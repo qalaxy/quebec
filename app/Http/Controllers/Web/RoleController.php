@@ -50,8 +50,16 @@ class RoleController extends Controller
 	
 	public function createRole(){
 		if(Auth::user()->can('create_roles')){
+			
+			$stations = $this->ext->getStations(); 
+			if(!is_object($stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			
+			
 			if(View::exists('w3.create.role'))
-				return view('w3.create.role')->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+				return view('w3.create.role')->with(compact('stations'))
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 			else{
 				return back()->with('notification', $this->ext->missing_view);
 			}
@@ -60,15 +68,61 @@ class RoleController extends Controller
 		}
 	}
 	
+	public function getRoleStations(){
+		if(Auth::user()->can('create_roles')){
+			$stations = $this->ext->getStations(); 
+			if(!is_object($stations))
+				return null;
+			
+			return $this->ext->getRoleStations($stations);
+		}else{
+			return null;
+		}
+	}
+	
+	public function getRoleUserStations(){
+		if(Auth::user()->can('create_roles')){
+			if(is_null(Auth::user()->account()->first()))
+				return null;
+			
+			if(is_null(Auth::user()->account()->first()->accountStation()->get()))
+				return null;
+			
+			$stations = $this->ext->getStations(); 
+			if(!is_object($stations))
+				return null;
+			
+			return $this->ext->getRoleUserStations(Auth::user()->account()->first()->accountStation()->get(), $stations);
+		}else{
+			return null;
+		}
+	}
+	
 	public function storeRole(Request $request){
 		if(Auth::user()->can('create_roles')){
+			//return var_dump($request->all());
+			
 			$validation = $this->ext->validateRoleData($request->all());
 			if($validation->fails()){
 				return redirect('create-role')
 							->withErrors($validation)
-							->withInput();
+							->withInput()
+							->with('notification', $this->ext->validation);
 			}
-			$notification = $this->mnt->createRole($request->all()); //return var_dump($notification['uuid']);
+			if($request['global'] == 3){
+				$stations = $this->ext->getStations(); 
+			}else if($request['global'] == 2){
+				$stations = $this->ext->getSelectedStations($request['stations']); 
+			}else if($request['global'] == 1){
+				$stations = $this->ext->getUserStations(Auth::id());
+			}
+			
+			if(!is_object($stations)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations))->withInput();
+			
+			//return back()->with('notification', $this->ext->under_construction)->withInput();
+			
+			$notification = $this->mnt->createRole($request->all(), $stations); //return var_dump($notification['uuid']);
 			if(in_array('success', $notification)){
 				if(View::exists('w3.show.role')){
 					return redirect('role/'.$notification['uuid'])
@@ -104,10 +158,15 @@ class RoleController extends Controller
 	
 	public function editRole($uuid){
 		if(Auth::user()->can('edit_roles')){
-			$role = $this->ext->getRole($uuid);
+			$stations = $this->ext->getStations(); 
+			if(!is_object($stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			$role = $this->ext->getRole($uuid); //return var_dump(count($role->station()->get()));
+			
 			if(is_object($role)){
 				if(View::exists('w3.edit.role')){
-					return view('w3.edit.role')->with(compact('role'))
+					return view('w3.edit.role')->with(compact('role', 'stations'))
 							->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 				}else{
 					return back()->with('notification', $this->ext->missing_view);
@@ -121,19 +180,35 @@ class RoleController extends Controller
 	}
 	
 	public function updateRole(Request $request, $uuid){
-		if(Auth::user()->can('edit_roles')){
+		if(Auth::user()->can('edit_roles')){ //return var_dump($request->all());
+			$request['role_id'] = $uuid;
 			$validation = $this->ext->validateRoleData($request->all());
 			if($validation->fails()){
 				return redirect('edit-role/'.$uuid)
 							->withErrors($validation)
-							->withInput();
+							->withInput()
+							->with('notification', $this->ext->validation);
 			}
 			
-			//$role = $this->ext->getRole($uuid);
+			if($request['global'] == 3){
+				$stations = $this->ext->getStations(); 
+			}else if($request['global'] == 2){
+				$stations = $this->ext->getSelectedStations($request['stations']); 
+			}else if($request['global'] == 1){
+				$stations = $this->ext->getUserStations(Auth::id());
+			}
 			
-			$notification = $this->mnt->editRole($request->all(), $uuid);
+			if(!is_object($stations)) return var_dump($stations);
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations))->withInput();
+			
+			$role = $this->ext->getRole($uuid);
+			if(!is_object($role))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$role));
+			
+			//return back()->with('notification', $this->ext->under_construction)->withInput();
+			
+			$notification = $this->mnt->editRole($request->all(), $stations, $role);
 			if(in_array('success', $notification)){
-				//$role = $this->ext->archiveRole($perm);
 				if(View::exists('w3.show.role')){
 					return redirect('role/'.$uuid)
 								->with(compact('notification'));

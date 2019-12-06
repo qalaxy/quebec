@@ -165,7 +165,7 @@
 @section('scripts')
 <script>
 
-document.getElementById('notified').className += " w3-text-blue";
+document.getElementById('errors').className += " w3-text-blue";
 document.getElementById('menu-error').className += " w3-text-blue";
 menuAcc('error');
 w3_show_nav('menuQMS');

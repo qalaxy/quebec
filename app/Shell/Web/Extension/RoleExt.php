@@ -3,10 +3,12 @@ namespace App\Shell\Web\Extension;
 
 use Exception;
 use App\Role;
+use App\Station;
 use App\Permission;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 use App\Shell\Web\Base;
 use App\Shell\Data\RoleData;
@@ -44,14 +46,82 @@ class RoleExt extends Base{
 		return $roles;
 	}
 	
+	public function getStations(){
+		try{
+			$stations = Station::all();
+			if(is_null($stations)){
+				throw new Exception('Stations have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $stations;
+	}
+	
+	public function getRoleStations(object $stations){
+		$data = array();
+		foreach($stations as $station){
+			array_push($data, ['id'=>$station->uuid, 'name'=>$station->name]);
+		}
+		return $data;
+	}
+	
+	public function getRoleUserStations(object $account_stations, object $stations){
+		$data = array();
+		foreach($account_stations as $account_station){
+			array_push($data, ['id'=>$account_station->station()->first()->uuid, 'name'=>$account_station->station()->first()->name]);
+		}
+		
+		return ['stations'=>$this->getRoleStations($stations), 'user_stations'=>$data];
+	}
+	
 	public function validateRoleData(array $data){
 		$rules = [
-			$this->role_data->name_key => $this->role_data->name_req,
-			$this->role_data->display_name_key => $this->role_data->display_name_req,
-			$this->role_data->description_key => $this->role_data->description_req
+			$this->role_data->name_key => ['required', 'regex:/[a-zA-Z0-9\ \-\.]+/', 
+					(isset($data['role_id'])? Rule::unique('roles')
+						->where(function($query) use($data){ 
+									$query->where('uuid', '<>',$data['role_id'])->whereNull('deleted_at');//Magical query
+								}) : Rule::unique('roles')->where(function($query){
+																	$query->whereNull('deleted_at');
+																}))],
+			$this->role_data->description_key => $this->role_data->description_req,
+			$this->role_data->global_key => $this->role_data->global_req,
+			$this->role_data->stations_key => ['array', (isset($data['global']))?Rule::requiredIf($data['global'] == 2):null],
+			$this->role_data->stations_key.'*' => $this->role_data->station_id_req,
 		];
-		
-		return Validator::make($data, $rules, $this->role_data->validationMsgs);
+		return Validator::make($data, $rules, $this->role_data->roleValidationMsgs);
+	}
+	
+	public function getSelectedStations(array $data){
+		try{
+			$stations = Station::withUuid($data)->get();
+			if(is_null($stations)){
+				throw new Exception('Stations have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $stations;
+	}
+	
+	public function getUserStations($id){
+		try{
+			$stations = DB::table('users')
+							->join('account_user', 'users.id', '=', 'account_user.user_id')
+							->join('accounts', 'account_user.account_id', '=', 'accounts.id')
+							->join('account_station', 'accounts.id', '=', 'account_station.account_id')
+							->join('stations', 'account_station.station_id', '=', 'stations.id')
+							->where('users.id', $id)
+							->select('stations.*')
+							->get();
+							
+			if(is_null($stations)){
+				throw new Exception('Stations have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $stations;
 	}
 	
 	public function getRole($uuid){

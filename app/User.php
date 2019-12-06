@@ -28,7 +28,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'uuid', 'name', 'email', 'password', 'status', 'level_id'
+        'uuid', 'name', 'email', 'password', 'status'
     ];
 
     /**
@@ -103,10 +103,6 @@ class User extends Authenticatable
 	
 	public function tracker(){
 		return $this->hasMany('App\Tracker', 'user_id');
-	}
-	
-	public function level(){
-		return $this->belongsTo('App\Level', 'level_id');
 	}
 	
 	public function roleOwn(){

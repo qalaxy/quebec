@@ -53,6 +53,16 @@ class CreateAccountTables extends Migration
 			$table->foreign('office_id')->references('id')->on('offices')->onUpdate('cascade')->onDelete('cascade');
         });
 		
+		Schema::create('role_station',function(Blueprint $table){
+			$table->unsignedBigInteger('role_id');
+            $table->unsignedBigInteger('station_id');
+
+            $table->foreign('role_id')->references('id')->on('roles')
+                ->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('station_id')->references('id')->on('stations')
+                ->onUpdate('cascade')->onDelete('cascade');
+				
+		});
 		
 		Schema::create('account_station', function (Blueprint $table) {
             $table->bigIncrements('id');
@@ -168,6 +178,7 @@ class CreateAccountTables extends Migration
         Schema::dropIfExists('emails');
         Schema::dropIfExists('phone_numbers');
         Schema::dropIfExists('account_station');
+        Schema::dropIfExists('role_station');
         Schema::dropIfExists('stations');
         Schema::dropIfExists('account_user');
         Schema::dropIfExists('accounts');

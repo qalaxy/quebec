@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\DB;
 use App\Shell\Web\Executor\RoleExe;
 
 class RoleMnt extends RoleExe{
-	public function createRole(array $data){
+	public function createRole(array $data, object $stations){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -14,18 +14,48 @@ class RoleMnt extends RoleExe{
 			DB::rollback();
 			return $this->error;
 		}
+		
+		foreach($stations as $station){
+			$role_station = $this->storeRoleStation($role, $station);
+			if(is_null($role_station)){
+				DB::rollback();
+				return $this->error;
+			}
+		}
+		
 		DB::commit();
 		return $this->success;
 	}
 	
-	public function editRole(array $data, $uuid){
+	public function editRole(array $data, $stations, $role){
 		$this->data = $data;
 		DB::beginTransaction();
-		$role = $this->updateRole($uuid);
-		if(is_null($role)){
+		$role_update = $this->updateRole($role);
+		if(is_null($role_update)){
 			DB::rollback();
 			return $this->error;
 		}
+		
+		/*foreach($role->station()->get() as $role_station){
+			foreach($stations as $station){
+				if($role_station->id != $station->id){
+					$role_stn = $this->deleteRoleStation($role, $role_station);
+					if(is_null($role_stn)){
+						DB::rollback();
+						return $this->error;
+					}
+				}
+			}
+		}*/
+		
+		foreach($stations as $station){
+			$role_station = $this->updateRoleStation($role, $station);
+			if(is_null($role_station)){
+				DB::rollback();
+				return $this->error;
+			}
+		}
+		
 		DB::commit();
 		return $this->success;
 	}

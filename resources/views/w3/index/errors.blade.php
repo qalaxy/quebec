@@ -26,49 +26,171 @@
 				<header class="w3-container w3-theme"> 
 					<span onclick="document.getElementById('search').style.display='none'" 
 					class="w3-button w3-display-topright">&times;</span>
-					<h2>Search accounts</h2>
+					<h2>Search errors</h2>
 				</header>
 				<div class="w3-container w3-padding-24">
 					<form class="w3-container" method="POST" action="{{url('/accounts')}}">
 						@csrf
+						
 						<div class="w3-row">
-							<div class="w3-col s12 m6 l6">
-								<div class="w3-row w3-padding-small">
-									<div class="w3-col s12 m10 l10 w3-left">
-										<label class="w3-text-dark-gray">Name</label>
-										<input class="w3-input w3-border {{($errors->has('name')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
-												name="name"
-												type="text"
-												autocomplete="off"
-												placeholder="Search by name" 
-												value="{{old('name')}}" />
-										@if($errors->has('name'))
-											<span class="w3-small w3-text-red">{{$errors->first('name')}}</span>
-										@else
-											<span>&nbsp;</span>
-										@endif
+							<div class="w3-col s12 m12 l12">
+								<div class="w3-row">
+									<div class="w3-col s12 m12 l6">
+										<div class="w3-row w3-padding-small">
+											<div class="w3-col s12 m12 l10 w3-left">
+												<label class="w3-text-dark-gray">Number</label>
+												<input class="w3-input w3-border {{($errors->has('number')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+														name="number"
+														type="text"
+														autocomplete="off"
+														placeholder="Search by number" 
+														value="{{old('number')}}" />
+												@if($errors->has('number'))
+													<span class="w3-small w3-text-red">{{$errors->first('number')}}</span>
+												@else
+													<span>&nbsp;</span>
+												@endif
+											</div>
+										</div>
+									</div>
+									<div class="w3-col s12 m12 l6">
+										<div class="w3-row w3-padding-small">
+											<div class="w3-col s12 m12 l10 w3-left">
+												<label class="w3-text-dark-gray">Function</label>
+												<input class="w3-input w3-border {{($errors->has('number')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+														name="number"
+														type="text"
+														autocomplete="off"
+														placeholder="Search by AIS function" 
+														value="{{old('number')}}" />
+												@if($errors->has('number'))
+													<span class="w3-small w3-text-red">{{$errors->first('number')}}</span>
+												@else
+													<span>&nbsp;</span>
+												@endif
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="w3-row">
+									<div class="w3-col s12 m12 l6">
+										<div class="w3-row w3-padding-small">
+											<div class="w3-col s12 m12 l10 w3-left">
+												<label class="w3-text-dark-gray">Station</label>
+												<input class="w3-input w3-border {{($errors->has('number')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+														name="number"
+														type="text"
+														autocomplete="off"
+														placeholder="Search by station" 
+														value="{{old('number')}}" />
+												@if($errors->has('number'))
+													<span class="w3-small w3-text-red">{{$errors->first('number')}}</span>
+												@else
+													<span>&nbsp;</span>
+												@endif
+											</div>
+										</div>
+									</div>
+									<div class="w3-col s12 m12 l6">
+										<div class="w3-row w3-padding-small">
+											<div class="w3-col s12 m12 l10 w3-left">
+												<label class="w3-text-dark-gray">Officer</label>
+												<input class="w3-input w3-border {{($errors->has('number')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+														name="number"
+														type="text"
+														autocomplete="off"
+														placeholder="Search by officer" 
+														value="{{old('number')}}" />
+												@if($errors->has('number'))
+													<span class="w3-small w3-text-red">{{$errors->first('number')}}</span>
+												@else
+													<span>&nbsp;</span>
+												@endif
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="w3-row">
+									<div class="w3-col s12 m12 l6">
+										<div class="w3-row w3-padding-small">
+											<div class="w3-col s12 m12 l10 w3-left">
+												<label class="w3-text-dark-gray">From(Reporting date)</label>
+												<input class="w3-input w3-border {{($errors->has('number')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+														name="number"
+														type="text"
+														autocomplete="off"
+														placeholder="Search by beginning date of reporting" 
+														value="{{old('number')}}" />
+												@if($errors->has('number'))
+													<span class="w3-small w3-text-red">{{$errors->first('number')}}</span>
+												@else
+													<span>&nbsp;</span>
+												@endif
+											</div>
+										</div>
+									</div>
+									<div class="w3-col s12 m12 l6">
+										<div class="w3-row w3-padding-small">
+											<div class="w3-col s12 m12 l10 w3-left">
+												<label class="w3-text-dark-gray">To(Reporting date)</label>
+												<input class="w3-input w3-border {{($errors->has('number')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+														name="number"
+														type="text"
+														autocomplete="off"
+														placeholder="Search by end date of reporting" 
+														value="{{old('number')}}" />
+												@if($errors->has('number'))
+													<span class="w3-small w3-text-red">{{$errors->first('number')}}</span>
+												@else
+													<span>&nbsp;</span>
+												@endif
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<div class="w3-row">
+									<div class="w3-col s12 m12 l6">
+										<div class="w3-row w3-padding-small">
+											<div class="w3-col s12 m12 l10 w3-left">
+												<label class="w3-text-dark-gray">From(Correction date)</label>
+												<input class="w3-input w3-border {{($errors->has('number')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+														name="number"
+														type="text"
+														autocomplete="off"
+														placeholder="Search by beginning date of correction" 
+														value="{{old('number')}}" />
+												@if($errors->has('number'))
+													<span class="w3-small w3-text-red">{{$errors->first('number')}}</span>
+												@else
+													<span>&nbsp;</span>
+												@endif
+											</div>
+										</div>
+									</div>
+									<div class="w3-col s12 m12 l6">
+										<div class="w3-row w3-padding-small">
+											<div class="w3-col s12 m12 l10 w3-left">
+												<label class="w3-text-dark-gray">To(Correction date)</label>
+												<input class="w3-input w3-border {{($errors->has('number')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+														name="number"
+														type="text"
+														autocomplete="off"
+														placeholder="Search by end date of correction" 
+														value="{{old('number')}}" />
+												@if($errors->has('number'))
+													<span class="w3-small w3-text-red">{{$errors->first('number')}}</span>
+												@else
+													<span>&nbsp;</span>
+												@endif
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
-							<div class="w3-col s12 m6 l6">
-								<div class="w3-row w3-padding-small">
-									<div class="w3-col s12 m10 l10 w3-left">
-										<label class="w3-text-dark-gray">Display name</label>
-										<input class="w3-input w3-border {{($errors->has('display_name')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
-												name="display_name"
-												type="text"
-												autocomplete="off"
-												placeholder="Search by display name" 
-												value="{{old('display_name')}}" />
-										@if($errors->has('display_name'))
-											<span class="w3-small w3-text-red">{{$errors->first('display_name')}}</span>
-										@else
-											<span>&nbsp;</span>
-										@endif
-									</div>
-								</div>	
-							</div>
 						</div>
+						
+						
 						<div class="w3-row">
 							<div class="w3-col w3-padding-small">
 								<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Search accounts">Go&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>

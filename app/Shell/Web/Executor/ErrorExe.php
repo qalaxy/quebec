@@ -39,7 +39,7 @@ class ErrorExe extends Base{
 						$this->error_data->description_key => $this->data[$this->error_data->description_key],
 						$this->error_data->impact_key => $this->data[$this->error_data->impact_key],
 						$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
-						$this->error_data->error_status_id_key => ErrorStatus::where('id', 1)->first()->id,
+						$this->error_data->error_status_id_key => ErrorStatus::where('code', 1)->first()->id,
 						$this->error_data->responsibility_key => $this->data[$this->error_data->responsibility_key],
 						));
 			if(is_null($func_error)){
@@ -184,6 +184,19 @@ class ErrorExe extends Base{
 			return null;
 		}
 		return $external_error;
+	}
+	
+	protected function updateErrorStatus($error){
+		try{
+			$error_status = $error->update([$this->error_data->error_status_id_key => ErrorStatus::where('code', 3)->first()->id]);
+			if(is_null($error_status)){
+				throw new Exception('Error status has not been updated successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$error_status);
+			return null;
+		}
+		return $error_status;
 	}
 	
 }

@@ -81,6 +81,12 @@ class ErrorMnt extends ErrorExe{
 				return $this->error;
 			}
 		}
+		$error_status = $this->updateErrorStatus($error);
+		if(is_null($error_status)){
+			DB::rollback();
+			return $this->error;
+		}
+		
 		DB::commit();
 		return $this->success;
 	}

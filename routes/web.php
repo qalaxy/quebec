@@ -66,6 +66,8 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('store-role-permission/{uuid}', 'Web\RoleController@storeRolePermission');
 	Route::get('delete-role-permission/{role_uuid}/{perm_uuid}', 'Web\RoleController@deleteRolePermission');
 	Route::get('destroy-role-permission/{role_uuid}/{perm_uuid}', 'Web\RoleController@destroyRolePermission');
+	Route::get('get-role-stations', 'Web\RoleController@getRoleStations');
+	Route::get('get-role-user-stations', 'Web\RoleController@getRoleUserStations');
 	
 	/*
 	 * =========================================================================================================
@@ -120,6 +122,8 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	 */	
 	Route::any('errors-pdf', 'Web\ErrorController@errorsPdf');
 	Route::any('errors', 'Web\ErrorController@errors');
+	Route::any('error-notifications', 'Web\ErrorController@errorNotifications');
+	Route::any('count-error-notifications', 'Web\ErrorController@countErrorNotifications');
 	Route::get('create-error', 'Web\ErrorController@createError');
 	Route::post('store-error', 'Web\ErrorController@storeError');
 	Route::get('error/{uuid}', 'Web\ErrorController@showError');
