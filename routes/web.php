@@ -112,6 +112,12 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('destroy-account-supervisory/{account_uuid}/{sup_uuid}', 'Web\AccountController@destroyAccountSupervisory');
 	Route::get('account-supervisories/{account_uuid}', 'Web\AccountController@accountSupervisories');
 	
+	Route::get('add-role/{account_uuid}', 'Web\AccountController@addRole');
+	Route::post('store-account-role/{account_uuid}', 'Web\AccountController@storeAccountRole');
+	Route::get('delete-account-role/{account_uuid}/{role_uuid}', 'Web\AccountController@deleteAccountRole');
+	Route::get('destroy-account-role/{account_uuid}/{role_uuid}', 'Web\AccountController@destroyAccountRole');
+	Route::get('account-role/{uuid}', 'Web\AccountController@accountRole');
+	
 	/*
 	 * ======================================================================================================================
 	 * Error routes
@@ -123,7 +129,7 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::any('errors-pdf', 'Web\ErrorController@errorsPdf');
 	Route::any('errors', 'Web\ErrorController@errors');
 	Route::any('error-notifications', 'Web\ErrorController@errorNotifications');
-	Route::any('count-error-notifications', 'Web\ErrorController@countErrorNotifications');
+	//Route::any('count-error-notifications', 'Web\ErrorController@countErrorNotifications');
 	Route::get('create-error', 'Web\ErrorController@createError');
 	Route::post('store-error', 'Web\ErrorController@storeError');
 	Route::get('error/{uuid}', 'Web\ErrorController@showError');

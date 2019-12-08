@@ -21,7 +21,7 @@
 					  <a href="{{url('/edit-account/'.$account->uuid)}}" class="w3-bar-item w3-button">Edit</a>
 					  <a href="javascript:void(0)" onclick="deleteAccount('{{$account->uuid}}');" class="w3-bar-item w3-button">Delete</a>
 					  @if(is_null($account->user()->first()->role()->first()))
-					  <a href="{{url('/add-')}}" class="w3-bar-item w3-button">Roles</a>
+					  <a href="{{url('/add-role/'.$account->uuid)}}" class="w3-bar-item w3-button">Roles</a>
 						@endif
 					  @if(is_null($account->accountStation()->first()))
 						<a href="{{url('/add-station/'.$account->uuid)}}" class="w3-bar-item w3-button">Station</a>
@@ -134,11 +134,11 @@
 					</div>
 					<div class="w3-col s12 m12 l10 w3-left">
 						@foreach($account->user()->first()->role()->distinct()->get() as $role)
-							<span class="w3-hover-text-blue" onmouseover="document.getElementById('{{$role->uuid}}').style.display='inline';" 
-												onmouseout="document.getElementById('{{$role->uuid}}').style.display='none'">{{$role->display_name}}
+							<span class="w3-hover-text-blue" onmouseover="document.getElementById('{{$role->uuid}}').style.display='inline';  this.style.cursor='pointer';" 
+												onmouseout="document.getElementById('{{$role->uuid}}').style.display='none'">
+												<span onmousedown="loadAccountRole(event, '{{$role->uuid}}')" title="Press ALT + left click on station to view role">{{$role->display_name}}</span>
 								<span id="{{$role->uuid}}" style="display:none;">
-									<a href="{{url('/edit-account-role/'.$account->uuid.'/'.$role->uuid)}}" class="w3-hover-blue"><i class="fa fa-edit fa-lg"></i></a>
-									<a class="w3-hover-blue" onclick="deleteRole('{{$account->uuid}}', '{{$role->uuid}}');"><i class="fa fa-trash fa-lg"></i></a>
+									<a class="w3-hover-blue" onclick="deleteRole('{{$account->uuid}}', '{{$role->uuid}}');"><i class="fa fa-close fa-lg"></i></a>
 								</span>,
 							</span>
 						@endforeach
@@ -322,6 +322,36 @@ function deleteSupervisory(account, supervisory){
 		if(xhr.readyState == 4 && xhr.status == 200){
 			document.getElementById('delete').innerHTML = xhr.responseText;
 			document.getElementById('delete').style.display='block';
+		}
+	}
+}
+
+function deleteRole(account, role){
+	let xhr = new XMLHttpRequest();
+
+	xhr.open("GET", "{{url('delete-account-role')}}/"+account+"/"+role);
+	xhr.send();
+	
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById('delete').innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block';
+		}
+	}
+}
+
+function loadAccountRole(event, role){
+	if(event.altKey){
+		let xhr = new XMLHttpRequest();
+		xhr.open("GET", "{{url('account-role')}}/"+role);
+		xhr.send();
+		
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				document.getElementById("delete").innerHTML = xhr.responseText;
+				document.getElementById('delete').style.display='block'
+				
+			}
 		}
 	}
 }

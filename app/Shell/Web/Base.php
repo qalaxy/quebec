@@ -123,6 +123,14 @@ class Base{
 		return $params;
 	}
 	
+	protected function stationIds($stations){
+		$ids = array();
+		foreach($stations as $station){
+			array_push($ids, $station->id);
+		}
+		return $ids;
+	}
+	
 	public function invalidDeletion(){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-theme"> 

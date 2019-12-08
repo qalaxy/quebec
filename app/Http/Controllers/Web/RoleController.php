@@ -25,10 +25,17 @@ class RoleController extends Controller
 	
 	public function roles(Request $request){
 		if(Auth::user()->can('view_roles')){
+			$user_stations = $this->ext->getUserStations(Auth::id());
+			if(!is_object($user_stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$user_stations));
+			
+			if(count($user_stations) < 1)
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'You have not been assigned a station'));
+			
 			if(count($request->all())){
-				$roles = $this->ext->searchRoles($request->all());
+				$roles = $this->ext->searchRoles($request->all(), $user_stations);
 			}else{				
-				$roles = $this->ext->getPaginatedRoles();
+				$roles = $this->ext->getPaginatedRoles($user_stations);
 			}
 			if(is_object($roles)){
 				if(View::exists('w3.index.roles'))
@@ -164,6 +171,10 @@ class RoleController extends Controller
 			
 			$role = $this->ext->getRole($uuid); //return var_dump(count($role->station()->get()));
 			
+			/*foreach($role->station()->get() as $station){
+				var_dump($station->name);
+			}return;*/
+			
 			if(is_object($role)){
 				if(View::exists('w3.edit.role')){
 					return view('w3.edit.role')->with(compact('role', 'stations'))
@@ -198,8 +209,10 @@ class RoleController extends Controller
 				$stations = $this->ext->getUserStations(Auth::id());
 			}
 			
-			if(!is_object($stations)) return var_dump($stations);
+			if(!is_object($stations)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations))->withInput();
+			
+			//return var_dump(count($stations));
 			
 			$role = $this->ext->getRole($uuid);
 			if(!is_object($role))
@@ -295,7 +308,12 @@ class RoleController extends Controller
 		if(Auth::user()->can('add_role_permission')){
 			$role = $this->ext->getRole($uuid);
 			if(is_object($role)){
-				$permissions = $this->ext->getPermNotInRole($role);
+				
+				$level = $this->ext->getUserHighestLevel(Auth::user());
+				if(!is_object($level))
+					return back()->with('notification', array('indicator'=>'warning', 'message'=>$level));
+				
+				$permissions = $this->ext->getPermNotInRole($role, $level);
 				if(is_object($permissions)){
 					if(View::exists('w3.create.role_permission')){
 						if(count($permissions))

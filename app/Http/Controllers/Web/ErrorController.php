@@ -78,7 +78,8 @@ class ErrorController extends Controller
 			if($validation->fails()){
 				return redirect('create-error')
 						->withErrors($validation)
-						->withInput();
+						->withInput()
+						->with('notification', $this->ext->validation);
 			}
 			
 			$function = $this->ext->getFunction($request['function_id']);

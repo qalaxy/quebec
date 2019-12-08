@@ -198,6 +198,29 @@ class AccountMnt extends AccountExe{
 		DB::commit();
 		return $this->success;
 	}
+	
+	public function createAccountRole(object $user, object $role){
+		DB::beginTransaction();
+		$role = $this->storeAccountRole($user, $role);
+		if(is_null($role)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function deleteAccountRole($user, $role){
+		DB::beginTransaction();
+		$del_role = $this->destroyAccountRole($user, $role);
+		if(is_null($del_role)){
+			DB::rollback();
+			return $this->error;
+		}
+		
+		DB::commit();
+		return $this->success;
+	}
 }
 
 ?>

@@ -79,6 +79,19 @@ class RoleExe extends Base{
 		return $role;
 	}
 	
+	protected function destroyRoleStations($role){
+		try{
+			$role_station = RoleStation::where('role_id', $role->id)->delete();
+			if(is_null($role_station)){
+				throw new Exception('Roles have not been detached sfrom stations successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $role_station;
+	}
+	
 	protected function deleteRoleStation($role, $station){
 		try{
 			$role_stn = $role->station()->detach($station);

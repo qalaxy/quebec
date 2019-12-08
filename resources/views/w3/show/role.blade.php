@@ -15,26 +15,18 @@
 		@include('w3.components.notification')
 		<div class="w3-container w3-text-dark-gray">
 			
-			@if($role->name)
-			<div class="w3-row w3-padding-small">
-				<div class="w3-col s12 m12 l2 w3-left">
-					<span class=""><strong>Name: </strong></span>
-				</div>
-				<div class="w3-col s12 m12 l10 w3-left">
-					<span class="">{{$role->name}}</span>
-				</div>
-			</div>
-			@endif
+			
 			@if($role->display_name)
 			<div class="w3-row w3-padding-small">
 				<div class="w3-col s12 m12 l2 w3-left">
-					<span class=""><strong>Display name: </strong></span>
+					<span class=""><strong>Name: </strong></span>
 				</div>
 				<div class="w3-col s12 m12 l10 w3-left">
 					<span class="">{{$role->display_name}}</span>
 				</div>
 			</div>
 			@endif
+			
 			@if($role->description)
 			<div class="w3-row w3-padding-small">
 				<div class="w3-col s12 m12 l2 w3-left">
@@ -42,6 +34,19 @@
 				</div>
 				<div class="w3-col s12 m12 l10 w3-left">
 					<span class="">{{$role->description}}</span>
+				</div>
+			</div>
+			@endif
+			
+			@if(count($role->station()->get()))
+			<div class="w3-row w3-padding-small">
+				<div class="w3-col s12 m12 l2 w3-left">
+					<span class=""><strong>Stations: </strong></span>
+				</div>
+				<div class="w3-col s12 m12 l10 w3-left">
+					@foreach($role->station()->get() as $station)
+						<span class="">{{$station->name}},&nbsp;</span>
+					@endforeach
 				</div>
 			</div>
 			@endif

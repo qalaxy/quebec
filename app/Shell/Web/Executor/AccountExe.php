@@ -365,6 +365,35 @@ class AccountExe extends Base{
 		}
 		return $supervisory;
 	}
+	
+	protected function storeAccountRole($user, $role){
+		try{
+			if($role->user()->attach($user)){
+				throw new Exception('Role has not been added to the user succesfsfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Role has been added to the user succesfsfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $role;
+	}
+	
+	protected function destroyAccountRole($user, $role){
+		try{
+			$del_role = $role->user()->detach($user);
+			if(is_null($del_role)){
+				throw new Exception('Role has not been removed from user succesfsfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Role has been removed from user succesfsfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $del_role;
+	}
 }
 
 ?>

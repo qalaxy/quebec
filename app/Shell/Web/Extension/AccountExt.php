@@ -4,6 +4,7 @@ namespace App\Shell\Web\Extension;
 use Exception;
 use App\Account;
 use App\AccountStation;
+use App\Role;
 use App\Station;
 use App\Supervisor;
 use App\Email;
@@ -13,6 +14,9 @@ use App\Mail\FirstLogin;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
 use App\Shell\Web\Base;
 use App\Shell\Data\AccountData;
 
@@ -427,6 +431,150 @@ class AccountExt extends Base{
 			return $e->getMessage();
 		}
 		return $supervisories;
+	}
+	
+	public function getUserStations($user){
+		try{
+			$stations = DB::table('users')
+							->join('account_user', 'users.id', '=', 'account_user.user_id')
+							->join('accounts', 'account_user.account_id', '=', 'accounts.id')
+							->join('account_station', 'accounts.id', '=', 'account_station.account_id')
+							->join('stations', 'account_station.station_id', '=', 'stations.id')
+							->where('users.id', $user->id)
+							->where('stations.deleted_at', null)
+							->select('stations.*')
+							->get();
+							
+			if(is_null($stations)){
+				throw new Exception('Stations have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $stations;
+	}
+	
+	public function getUnaddedRoles($user_stations, $user){
+		try{
+			if(Auth::user()->hasRole('super_admin') || Auth::user()->hasRole('system_admin')){
+				$first = DB::table('roles')
+							->whereNotIn('roles.id', function ($query){
+								$query->select(DB::raw('role_id'))
+									  ->from('role_station');
+							})
+							->whereNotIn('roles.id', function ($query) use($user){
+								$query->select(DB::raw('role_id'))
+									  ->from('role_user')
+									  ->whereRaw('role_user.user_id='.$user->id);
+							})
+							->where('roles.deleted_at', null)
+							->select('roles.*');
+				
+				$roles = DB::table('roles')
+							->join('role_station', 'roles.id', '=', 'role_station.role_id')
+							->whereExists(function ($query) use($user_stations){
+								$query->select(DB::raw('*'))
+									  ->from('stations')
+									  ->orWhere('role_station.station_id', $this->stationIds($user_stations));
+							})
+							->whereNotIn('roles.id', function ($query) use($user){
+								$query->select(DB::raw('role_id'))
+									  ->from('role_user')
+									  ->whereRaw('role_user.user_id='.$user->id);
+							})
+							->where('roles.deleted_at', null)
+							->select('roles.*')
+							->union($first)
+							->orderBy('id', 'desc')
+							->get();
+			}else{
+				$roles = DB::table('roles')
+							->join('role_station', 'roles.id', '=', 'role_station.role_id')
+							->whereExists(function ($query) use($user_stations){
+								$query->select(DB::raw('*'))
+									  ->from('stations')
+									  ->orWhere('role_station.station_id', $this->stationIds($user_stations));
+							})->whereNotIn('roles.id', function ($query) use($user){
+								$query->select(DB::raw('role_id'))
+									  ->from('role_user')
+									  ->where('role_user.user_id', $user->id);
+							})
+							->where('roles.deleted_at', null)
+							->select('roles.*')
+							->get();
+			}
+			if(is_null($roles)){
+				throw new Exception('Roles have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $roles;
+	}
+	
+	public function validateAccountRoleData(array $data){
+		$rules = [
+			$this->acc_data->role_id_key => $this->acc_data->role_id_req,
+		];
+		
+		return Validator::make($data, $rules, $this->acc_data->role_validation_msgs);
+	}
+	
+	public function getRole($uuid){
+		try{
+			$role = Role::withUuid($uuid)->first();
+			if(is_null($role)){
+				throw new Exception('Role has not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $role;
+	}
+	
+	public function deleteAccountrole($account, $role){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Remove user\' role</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-middle w3-large">Your are about to remove a user\'s role:</p>
+						<p><strong>User\'s name:</strong> '.$account->first_name.' '
+						.((strlen($account->middle_name) < 1) ? '' : $account->middle_name).' '.$account->last_name
+						.'</p><p><strong>Role\'s name:</strong> '.$role->display_name.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-account-role').'/'.$account->uuid.'/'.$role->uuid.'" 
+								title="Remove user\'s role">Remove&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
+	
+	public function showAccountRole($role){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-theme"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>User\' role</h2>
+					</header>
+					<div class="w3-container">
+						<p><strong>Name:</strong> '.$role->display_name.'</p>
+						<p><strong>Description:</strong> '.$role->description.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<button class="w3-button w3-large w3-theme w3-hover-light-blue" title="Dismiss" onclick="document.getElementById(\'delete\').style.display=\'none\'">OK&nbsp;</button>
+							</div>
+						</div>
+					</footer>
+				</div>';
 	}
 	
 }

@@ -38,7 +38,7 @@
 			</div>
 			<div class="w3-row">
 				<div class="w3-col w3-padding-small">
-					<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Create permission for a role">Create&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
+					<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Add permission for a role">Add&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
 				</div>
 			</div>
 		</form>

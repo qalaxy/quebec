@@ -814,4 +814,126 @@ class AccountController extends Controller
 		}
 	}
 	
+	public function addRole($uuid){
+		if(Auth::user()->can('create_users')){ 
+			
+			$account = $this->ext->getAccount($uuid);  
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$user_stations = $this->ext->getUserStations($account->user()->first()); 
+			if(!is_object($user_stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$user_stations));
+			
+			if(count($user_stations) < 1)
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'User has not been assigned a station'));
+			
+			$roles = $this->ext->getUnaddedRoles($user_stations, $account->user()->first());
+			if(!is_object($roles))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$roles));
+			
+			if(View::exists('w3.create.account-role')){
+				return view('w3.create.account-role')->with(compact('account', 'roles'))
+						->with('notification',array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add user\'s supervisory'));
+		}
+	}
+	
+	public function storeAccountRole(Request $request, $uuid){
+		if(Auth::user()->can('create_users')){ 
+			$validation = $this->ext->validateAccountRoleData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+						->withInput()
+						->with('notification', $this->ext->validation);
+			}
+			$account = $this->ext->getAccount($uuid);  
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account))->withInput();
+			
+			$role = $this->ext->getRole($request['role_id']);
+			if(!is_object($role))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$role))->withInput();
+			
+			$notification = $this->mnt->createAccountRole($account->user()->first(), $role);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.account'))
+					return redirect('account/'.$uuid)
+							->with(compact('notification'));
+				else
+					return back()->with('notification', $this->ext->missing_view);
+			}else{
+				return back()->with(compact('notification'))->withInput();
+			}
+			
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add user\'s supervisory'));
+		}
+		
+	}
+	
+	public function deleteAccountRole($account_uuid, $role_uuid){
+		if(session()->has('params')) session()->reflash();
+		
+		if(Auth::user()->can('delete_users')){
+			
+			$account = $this->ext->getAccount($account_uuid);
+			
+			$role = $this->ext->getRole($role_uuid);
+			if(is_object($account) && is_object($role)){
+				return $this->ext->deleteAccountrole($account, $role);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s role'));
+		}
+	}
+	
+	public function destroyAccountRole($account_uuid, $role_uuid){
+		if(Auth::user()->can('delete_users')){
+			$account = $this->ext->getAccount($account_uuid);  
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account))->withInput();
+			
+			$role = $this->ext->getRole($role_uuid);
+			if(is_object($role)){
+				$notification = $this->mnt->deleteAccountRole($account->user()->first(), $role);
+				if(in_array('success', $notification)){
+					if(View::exists('w3.show.account')){
+						return redirect('account/'.$account_uuid)
+									->with(compact('notification'));
+					}else
+						return back()->with(compact('notification'));
+				}else{
+					return back()->with(compact('notification'));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $role));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s supervisory'));
+		}
+	}
+	
+	public function accountRole($uuid){
+		if(session()->has('params')) session()->reflash();
+		
+		if(Auth::user()->can('view_users')){
+			
+			$role = $this->ext->getRole($uuid);
+			if(is_object($role)){
+				return $this->ext->showAccountRole($role);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view a user\'s role'));
+		}
+	}
+	
 }

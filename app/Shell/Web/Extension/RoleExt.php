@@ -20,11 +20,42 @@ class RoleExt extends Base{
 		$this->role_data = new RoleData();
 	}
 	
-	public function searchRoles(array $data){
+	public function searchRoles(array $data, $user_stations){
 		try{
-			$roles = Role::where('owner_id',Auth::id())
-							->where($this->prepareSearchParam($data, ['name', 'display_name']))
+			if(Auth::user()->hasRole('super_admin') || Auth::user()->hasRole('system_admin')){
+				$first = DB::table('roles')
+							->whereNotIn('roles.id', function ($query){
+								$query->select(DB::raw('role_id'))
+									  ->from('role_station');
+							})
+							->where($this->prepareSearchParam($data, ['roles.name']))
+							->select('roles.*');
+							
+				$roles = DB::table('roles')
+							->join('role_station', 'roles.id', '=', 'role_station.role_id')
+							->whereExists(function ($query) use($user_stations){
+								$query->select(DB::raw('*'))
+									  ->from('stations')
+									  ->orWhere('role_station.station_id', $this->stationIds($user_stations));
+							})
+							->where($this->prepareSearchParam($data, ['roles.name']))
+							->where('roles.deleted_at', null)
+							->select('roles.*')
+							->union($first)
 							->paginate($this->role_data->rows);
+			}else{
+				$roles = DB::table('roles')
+							->join('role_station', 'roles.id', '=', 'role_station.role_id')
+							->whereExists(function ($query) use($user_stations){
+								$query->select(DB::raw('*'))
+									  ->from('stations')
+									  ->orWhere('role_station.station_id', $this->stationIds($user_stations));
+							})
+							->where($this->prepareSearchParam($data, ['roles.name']))
+							->where('roles.deleted_at', null)
+							->select('roles.*')
+							->paginate($this->role_data->rows);
+			}
 			if(is_null($roles)){
 				throw new Exception('Roles have not been retrieved successfully');
 			}
@@ -34,9 +65,39 @@ class RoleExt extends Base{
 		return $roles; 
 	}
 	
-	public function getPaginatedRoles(){
+	public function getPaginatedRoles($user_stations){
 		try{
-			$roles = Role::where('owner_id',Auth::id())->paginate($this->role_data->rows);
+			if(Auth::user()->hasRole('super_admin') || Auth::user()->hasRole('system_admin')){
+				$first = DB::table('roles')
+							->whereNotIn('roles.id', function ($query){
+								$query->select(DB::raw('role_id'))
+									  ->from('role_station');
+							})
+							->select('roles.*');
+				
+				$roles = DB::table('roles')
+							->join('role_station', 'roles.id', '=', 'role_station.role_id')
+							->whereExists(function ($query) use($user_stations){
+								$query->select(DB::raw('*'))
+									  ->from('stations')
+									  ->orWhere('role_station.station_id', $this->stationIds($user_stations));
+							})
+							->where('roles.deleted_at', null)
+							->select('roles.*')
+							->union($first)
+							->paginate($this->role_data->rows);
+			}else{
+				$roles = DB::table('roles')
+							->join('role_station', 'roles.id', '=', 'role_station.role_id')
+							->whereExists(function ($query) use($user_stations){
+								$query->select(DB::raw('*'))
+									  ->from('stations')
+									  ->orWhere('role_station.station_id', $this->stationIds($user_stations));
+							})
+							->where('roles.deleted_at', null)
+							->select('roles.*')
+							->paginate($this->role_data->rows);
+			}
 			if(is_null($roles)){
 				throw new Exception('Roles have not been retrieved successfully');
 			}
@@ -94,7 +155,7 @@ class RoleExt extends Base{
 	
 	public function getSelectedStations(array $data){
 		try{
-			$stations = Station::withUuid($data)->get();
+			$stations = Station::withUuids($data)->get();
 			if(is_null($stations)){
 				throw new Exception('Stations have not been retrieved successfully');
 			}
@@ -112,6 +173,7 @@ class RoleExt extends Base{
 							->join('account_station', 'accounts.id', '=', 'account_station.account_id')
 							->join('stations', 'account_station.station_id', '=', 'stations.id')
 							->where('users.id', $id)
+							->where('stations.deleted_at', null)
 							->select('stations.*')
 							->get();
 							
@@ -211,7 +273,28 @@ class RoleExt extends Base{
 		return Validator::make($data, $rules, $this->role_data->rolePermValidationMsgs);
 	}
 	
-	public function getPermNotInRole(object $role){
+	public function getUserHighestLevel($user){
+		$level = null;
+		try{
+			foreach($user->role()->get() as $role){
+				foreach($role->permission()->get() as $permission){
+					if(is_null($level))
+						$level = $permission->level()->first();
+					else if($level->order > $permission->level()->first()->order){
+						$level = $permission->level()->first();
+					}
+				}
+			}
+			if(is_null($level)){
+				throw new Exception('User highest level has not been obtained successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $level;
+	}
+	
+	public function getPermNotInRole(object $role, object $level){
 		try{
 			$permissions = DB::table('permissions')
 								->whereNotIn('permissions.id', function($query) use($role){
@@ -220,7 +303,7 @@ class RoleExt extends Base{
 									->whereRaw('permission_role.role_id='.$role->id);
 								})
 								->join('levels', 'permissions.level_id', '=', 'levels.id')
-								->where('levels.order', '>=', Auth::user()->level()->first()->order)
+								->where('levels.order', '>=', $level->order)
 								->select('permissions.*')
 								->get();
 								

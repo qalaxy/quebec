@@ -22,6 +22,7 @@ class AccountData{
 	public $to_key = 'to';
 	public $account_id_key = 'account_id';
 	public $level_id_key = 'level_id';
+	public $role_id_key = 'role_id';
 	
 	public $name_req = 'required|regex:/[a-zA-Z\ \']/|min:3';
 	public $optional_name_req = 'nullable|regex:/[a-zA-Z\ \']/|min:3';
@@ -32,6 +33,7 @@ class AccountData{
 	public $from_req = 'required|date|before_or_equal:today';
 	public $to_req = 'nullable|date|after_or_equal:from';
 	public $status_req = 'required|boolean';
+	public $role_id_req = 'required|uuid';
 	
 	public $validation_msgs = [
 		'first_name.required'=>'You have not entered first name',
@@ -86,6 +88,11 @@ class AccountData{
 		'to.after_or_equal'=>'The date officer cease being a supervisor should be later than the date the officer became a supervisor',
 		'status.required'=>'You have not selected the status of officer being a supervisor at the station',
 		'status.boolean'=>'Status value should either be 1 or 0',
+	];
+	
+	public $role_validation_msgs = [
+		'role_id.required'=>'You have not selected a role',
+		'role_id.uuid'=>'Role value should be uuid',
 	];
 	
 }

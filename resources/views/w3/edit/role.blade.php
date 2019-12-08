@@ -140,11 +140,11 @@
 										@elseif($display && is_null(old('stations')) && is_null(old('global')))
 											@foreach($role->station()->get() as $role_station)
 												@if($role_station->id == $station->id)
-													<option value="{{$station->uuid}}" selected>{{$station->name}}</option>
+													<option value="{{$station->uuid}}" {{($owner_station)?'disabled':null}} selected>{{$station->name}}</option>
 													@php continue 2; @endphp
 												@endif
 											@endforeach
-										<option value="{{$station->uuid}}">{{$station->name}}</option>
+										<option value="{{$station->uuid}}" {{($owner_station)?'disabled':null}}>{{$station->name}}</option>
 										@else
 											<option value="{{$station->uuid}}">{{$station->name}}</option>
 										@endif

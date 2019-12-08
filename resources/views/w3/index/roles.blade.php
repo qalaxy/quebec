@@ -83,15 +83,15 @@
 					<th colspan="2"></th>
 				</tr>
 				@foreach($roles as $role)
-				<tr>
-					<td><a href="{{url('role/'.$role->uuid)}}" style="text-decoration:none;">{{$role->display_name}}</a></td>
-					<td><a href="{{url('role/'.$role->uuid)}}" style="text-decoration:none;">{{$role->description}}</a></td>
-					<td><a class="w3-button" href="{{url('edit-role/'.$role->uuid)}}" title="Edit {{$role->display_name}}"><i class="fa fa-edit fa-lg"></i></a></td>
-					<td><button class="w3-button" onclick="deleteRole('{{$role->uuid}}');" title="Delete {{$role->display_name}}">
-						<i class="fa fa-trash fa-lg"></i>
-						</button>
-					</td>
-				</tr>
+					<tr>
+						<td><a href="{{url('role/'.$role->uuid)}}" style="text-decoration:none;">{{$role->display_name}}</a></td>
+						<td><a href="{{url('role/'.$role->uuid)}}" style="text-decoration:none;">{{$role->description}}</a></td>
+						<td><a class="w3-button" href="{{url('edit-role/'.$role->uuid)}}" title="Edit {{$role->display_name}}"><i class="fa fa-edit fa-lg"></i></a></td>
+						<td><button class="w3-button" onclick="deleteRole('{{$role->uuid}}');" title="Delete {{$role->display_name}}">
+								<i class="fa fa-trash fa-lg"></i>
+							</button>
+						</td>
+					</tr>
 				@endforeach
 			</table>
 		</div>

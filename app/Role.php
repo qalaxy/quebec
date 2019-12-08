@@ -29,6 +29,6 @@ class Role extends EntrustRole
 	}
 	
 	public function station(){
-		return $this->belongsToMany('App\Role', 'role_station', 'role_id', 'station_id');
+		return $this->belongsToMany('App\Station', 'role_station', 'role_id', 'station_id');
 	}
 }

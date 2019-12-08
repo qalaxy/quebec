@@ -76,7 +76,7 @@
   <div id="error" class="w3-hide w3-white w3-card w3-margin-left w3-leftbar w3-border-gray w3-text-blue-gray">
     <a id="errors" href="{{url('errors')}}" class="w3-bar-item w3-button w3-hover-light-blue">Logs</a>
     <a id="notifications" href="{{asset('/error-notifications')}}" class="w3-bar-item w3-button w3-hover-light-blue">Notified 
-		<span class="w3-badge w3-theme w3-small w3-right"  onload="countErrorNotifications();"></span>
+		<span class="w3-badge w3-theme w3-small w3-right"></span>
 	</a>
   </div>  
   <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/home')}}">System errors</a>
@@ -143,10 +143,10 @@ function myFunction() {
   }
 }
 
-var interval = setInterval(countErrorNotifications, 5000);
-countErrorNotifications();
+//var interval = setInterval(countErrorNotifications, 5000);
+//countErrorNotifications();
 
-function countErrorNotifications(){
+/*function countErrorNotifications(){
 	
 	let xhr = new XMLHttpRequest();
 	xhr.open("GET", "{{url('/count-error-notifications')}}");
@@ -159,7 +159,7 @@ function countErrorNotifications(){
 			//alert(document.getElementById('funtion-error').innerHTML);
 		}
 	}
-}
+}*/
 
 </script>
 

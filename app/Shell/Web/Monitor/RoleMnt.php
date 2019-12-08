@@ -36,7 +36,7 @@ class RoleMnt extends RoleExe{
 			return $this->error;
 		}
 		
-		/*foreach($role->station()->get() as $role_station){
+		foreach($role->station()->get() as $role_station){
 			foreach($stations as $station){
 				if($role_station->id != $station->id){
 					$role_stn = $this->deleteRoleStation($role, $role_station);
@@ -46,6 +46,12 @@ class RoleMnt extends RoleExe{
 					}
 				}
 			}
+		}
+		
+		/*$role_station = $this->destroyRoleStations($role);
+		if(is_null($role_station)){
+			DB::rollback();
+			return $this->error;
 		}*/
 		
 		foreach($stations as $station){
@@ -68,7 +74,7 @@ class RoleMnt extends RoleExe{
 			return $this->error;
 		}
 		
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 	
