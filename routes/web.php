@@ -146,6 +146,22 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('error-corrective-action/{uuid}', 'Web\ErrorController@addCorrectiveAction');
 	Route::get('get-account-station/{uuid}', 'Web\ErrorController@getAccountStation');
 	Route::post('store-error-corrective-action/{uuid}', 'Web\ErrorController@storeCorrectiveAction');
+	
+	/*
+	 * ========================================================================================================================
+	 * Station routes
+	 * 
+	 */
+	Route::any('stations', 'Web\StationController@stations');
+	Route::get('station/{uuid}', 'Web\StationController@station');
+	Route::get('add-station-function/{uuid}', 'Web\StationController@addStationFunction');
+	Route::post('store-station-function/{uuid}', 'Web\StationController@storeStationFunction');
+	Route::get('delete-station-function/{stn_uuid}/{func_uuid}', 'Web\StationController@deleteStationFunction');
+	Route::get('destroy-station-function/{stn_uuid}/{func_uuid}', 'Web\StationController@destroyStationFunction');
+	Route::get('add-station-recipient/{uuid}', 'Web\StationController@addStationRecipient');
+	Route::post('store-station-recipient/{uuid}', 'Web\StationController@storeStationRecipient');
+	Route::get('delete-station-recipient/{stn_uuid}/{user_uuid}', 'Web\StationController@deleteStationRecipient');
+	Route::get('destroy-station-recipient/{stn_uuid}/{user_uuid}', 'Web\StationController@destroyStationRecipient');
 
 });
 

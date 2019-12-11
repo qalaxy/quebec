@@ -22,4 +22,12 @@ class ErrorStatus extends Model
 	public function error(){
 		return $this->hasMany('App\Error', 'error_status_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		ErrorStatus::deleted(function($error_status){
+			$error_status->systemError()->delete();
+			$error_status->error()->delete();
+		});
+	}
 }

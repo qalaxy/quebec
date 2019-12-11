@@ -34,4 +34,11 @@ class SystemError extends Model
 	public function systemErrorNotification(){
 		return $this->hasMany('App\SystemErrorNotification', 'error_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		SystemError::deleted(function($system_error){
+			$system_error->systemErrorNotification()->delete();
+		});
+	}
 }

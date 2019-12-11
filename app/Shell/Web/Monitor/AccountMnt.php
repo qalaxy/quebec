@@ -21,6 +21,7 @@ class AccountMnt extends AccountExe{
 	public function createAccount(array $data){
 		$this->data = $data;
 		DB::beginTransaction();
+		
 		$acc_user = $this->storeUser();
 		if(is_null($acc_user)){
 			DB::rollback();

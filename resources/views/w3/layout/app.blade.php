@@ -64,8 +64,8 @@
     <!--<a id="permissions" href="{{url('/permissions')}}" class="w3-bar-item w3-button w3-hover-light-blue">Permissions</a>-->
     <a id="roles" href="{{url('/roles')}}" class="w3-bar-item w3-button w3-hover-light-blue">Roles</a>
     <!--<a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Error status</a>
-    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Offices</a>
-    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Stations</a>-->
+    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Offices</a>-->
+    <a id="stations" href="{{url('/stations')}}" class="w3-bar-item w3-button w3-hover-light-blue">Stations</a>
     <a href="{{url('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Products</a>
     <a href="{{url('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Functions</a>
     <a id="accounts" href="{{url('/accounts')}}" class="w3-bar-item w3-button w3-hover-light-blue">Users account</a>

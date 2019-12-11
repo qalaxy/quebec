@@ -20,13 +20,13 @@
 					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
 					  <a href="{{url('/edit-account/'.$account->uuid)}}" class="w3-bar-item w3-button">Edit</a>
 					  <a href="javascript:void(0)" onclick="deleteAccount('{{$account->uuid}}');" class="w3-bar-item w3-button">Delete</a>
-					  @if(is_null($account->user()->first()->role()->first()))
+					  @if(is_null($account->user()->first()->role()->first()) && $account->accountStation()->first())
 					  <a href="{{url('/add-role/'.$account->uuid)}}" class="w3-bar-item w3-button">Roles</a>
 						@endif
 					  @if(is_null($account->accountStation()->first()))
-						<a href="{{url('/add-station/'.$account->uuid)}}" class="w3-bar-item w3-button">Station</a>
+						<a href="{{url('/add-station/'.$account->uuid)}}" class="w3-bar-item w3-button">Assign station</a>
 					  @endif
-					  @if(is_null($account->supervisor()->first()))
+					  @if(is_null($account->supervisor()->first()) && $account->accountStation()->first())
 					  <a href="{{url('/add-account-supervisory/'.$account->uuid)}}" class="w3-bar-item w3-button">Supervisory</a>
 						@endif
 					</div>
@@ -121,7 +121,7 @@
 				<div class="w3-dropdown-hover w3-right w3-white">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
-					  <a href="{{($account)?url('/add-account-role/'.$account->uuid):null}}" class="w3-bar-item w3-button">Add a role</a>
+					  <a href="{{($account)?url('/add-role/'.$account->uuid):null}}" class="w3-bar-item w3-button">Add a role</a>
 					  <a href="{{($account)?url('/account-role/'.$account->uuid):null}}" class="w3-bar-item w3-button">All user's roles</a>
 					</div>
 				  </div>

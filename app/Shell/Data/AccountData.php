@@ -54,6 +54,8 @@ class AccountData{
 		'phone_number.starts_with'=>'Phone number should start with 07 or 08',
 		'email.required'=>'You have not entered email address',
 		'email.email'=>'Email address should have correct email format',
+		'email.unique'=>'Email address has been assigned by anothe user',
+		
 		'from.required'=>'You have not enter the date officer begin being at the station',
 		'from.date'=>'From field should have a date entry',
 		'from.before_or_equal'=>'The date officer is joining a station should be today before today',

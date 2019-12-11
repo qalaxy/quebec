@@ -18,4 +18,11 @@ class Office extends Model
 	public function station(){
 		return $this->hasMany('App\Station', 'office_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		Office::deleted(function($office){
+			$office->station()->delete();
+		});
+	}
 }

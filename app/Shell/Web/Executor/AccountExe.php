@@ -44,7 +44,7 @@ class AccountExe extends Base{
 		try{
 			$user = User::firstOrCreate(array($this->acc_data->email_key=>$this->data[$this->acc_data->email_key], 'deleted_at' => null), 
 						array('uuid'=>Uuid::generate(),
-							$this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key],
+			$this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key].' '.$this->data[$this->acc_data->middle_name_key].' '.$this->data[$this->acc_data->last_name_key],
 							$this->acc_data->email_key=>$this->data[$this->acc_data->email_key],
 							$this->acc_data->password_key=>Hash::make(Str::random(8)),//Send a login link to the email
 							$this->acc_data->status_key=>0,
@@ -127,7 +127,9 @@ class AccountExe extends Base{
 	
 	protected function updateUser($account){
 		try{
-			$user = $account->user()->first()->update(array($this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key]));
+			$user = $account->user()->first()->
+				update(array(
+		$this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key].' '.$this->data[$this->acc_data->middle_name_key].' '.$this->data[$this->acc_data->last_name_key]));
 			if(is_null($user)){
 				throw new Exception('User has not been edited successfully');
 			}
@@ -161,7 +163,7 @@ class AccountExe extends Base{
 	
 	protected function destroyUser($account){
 		try{
-			$user = $account->user()->delete();
+			$user = $account->user()->first()->delete();
 			if(is_null($user)){
 				throw new Exception('User has not been deleted successfully');
 			}

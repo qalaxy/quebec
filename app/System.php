@@ -18,4 +18,11 @@ class System extends Model
 	public function systemError(){
 		return $this->hasMany('App\SystemError', 'system_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		System::deleted(function($system){
+			$system->systemError()->delete();
+		});
+	}
 }

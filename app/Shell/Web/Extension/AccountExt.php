@@ -111,7 +111,10 @@ class AccountExt extends Base{
 																	$query->whereNull('deleted_at');
 																}))],
 				$this->acc_data->phone_number_key => (isset($data['account_id'])?'':$this->acc_data->phone_number_req),
-				$this->acc_data->email_key => (isset($data['account_id'])?'':$this->acc_data->email_req),
+				$this->acc_data->email_key => (isset($data['account_id'])?'':['required', 'email', 
+																Rule::unique('users')->where(function($query){
+																	$query->whereNull('deleted_at');
+																})]),
 		];
 		
 		return Validator::make($data, $rules, $this->acc_data->validation_msgs);

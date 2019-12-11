@@ -38,4 +38,13 @@ class Account extends Model
 	public function supervisor(){
 		return $this->hasMany('App\Supervisor', 'account_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		Account::deleted(function($account){
+			$account->accountStation()->delete();
+			$account->supervisor()->delete();
+		});
+	}
+	
 }

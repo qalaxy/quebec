@@ -49,6 +49,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 	
+	
 	public function role(){
 		return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
 	}
@@ -59,10 +60,6 @@ class User extends Authenticatable
 	
 	public function account(){
 		return $this->belongsToMany('App\Account', 'account_user', 'user_id', 'account_id');
-	}
-	
-	public function supervisor(){
-		return $this->hasMany('App\Supervisor', 'user_id');
 	}
 	
 	public function error(){
@@ -87,10 +84,6 @@ class User extends Authenticatable
 	
 	public function errorCorrectionUser(){
 		return $this->hasMany('App\ErrorCorrection', 'user_id');
-	}
-	
-	public function errorCorrectionOriginator(){
-		return $this->hasMany('App\ErrorCorrection', 'originator_id');
 	}
 	
 	public function systemError(){
@@ -118,5 +111,31 @@ class User extends Authenticatable
 	}
 	public function externalError(){
 		return $this->hasMany('App\ExternalError', 'user_id');
+	}
+	
+	public function recipient(){
+		return $this->hasMany('App\Recipient', 'user_id');
+	}
+	
+	public static function boot(){
+		parent::boot();
+		
+		User::deleted(function($user){
+			$user->owner()->delete();
+			$user->error()->delete();
+			$user->affectedProduct()->delete();
+			$user->errorNotification()->delete();
+			$user->message()->delete();
+			$user->notificationRecipient()->delete();
+			$user->errorCorrectionUser()->delete();
+			$user->systemError()->delete();
+			$user->systemErrorNotification()->delete();
+			$user->tracker()->delete();
+			$user->roleOwn()->delete();
+			$user->aioError()->delete();
+			$user->aioErrorOriginator()->delete();
+			$user->externalError()->delete();
+			$user->recipient()->delete();
+		});
 	}
 }

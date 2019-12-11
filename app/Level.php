@@ -19,4 +19,11 @@ class Level extends Model
 	public function permission(){
 		return $this->hasMany('App\Permission', 'level_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		Level::deleted(function($level){
+			$level->permission()->delete();
+		});
+	}
 }

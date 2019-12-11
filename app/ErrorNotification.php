@@ -34,4 +34,12 @@ class ErrorNotification extends Model
 	public function notificationRecipient(){
 		return $this->hasMany('App\NotificationRecipient', 'error_notification_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		ErrorNotification::deleted(function($error_notification){
+			$error_notification->message()->delete();
+			$error_notification->notificationRecipient()->delete();
+		});
+	}
 }

@@ -26,4 +26,11 @@ class Func extends Model
 	public function func(){
 		return $this->hasMany('App\Func', 'function_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		Func::deleted(function($func){
+			$func->func()->delete();
+		});
+	}
 }

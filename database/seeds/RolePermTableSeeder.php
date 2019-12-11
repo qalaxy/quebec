@@ -38,6 +38,11 @@ class RolePermTableSeeder extends Seeder
 						array('role'=>'super_admin', 'perm'=>'create_errors'),
 						array('role'=>'super_admin', 'perm'=>'edit_errors'),
 						array('role'=>'super_admin', 'perm'=>'delete_errors'),
+						
+						array('role'=>'super_admin', 'perm'=>'view_stations'),
+						array('role'=>'super_admin', 'perm'=>'create_stations'),
+						array('role'=>'super_admin', 'perm'=>'edit_stations'),
+						array('role'=>'super_admin', 'perm'=>'delete_stations'),
 	   ); 
 	   $roles = Role::all();
 	   $perms = Permission::all();

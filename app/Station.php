@@ -60,6 +60,20 @@ class Station extends Model
 	}
 	
 	public function role(){
-		return $this->belongdToMany('App\Role', 'role_station', 'station_id', 'role_id');
+		return $this->belongsToMany('App\Role', 'role_station', 'station_id', 'role_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		Station::deleted(function($station){
+			$station->accountStation()->delete();
+			$station->error()->delete();
+			$station->errorNotification()->delete();
+			$station->errorCorrection()->delete();
+			$station->recipient()->delete();
+			$station->systemError()->delete();
+			$station->supervisor()->delete();
+		});
+	}
+	
 }

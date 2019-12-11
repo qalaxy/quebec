@@ -22,4 +22,11 @@ class Product extends Model
 	public function affectedProduct(){
 		return $this->hasMany('App\AffectedProduct', 'product_id_id');
 	}
+	
+	public static function boot(){
+		parent::boot();
+		Product::deleted(function($product){
+			$product->affectedProduct()->delete();
+		});
+	}
 }

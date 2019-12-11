@@ -85,7 +85,7 @@ class AccountController extends Controller
 	public function createAccount(){
 		if(Auth::user()->can('create_users')){
 			if(View::exists('w3.create.account')){
-				return view('w3.create.account')->with(array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+				return view('w3.create.account')->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 			}else{
 				return back()->with('notification', $this->ext->missing_view);
 			}
@@ -100,7 +100,8 @@ class AccountController extends Controller
 			if($validation->fails()){
 				return redirect('create-account')
 							->withErrors($validation)
-							->withInput();
+							->withInput()
+							->with('notification', $this->ext->validation);
 			}
 			$notification = $this->mnt->createAccount($request->all()); 
 			if(in_array('success', $notification)){
@@ -121,7 +122,7 @@ class AccountController extends Controller
 							->withInput();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'warning', 'message'=>'You are not allowed to create user\'s account'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to create user\'s account'));
 		}
 	}
 	
@@ -668,7 +669,8 @@ class AccountController extends Controller
 			if($validation->fails()){
 				return redirect('add-account-supervisory/'.$uuid)
 							->withErrors($validation)
-							->withInput();
+							->withInput()
+							->with('notification', $this->ext->validation);
 			}
 			
 			$account = $this->ext->getAccount($uuid);
