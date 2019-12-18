@@ -5,7 +5,7 @@ use Exception;
 use App\Account;
 use App\Error;
 use App\ErrorNotification;
-use App\ErrorStatus;
+use App\State;
 use App\Func;
 use App\Product;
 use App\Station;
@@ -98,7 +98,7 @@ class ErrorExt extends Base{
 	
 	public function getErrorStatus(){
 		try{
-			$status = ErrorStatus::all();
+			$status = State::all();
 			if(is_null($status)){
 				throw new Exception('Error status have not been retrieved successfully');
 			}
@@ -106,6 +106,14 @@ class ErrorExt extends Base{
 			return $e->getMessage();
 		}
 		return $status;
+	}
+	
+	public function getStationFunctions(object $station){
+		$data = array();
+		foreach($station->func()->get() as $func){
+			array_push($data, ['id'=>$func->uuid, 'name'=>$func->name]);
+		}
+		return $data;
 	}
 	
 	public function validateErrorData(array $data){
@@ -211,7 +219,7 @@ class ErrorExt extends Base{
 		$addresses = array();
 		foreach($recipients as $recipient){
 			foreach($recipient->user()->first()->account()->first()->email()->get() as $email){
-				//array_push($addresses, $email->address);
+				array_push($addresses, $email->address);
 			}
 		}
 		
@@ -293,6 +301,19 @@ class ErrorExt extends Base{
 		}
 		return $account;
 	}
+	
+	public function sendOriginatorEmail($error){
+		try{
+			$email = Mail::to($error->errorCorrection()->first()->originator()->first()->email)
+							->send(new ErrorOriginatorNotification($error));
+			if($email){
+				throw new Exception('Email to '.$error->errorCorrection()->first()->originator()->first()->name.' has not been sent successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}	
+	}
+	
 	
 	public function pdfError(object $error){
 		
@@ -664,7 +685,7 @@ class ErrorExt extends Base{
 		
 		$i = 0;
 		foreach($error_notifications as $error_notification){
-			if($error_notification->error()->first()->errorStatus()->first()->code == '1')
+			if($error_notification->error()->first()->status()->first()->state()->first()->code == '1')
 				$i++;
 		}
 		

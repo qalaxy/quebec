@@ -16,7 +16,7 @@ class CreateStaticDataTables extends Migration
     {
 		DB::beginTransaction();
 		
-        Schema::create('error_status', function (Blueprint $table) {
+        Schema::create('states', function (Blueprint $table) {
             $table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->string('name');
@@ -102,6 +102,6 @@ class CreateStaticDataTables extends Migration
         Schema::dropIfExists('products');
         Schema::dropIfExists('offices');
         Schema::dropIfExists('systems');
-        Schema::dropIfExists('error_status');
+        Schema::dropIfExists('states');
     }
 }

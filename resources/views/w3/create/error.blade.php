@@ -16,8 +16,31 @@
 				<div class="w3-col s12 m6 l6">
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
+							<label class="w3-text-dark-gray">Station of origin<span class="w3-text-red">*</span></label>
+							<select class="w3-select w3-border {{($errors->has('station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+									name="station_id"
+									onchange="getStationFunctions(this.value);">
+								<option value="" disabled selected>Select a station</option>
+								@if($stations)
+									@foreach($stations as $station)
+										<option value="{{$station->uuid}}" {{(old('station_id') == $station->uuid)? 'selected':null}}>{{$station->name}}</option>
+											
+									@endforeach
+								@endif
+							 </select>
+							@if($errors->has('station_id'))
+								<span class="w3-small w3-text-red">{{$errors->first('station_id')}}</span>
+							@else
+								<span>&nbsp;</span>
+							@endif
+						</div>
+					</div>
+					<div class="w3-row w3-padding-small">
+						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Function<span class="w3-text-red">*</span></label>
-							<select class="w3-select w3-border {{($errors->has('function_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" name="function_id">
+							<select class="w3-select w3-border {{($errors->has('function_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+									id="functions"
+									name="function_id">
 								<option value="" disabled selected>Select a functional unit</option>
 								@if($functions)
 									@foreach($functions as $func)
@@ -40,7 +63,7 @@
 							<textarea class="w3-input w3-border {{($errors->has('description')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="Describe the error"
 										name="description"
-										rows="4">{{old('description')}}</textarea>
+										rows="6">{{old('description')}}</textarea>
 							@if($errors->has('description'))
 								<span class="w3-small w3-text-red">{{$errors->first('description')}}</span>
 							@else
@@ -48,36 +71,17 @@
 							@endif
 						</div>
 					</div>	
+				</div>
+				<div class="w3-col s12 m6 l6">
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Impact<span class="w3-text-red">*</span></label>
 							<textarea class="w3-input w3-border {{($errors->has('impact')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									placeholder="Describe the impact of the error" 
 									name="impact"
-									rows="4">{{old('impact')}}</textarea>
+									rows="2">{{old('impact')}}</textarea>
 							@if($errors->has('function_id'))
 								<span class="w3-small w3-text-red">{{$errors->first('impact')}}</span>
-							@else
-								<span>&nbsp;</span>
-							@endif
-						</div>
-					</div>
-				</div>
-				<div class="w3-col s12 m6 l6">
-					<div class="w3-row w3-padding-small">
-						<div class="w3-col s12 m10 l10 w3-left">
-							<label class="w3-text-dark-gray">Station of origin<span class="w3-text-red">*</span></label>
-							<select class="w3-select w3-border {{($errors->has('station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" name="station_id">
-								<option value="" disabled selected>Select a functional unit</option>
-								@if($stations)
-									@foreach($stations as $station)
-										<option value="{{$station->uuid}}" {{(old('station_id') == $station->uuid)? 'selected':null}}>{{$station->name}}</option>
-											
-									@endforeach
-								@endif
-							 </select>
-							@if($errors->has('station_id'))
-								<span class="w3-small w3-text-red">{{$errors->first('station_id')}}</span>
 							@else
 								<span>&nbsp;</span>
 							@endif
@@ -170,6 +174,22 @@ document.getElementById('menu-error').className += " w3-text-blue";
 menuAcc('error');
 w3_show_nav('menuQMS');
 
+
+function getStationFunctions(station){
+	let options = '<option value="" disabled selected>Select a functional unit</option>';
+	xhr = new XMLHttpRequest();
+	xhr.open("GET", "{{url('get-station-functions')}}/"+station);
+	xhr.send();
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			let functions = JSON.parse(xhr.responseText);
+			for(i in functions){
+				options += '<option value="'+functions[i]['id']+'">'+functions[i]['name']+'</option>';
+			}
+			document.getElementById('functions').innerHTML = options;
+		}
+	}
+}
 </script>
 
 <script src="{{asset('public/js/error.js')}}"></script>

@@ -72,6 +72,18 @@ class ErrorController extends Controller
 		}
 	}
 	
+	public function getStationFunctions($uuid){
+		if(Auth::user()->can('create_errors')){
+			$station = $this->ext->getStation($uuid);
+			if(!is_object($station))
+				return null;
+			return response()->json($this->ext->getStationFunctions($station));
+			
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to create functional errors'));
+		}
+	}
+	
 	public function storeError(Request $request){
 		if(Auth::user()->can('create_errors')){
 			$validation = $this->ext->validateErrorData($request->all());
@@ -102,7 +114,7 @@ class ErrorController extends Controller
 				
 			$notification = $this->mnt->createError($request->all(), $function, $station, $recipients); 
 			if(in_array('success', $notification)){
-				if($request['responsibility'] == 0){
+				if($request['responsibility'] == 0 && count($recipients)){
 					$error_email = $this->ext->sendErrorNotificationEmail($notification['uuid'], $recipients); 
 					if(is_string($error_email)) $notification['message'] .= '. '.$error_email;
 				}			
@@ -131,7 +143,7 @@ class ErrorController extends Controller
 				else return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
 			}
 			
-			
+			//return $error->aioError()->first()->user()->first()->id;
 			
 			if(View::exists('w3.show.error')){
 				return view('w3.show.error')->with(compact('error'));
@@ -289,9 +301,13 @@ class ErrorController extends Controller
 				$request['aio'] = $account->user()->first()->id;
 			}
 			
-			$notification = $this->mnt->createCorrectiveAction($request->all(), $error); 
+			$notification = $this->mnt->createCorrectiveAction($request->all(), $error);
 			if(in_array('success', $notification)){
 				//Send email to the aio who caused the error
+				$originator_email = $this->ext->sendOriginatorEmail($error);
+				if(is_string($originator_email))
+					$notification['message'] .= '. ' . $originator_email;
+				
 				if(View::exists('w3.show.error'))
 					return redirect('error/'.$uuid)->with(compact('notification'));
 				else 
@@ -357,6 +373,10 @@ class ErrorController extends Controller
 	
 	public function errorNotifications(){
 		if(Auth::user()->can('view_errors')){
+			
+			if(is_null(Auth::user()->account()->first()) || is_null(Auth::user()->account()->first()->accountStation()->first()))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'You have not been allocated a station'));
+			
 			$account_stations = $this->ext->getAccountStations(); 
 			if(!is_object($account_stations)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account_stations));
@@ -385,9 +405,12 @@ class ErrorController extends Controller
 	}
 	
 	public function countErrorNotifications(){
+		if(is_null(Auth::user()->account()->first()) || is_null(Auth::user()->account()->first()->accountStation()->first()))
+			return '<span class="w3-text-red">!stn</span>';
+		
 		$account_stations = $this->ext->getAccountStations();
 		if(!is_object($account_stations)) 
-				return '<span class="w3-text-red">Error!</span>';
+				return '<span class="w3-text-red">!acc stn</span>';
 		
 		if(count($account_stations)){
 			$error_notifications = $this->ext->getNotifiedErrors($account_stations); 
@@ -398,5 +421,7 @@ class ErrorController extends Controller
 			return $this->ext->countErrorNotifications($error_notifications);
 		}
 	}
+	
+	
 	
 }

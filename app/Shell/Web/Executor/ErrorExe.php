@@ -6,7 +6,8 @@ use App\AioError;
 use App\Error;
 use App\ErrorCorrection;
 use App\ErrorNotification;
-use App\ErrorStatus;
+use App\State;
+use App\Status;
 use App\ExternalError;
 use App\Message;
 use App\NotificationRecipient;
@@ -39,7 +40,6 @@ class ErrorExe extends Base{
 						$this->error_data->description_key => $this->data[$this->error_data->description_key],
 						$this->error_data->impact_key => $this->data[$this->error_data->impact_key],
 						$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
-						$this->error_data->error_status_id_key => ErrorStatus::where('code', 1)->first()->id,
 						$this->error_data->responsibility_key => $this->data[$this->error_data->responsibility_key],
 						));
 			if(is_null($func_error)){
@@ -52,6 +52,23 @@ class ErrorExe extends Base{
 			return null;
 		}
 		return $func_error;
+	}
+	
+	protected function storeErrorStatus($func_error){
+		try{
+			$status = Status::create(array('uuid'=>Uuid::generate(),
+						$this->error_data->user_id_key => Auth::id(),
+						$this->error_data->state_id_key => State::where('code', 1)->first()->id,)
+					);
+			if(is_null($status)){
+				throw new Exception('Error status has not been created successfully');
+			}else{
+				$status->error()->attach($func_error);
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+		}
+		return $status;
 	}
 	
 	protected function storeErrorNotification($func_error, $station){
@@ -152,6 +169,24 @@ class ErrorExe extends Base{
 		return $correction;
 	}
 	
+	protected function storeErrorCorrectionStatus($correction){
+		try{
+			$status = Status::create(array('uuid'=>Uuid::generate(),
+						$this->error_data->user_id_key => Auth::id(),
+						$this->error_data->state_id_key => State::where('code', 3)->first()->id,)
+					);
+			if(is_null($status)){
+				throw new Exception('Error correction status has not been created successfully');
+			}else{
+				$status->errorCorrection()->attach($correction);
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $status;
+	}
+	
 	protected function storeAioError($error, $correction){
 		try{
 			$aio_error = AioError::firstOrCreate(array($this->error_data->error_id_key => $error->id), 
@@ -186,9 +221,9 @@ class ErrorExe extends Base{
 		return $external_error;
 	}
 	
-	protected function updateErrorStatus($error){
+	protected function updateErrorStatus($status){
 		try{
-			$error_status = $error->update([$this->error_data->error_status_id_key => ErrorStatus::where('code', 3)->first()->id]);
+			$error_status = $status->update([$this->error_data->state_id_key => State::where('code', 3)->first()->id]);
 			if(is_null($error_status)){
 				throw new Exception('Error status has not been updated successfully');
 			}

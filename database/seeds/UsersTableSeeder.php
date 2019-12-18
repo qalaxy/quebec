@@ -12,10 +12,8 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-		$users = array(array('name'=>'Elias','email'=>'ekorir@kcaa.or.ke', 'password'=>'12345678', 'status'=>1),
-					array('name'=>'Kibet','email'=>'kibeliask@gmail.com', 'password'=>'12345678', 'status'=>1),
-					array('name'=>'Korir','email'=>'kibeteliask@yahoo.com', 'password'=>'12345678', 'status'=>1),
-					array('name'=>'John','email'=>'jnjoroge@kcaa.or.ke', 'password'=>'12345678', 'status'=>1),
+		$users = array(
+					array('name'=>'Administrator','email'=>'admin@email.com', 'password'=>'12345678', 'status'=>1),
 				);
 		
 		

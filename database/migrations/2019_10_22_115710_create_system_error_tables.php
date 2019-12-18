@@ -28,14 +28,14 @@ class CreateSystemErrorTables extends Migration
 			$table->dateTime('to');
 			$table->date('date_created');
 			$table->time('time_created');
-			$table->unsignedBigInteger('error_status_id');
+			$table->unsignedBigInteger('state_id');
 			$table->string('remarks')->nullable();
             $table->timestamps();
 			$table->softDeletes();
 			$table->foreign('system_id')->references('id')->on('systems')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('station_id')->references('id')->on('stations')->onUpdate('cascade')->onDelete('cascade');
-			$table->foreign('error_status_id')->references('id')->on('error_status')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('state_id')->references('id')->on('states')->onUpdate('cascade')->onDelete('cascade');
         });
 		
 		Schema::create('system_error_notifications', function (Blueprint $table) {

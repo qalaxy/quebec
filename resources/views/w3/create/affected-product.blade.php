@@ -7,8 +7,8 @@
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Add affected product for error number: 
-{{$func_error->station()->first()->abbreviation}}/{{$func_error->func()->first()->abbreviation}}/{{$func_error->number}}/{{date_format(date_create($func_error->date_time_created), 'y')}}
+  <h1 class="w3-xlarge">Add affected product for error number: <a class="w3-hover-text-blue" href="{{url('error/'.$func_error->uuid)}}" style="text-decoration:none;">
+{{$func_error->station()->first()->abbreviation}}/{{$func_error->func()->first()->abbreviation}}/{{$func_error->number}}/{{date_format(date_create($func_error->date_time_created), 'y')}} </a>
   </h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		@include('w3.components.notification')

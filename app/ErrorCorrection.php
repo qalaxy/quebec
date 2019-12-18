@@ -30,4 +30,24 @@ class ErrorCorrection extends Model
 	public function station(){
 		return $this->belongsTo('App\Station', 'station_id');
 	}
+	
+	public function supervisorReaction(){
+		return $this->hasMany('App\SupervisorReaction', 'error_correction_id');
+	}
+	
+	public function originatorReaction(){
+		return $this->hasMany('App\SupervisorReaction', 'error_correction_id');
+	}
+	
+	public function status(){
+		return $this->belongsToMany('App\Status', 'error_correction_status', 'error_correction_id', 'status_id');
+	}
+	
+	public static function boot(){
+		parent::boot();
+		ErrorCorrection::deleted(function($error_correction){
+			$error_correction->supervisorReaction()->delete();
+			$error_correction->originatorReaction()->delete();
+		});
+	}
 }

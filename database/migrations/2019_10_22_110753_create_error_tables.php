@@ -27,15 +27,32 @@ class CreateErrorTables extends Migration
 			$table->string('description');
 			$table->string('impact');
 			$table->string('remarks')->nullable();
-			$table->unsignedBigInteger('error_status_id');
 			$table->boolean('responsibility');
             $table->timestamps();
 			$table->softDeletes();
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('function_id')->references('id')->on('functions')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('station_id')->references('id')->on('stations')->onUpdate('cascade')->onDelete('cascade');
-			$table->foreign('error_status_id')->references('id')->on('error_status')->onUpdate('cascade')->onDelete('cascade');
         });
+		
+		Schema::create('status', function(Blueprint $table){
+			$table->bigIncrements('id');
+			$table->uuid('uuid');
+			$table->unsignedBigInteger('state_id');
+			$table->unsignedBigInteger('user_id');
+			$table->string('remarks')->nullable();
+            $table->timestamps();
+			$table->softDeletes();
+			$table->foreign('state_id')->references('id')->on('states')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+		});
+		
+		Schema::create('error_status', function(Blueprint $table){
+			$table->unsignedBigInteger('error_id');
+			$table->unsignedBigInteger('status_id');
+			$table->foreign('error_id')->references('id')->on('errors')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('status_id')->references('id')->on('status')->onUpdate('cascade')->onDelete('cascade');
+		});
 		
 		Schema::create('affected_products', function (Blueprint $table) {
             $table->bigIncrements('id');
@@ -116,6 +133,13 @@ class CreateErrorTables extends Migration
 			$table->foreign('station_id')->references('id')->on('stations')->onUpdate('cascade')->onDelete('cascade');
         });
 		
+		Schema::create('error_correction_status', function(Blueprint $table){
+			$table->unsignedBigInteger('error_correction_id');
+			$table->unsignedBigInteger('status_id');
+			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('status_id')->references('id')->on('status')->onUpdate('cascade')->onDelete('cascade');
+		});
+		
 		Schema::create('aio_errors', function(Blueprint $table){
 			$table->bigIncrements('id');
 			$table->uuid('uuid');
@@ -130,6 +154,17 @@ class CreateErrorTables extends Migration
 			
 		});
 		
+		Schema::create('originator_reactions', function(Blueprint $table){
+			$table->bigIncrements('id');
+			$table->uuid('uuid');
+			$table->unsignedBigInteger('error_correction_id');
+			$table->boolean('status');
+			$table->string('remarks');
+			$table->timestamps();
+			$table->softDeletes();
+			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
+		});
+		
 		Schema::create('external_errors', function(Blueprint $table){
 			$table->bigIncrements('id');
 			$table->uuid('uuid');
@@ -140,6 +175,17 @@ class CreateErrorTables extends Migration
 			$table->softDeletes();
 			$table->foreign('error_id')->references('id')->on('errors')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+		});
+		
+		Schema::create('supervisor_reactions', function(Blueprint $table){
+			$table->bigIncrements('id');
+			$table->uuid('uuid');
+			$table->unsignedBigInteger('error_correction_id');
+			$table->boolean('status');
+			$table->string('remarks');
+			$table->timestamps();
+			$table->softDeletes();
+			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
 		});
 		
 		Schema::create('recipients', function (Blueprint $table) {
@@ -164,14 +210,19 @@ class CreateErrorTables extends Migration
     public function down()
     {
         Schema::dropIfExists('recipients');
+        Schema::dropIfExists('supervisor_reactions');
         Schema::dropIfExists('external_errors');
+        Schema::dropIfExists('originator_reactions');
         Schema::dropIfExists('aio_errors');
+        Schema::dropIfExists('error_correction_status');
         Schema::dropIfExists('error_corrections');
         Schema::dropIfExists('notification_recipients');
         Schema::dropIfExists('message_response');
         Schema::dropIfExists('messages');
         Schema::dropIfExists('error_notifications');
         Schema::dropIfExists('affected_products');
+        Schema::dropIfExists('error_status');
+        Schema::dropIfExists('status');
         Schema::dropIfExists('errors');
     }
 }

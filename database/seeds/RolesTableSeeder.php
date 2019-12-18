@@ -13,10 +13,10 @@ class RolesTableSeeder extends Seeder
      */
     public function run()
     {
-        $roles = array(array('name'=>'super_admin', 'display_name'=>'Super Admin', 'description'=>'', 'global'=>'1', 'owner'=>'Kibet'),
-				array('name'=>'system_admin', 'display_name'=>'System Admin', 'description'=>'', 'global'=>'1', 'owner'=>'Kibet'),
-				array('name'=>'admin', 'display_name'=>'Admin', 'description'=>'', 'global'=>'1', 'owner'=>'Kibet'),
-				array('name'=>'user', 'display_name'=>'System user', 'description'=>'', 'global'=>'1', 'owner'=>'Kibet'),
+        $roles = array(array('name'=>'super_admin', 'display_name'=>'Super Admin', 'description'=>'', 'global'=>'1', 'owner'=>'Administrator'),
+				array('name'=>'system_admin', 'display_name'=>'System Admin', 'description'=>'', 'global'=>'1', 'owner'=>'Administrator'),
+				array('name'=>'admin', 'display_name'=>'Admin', 'description'=>'', 'global'=>'1', 'owner'=>'Administrator'),
+				array('name'=>'user', 'display_name'=>'System user', 'description'=>'', 'global'=>'1', 'owner'=>'Administrator'),
 		
 		);
 		$users = User::all();

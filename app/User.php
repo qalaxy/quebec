@@ -117,6 +117,10 @@ class User extends Authenticatable
 		return $this->hasMany('App\Recipient', 'user_id');
 	}
 	
+	public function status(){
+		return $this->hasMany('App\Status', 'user_id');
+	}
+	
 	public static function boot(){
 		parent::boot();
 		
@@ -136,6 +140,7 @@ class User extends Authenticatable
 			$user->aioErrorOriginator()->delete();
 			$user->externalError()->delete();
 			$user->recipient()->delete();
+			$user->status()->delete();
 		});
 	}
 }

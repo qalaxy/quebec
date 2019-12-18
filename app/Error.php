@@ -13,7 +13,7 @@ class Error extends Model
 	
 	protected $table = 'errors';
 	
-	protected $fillable = ['uuid', 'user_id', 'function_id', 'station_id', 'number', 'date_time_created', 'description', 'impact', 'error_status_id', 'remarks', 'responsibility'];
+	protected $fillable = ['uuid', 'user_id', 'function_id', 'station_id', 'number', 'date_time_created', 'description', 'impact', 'state_id', 'remarks', 'responsibility'];
 
 	
 	public function user(){
@@ -40,8 +40,8 @@ class Error extends Model
 		return $this->hasOne('App\ErrorCorrection', 'error_id');
 	}
 	
-	public function errorStatus(){
-		return $this->belongsTo('App\ErrorStatus', 'error_status_id');
+	public function status(){
+		return $this->belongsToMany('App\Status', 'error_status', 'error_id', 'status_id');
 	}
 	
 	public function aioError(){

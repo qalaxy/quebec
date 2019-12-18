@@ -223,7 +223,7 @@
 					</td>
 					<td>{{$error->station()->first()->name}}</td>
 					<td>{{$error->description}}</td>
-					<td>{{$error->errorStatus()->first()->name}}</td>
+					<td>{{$error->status()->first()->state()->first()->name}}</td>
 					<td>{{date_format(date_create($error->date_time_created), 'd/m/Y H:i:s')}}</td>
 					<td><a class="w3-button" href="{{url('edit-error/'.$error->uuid)}}"><i class="fa fa-edit fa-lg"></i></a></td>
 					<td><button class="w3-button" onclick="deleteError('{{$error->uuid}}');">

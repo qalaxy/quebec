@@ -131,6 +131,7 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::any('error-notifications', 'Web\ErrorController@errorNotifications');
 	//Route::any('count-error-notifications', 'Web\ErrorController@countErrorNotifications');
 	Route::get('create-error', 'Web\ErrorController@createError');
+	Route::get('get-station-functions/{uuid}', 'Web\ErrorController@getStationFunctions');
 	Route::post('store-error', 'Web\ErrorController@storeError');
 	Route::get('error/{uuid}', 'Web\ErrorController@showError');
 	Route::get('pdf-error/{uuid}', 'Web\ErrorController@pdfError');

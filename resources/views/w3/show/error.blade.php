@@ -19,17 +19,25 @@
 				<div class="w3-row">
 					<div class="w3-dropdown-hover w3-right w3-white">
 						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-						<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
-						  <a href="{{url('/edit-error/'.$error->uuid)}}" class="w3-bar-item w3-button">Edit</a>
-						  <a href="javascript:void(0)" onclick="deleteError('{{$error->uuid}}');" class="w3-bar-item w3-button">Delete</a>
-						  <a href="{{url('error-pdf/'.$error->uuid)}}"  target="_blank" class="w3-bar-item w3-button">PDF format</a>
-						  @if(is_null($error->errorCorrection()->first()))
-						  <a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button">Corrective action</a>
+						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
+							@if(is_null($error->errorCorrection()->first()))
+								<a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Corrective action</a>
 							@endif
-						  @if(is_null($error->affectedProduct()->first()))
-						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button">Affected product</a>
-						@endif
-						
+							@if(is_null($error->affectedProduct()->first()))
+								<a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Affected product</a>
+							@endif
+							@if($error->status()->first()->state()->first()->code == 2)
+								<a href="{{url('error-reject/'.$error->uuid)}}"  class="w3-bar-item w3-button w3-hover-light-blue">Open</a>
+							@else
+								<a href="{{url('error-reject/'.$error->uuid)}}"  class="w3-bar-item w3-button w3-hover-light-blue">Reject</a>
+							@endif
+							
+							<a href="{{url('error-pdf/'.$error->uuid)}}"  target="_blank" class="w3-bar-item w3-button w3-hover-light-blue">PDF format</a>
+							
+							@if($error->user()->first()->id == Auth::id())
+							<a href="{{url('/edit-error/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>
+							<a href="javascript:void(0)" onclick="deleteError('{{$error->uuid}}');" class="w3-bar-item w3-button w3-hover-light-blue">Delete</a>
+							@endif
 						</div>
 					  </div>
 				</div>
@@ -131,8 +139,8 @@
 				<div class="w3-row">
 					<div class="w3-dropdown-hover w3-right w3-white">
 						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-						<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
-						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button">Add a product</a>						
+						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
+						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Add a product</a>						
 						</div>
 					  </div>
 				</div>
@@ -167,10 +175,26 @@
 				<div class="w3-row">
 					
 					<div class="w3-dropdown-hover w3-right w3-white">
-						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-						<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">						
-						  <a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button">Edit</a>						
-						  <span class="w3-bar-item w3-button" onclick="">Delete</span>						
+						<button class="w3-button w3-xlarge w3-text-red">
+						@if($error->errorCorrection()->first() && $error->errorCorrection()->first()->status()->first()->state()->first()->code == 3 
+							&& ($error->aioError()->first()->user()->first()->id == Auth::id() 
+								|| $error->station()->first()->supervisor()->first()->account()->first()->user()->first()->id == Auth::id()))
+							<i class="fa fa-bell"></i>
+						@else
+							<i class="fa fa-bars"></i>
+						@endif
+						</button>
+						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">						
+							<a href="{{url('/error-correction-originator/'.$error->uuid)}}" 
+								class="w3-bar-item w3-button w3-hover-light-blue">
+								Originator comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
+							</a>
+							<a href="{{url('/error-correction-supervisor/'.$error->uuid)}}" 
+								class="w3-bar-item w3-button w3-hover-light-blue">
+								Supervisor comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
+							</a>							
+							<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>						
+							<span class="w3-bar-item w3-button w3-hover-light-blue" onclick="">Delete</span>						
 						</div>
 					  </div>
 				</div>

@@ -28,6 +28,7 @@ class ErrorData{
 	public $error_origin_key = 'error_origin';
 	public $source_key = 'source';
 	public $aio_key = 'aio';
+	public $state_id_key = 'state_id';
 	
 	public $function_id_req = 'required|uuid';
 	public $station_id_req = 'required|uuid';
