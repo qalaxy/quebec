@@ -21,7 +21,7 @@ class AccountController extends Controller
 	}
 	
 	public function accountFirstLogin($uuid){
-		$user = $this->ext->getUser(decrypt($uuid));
+		$user = $this->ext->getUser(decrypt($uuid)); //return var_dump($user->status);
 		if(is_object($user)){
 			if($user->status == 1)
 				abort(403);

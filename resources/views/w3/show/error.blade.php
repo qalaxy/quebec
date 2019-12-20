@@ -21,16 +21,31 @@
 						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
 							@if(is_null($error->errorCorrection()->first()))
-								<a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Corrective action</a>
+								@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
+									@if($account_station->station()->first()->id == $error->station()->first()->id)
+										<a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Corrective action</a>
+										@php continue; @endphp
+									@endif
+								@endforeach
 							@endif
 							@if(is_null($error->affectedProduct()->first()))
-								<a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Affected product</a>
+								@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
+									@if($account_station->station()->first()->id == $error->station()->first()->id)
+										<a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Affected product</a>
+										@php continue; @endphp
+									@endif
+								@endforeach
 							@endif
-							@if($error->status()->first()->state()->first()->code == 2)
-								<a href="{{url('error-reject/'.$error->uuid)}}"  class="w3-bar-item w3-button w3-hover-light-blue">Open</a>
-							@else
-								<a href="{{url('error-reject/'.$error->uuid)}}"  class="w3-bar-item w3-button w3-hover-light-blue">Reject</a>
-							@endif
+							@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
+								@if($account_station->station()->first()->id == $error->station()->first()->id)
+									@if($error->status()->first()->state()->first()->code == 2)
+										<a href="{{url('error-reject/'.$error->uuid)}}"  class="w3-bar-item w3-button w3-hover-light-blue">Open</a>
+									@else
+										<a href="{{url('error-reject/'.$error->uuid)}}"  class="w3-bar-item w3-button w3-hover-light-blue">Reject</a>
+									@endif
+									@php continue; @endphp
+								@endif
+							@endforeach
 							
 							<a href="{{url('error-pdf/'.$error->uuid)}}"  target="_blank" class="w3-bar-item w3-button w3-hover-light-blue">PDF format</a>
 							
@@ -136,11 +151,18 @@
 					</div>
 					@endif
 				</div>
+				@if($error->affectedProduct()->first())
 				<div class="w3-row">
 					<div class="w3-dropdown-hover w3-right w3-white">
 						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
-						  <a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Add a product</a>						
+							@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
+								@if($account_station->station()->first()->id == $error->station()->first()->id)
+									<a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Add a product</a>
+									@php continue; @endphp
+								@endif
+							@endforeach
+													
 						</div>
 					  </div>
 				</div>
@@ -171,30 +193,48 @@
 					
 				</div>
 				@endif
+				@endif
 				@if($error->errorCorrection()->first())
 				<div class="w3-row">
 					
 					<div class="w3-dropdown-hover w3-right w3-white">
-						<button class="w3-button w3-xlarge w3-text-red">
-						@if($error->errorCorrection()->first() && $error->errorCorrection()->first()->status()->first()->state()->first()->code == 3 
-							&& ($error->aioError()->first()->user()->first()->id == Auth::id() 
-								|| $error->station()->first()->supervisor()->first()->account()->first()->user()->first()->id == Auth::id()))
-							<i class="fa fa-bell"></i>
+						<button class="w3-button w3-xlarge">
+						@if($error->errorCorrection()->first() && $error->errorCorrection()->first()->status()->first()->state()->first()->code == 3)
+								
+							@if(($error->aioError()->first() && $error->aioError()->first()->errorOriginator()->first()->id == Auth::id())
+								|| ($error->station()->first()->supervisor()->first() 
+									&& $error->station()->first()->supervisor()->first()->account()->first()->user()->first()->id == Auth::id()))
+								<i class="fa fa-bell w3-text-red"></i>
+							@else
+								<i class="fa fa-bars"></i>
+							@endif
+							
 						@else
 							<i class="fa fa-bars"></i>
 						@endif
 						</button>
-						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">						
+						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">		
+							@if(($error->aioError()->first() && $error->aioError()->first()->errorOriginator()->first()->id == Auth::id()))
 							<a href="{{url('/error-correction-originator/'.$error->uuid)}}" 
 								class="w3-bar-item w3-button w3-hover-light-blue">
 								Originator comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
+								
 							</a>
+							@elseif($error->station()->first()->supervisor()->first() 
+									&& $error->station()->first()->supervisor()->first()->account()->first()->user()->first()->id == Auth::id())
 							<a href="{{url('/error-correction-supervisor/'.$error->uuid)}}" 
 								class="w3-bar-item w3-button w3-hover-light-blue">
 								Supervisor comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
-							</a>							
-							<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>						
-							<span class="w3-bar-item w3-button w3-hover-light-blue" onclick="">Delete</span>						
+							</a>
+							@endif
+							@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
+								@if($account_station->station()->first()->id == $error->station()->first()->id)
+									<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>						
+									<span class="w3-bar-item w3-button w3-hover-light-blue" onclick="">Delete</span>
+									@php continue; @endphp
+								@endif
+							@endforeach
+													
 						</div>
 					  </div>
 				</div>

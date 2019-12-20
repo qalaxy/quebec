@@ -12,6 +12,7 @@ use App\Station;
 
 use Illuminate\Support\Str;
 use App\Mail\ErrorNotificationEmail;
+use App\Mail\ErrorOriginatorNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -304,10 +305,10 @@ class ErrorExt extends Base{
 	
 	public function sendOriginatorEmail($error){
 		try{
-			$email = Mail::to($error->errorCorrection()->first()->originator()->first()->email)
+			$email = Mail::to($error->aioError()->first()->errorOriginator()->first()->email)
 							->send(new ErrorOriginatorNotification($error));
 			if($email){
-				throw new Exception('Email to '.$error->errorCorrection()->first()->originator()->first()->name.' has not been sent successfully');
+				throw new Exception('Email to '.$error->aioError()->first()->errorOriginator()->first()->name.' has not been sent successfully');
 			}
 		}catch(Exception $e){
 			return $e->getMessage();

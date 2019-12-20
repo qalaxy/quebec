@@ -26,6 +26,11 @@ Route::get('uuid', function(){
 	return Uuid::generate();
 })->middleware('auth');
 
+Route::group(['middleware'=>['web']], function(){
+	Route::get('first-login/{uuid}', 'Web\AccountController@accountFirstLogin');
+	Route::post('first-auth/{uuid}', 'Web\AccountController@accountFirstAuth');
+});
+
 Route::group(['middleware'=>['auth', 'web']], function(){
 	//Route::get('create-error', 'Web\FuncErrorController@createError')->name('error');
 	
@@ -82,8 +87,6 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('update-account/{uuid}', 'Web\AccountController@updateAccount');
 	Route::get('delete-account/{uuid}', 'Web\AccountController@deleteAccount');
 	Route::get('destroy-account/{uuid}', 'Web\AccountController@destroyAccount');
-	Route::get('first-login/{uuid}', 'Web\AccountController@accountFirstLogin');
-	Route::post('first-auth/{uuid}', 'Web\AccountController@accountFirstAuth');
 	
 	Route::get('emails/{uuid}', 'Web\AccountController@addEmail');
 	Route::get('add-email/{uuid}', 'Web\AccountController@addEmail');
@@ -129,7 +132,7 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::any('errors-pdf', 'Web\ErrorController@errorsPdf');
 	Route::any('errors', 'Web\ErrorController@errors');
 	Route::any('error-notifications', 'Web\ErrorController@errorNotifications');
-	//Route::any('count-error-notifications', 'Web\ErrorController@countErrorNotifications');
+	Route::any('count-error-notifications', 'Web\ErrorController@countErrorNotifications');
 	Route::get('create-error', 'Web\ErrorController@createError');
 	Route::get('get-station-functions/{uuid}', 'Web\ErrorController@getStationFunctions');
 	Route::post('store-error', 'Web\ErrorController@storeError');

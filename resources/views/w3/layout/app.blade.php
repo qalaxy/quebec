@@ -144,9 +144,9 @@ function myFunction() {
 }
 
 //var interval = setInterval(countErrorNotifications, 5000);
-//countErrorNotifications();
+countErrorNotifications();
 
-/*function countErrorNotifications(){
+function countErrorNotifications(){
 	
 	let xhr = new XMLHttpRequest();
 	xhr.open("GET", "{{url('/count-error-notifications')}}");
@@ -159,7 +159,7 @@ function myFunction() {
 			//alert(document.getElementById('funtion-error').innerHTML);
 		}
 	}
-}*/
+}
 
 </script>
 

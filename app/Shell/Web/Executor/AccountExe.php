@@ -33,7 +33,7 @@ class AccountExe extends Base{
 			if(is_null($user)){
 				throw new Exception('Your credentials have not been updated successfully');
 			}else{
-				$this->success = array('indicator'=>'success', 'message'=>'Your credentials have been updated succesfsfully');
+				$this->success = array('indicator'=>'success', 'message'=>'Your credentials have been updated successfully');
 			}
 		}catch(Exception $e){
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());

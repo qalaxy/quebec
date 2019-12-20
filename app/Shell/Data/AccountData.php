@@ -3,7 +3,7 @@ namespace App\Shell\Data;
 
 
 class AccountData{
-	public $rows = 5;
+	public $rows = 15;
 	
 	public $name_key = 'name';
 	public $password_key = 'password';

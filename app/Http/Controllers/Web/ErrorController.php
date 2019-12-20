@@ -250,6 +250,9 @@ class ErrorController extends Controller
 			if(!is_object($error)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error)); 
 			
+			if($error->errorCorrection()->first())
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Error has been provided with a corrective action already'))->withInput();
+			
 			$stations = $this->ext->getStations();
 			if(!is_object($stations)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
@@ -282,6 +285,7 @@ class ErrorController extends Controller
 	
 	public function storeCorrectiveAction(Request $request, $uuid){
 		if(Auth::user()->can('create_errors')){
+			
 			$validation = $this->ext->validateCorrectiveActionData($request->all());
 			if($validation->fails()){
 				return redirect('error-corrective-action/'.$uuid)
@@ -293,6 +297,9 @@ class ErrorController extends Controller
 			$error = $this->ext->getError($uuid);
 			if(!is_object($error)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error))->withInput();
+			
+			if($error->errorCorrection()->first())
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Error has been provided with a corrective action already'))->withInput();
 			
 			if(isset($request['originator_id'])){
 				$account = $this->ext->getAccount($request['originator_id']);
@@ -408,12 +415,12 @@ class ErrorController extends Controller
 		if(is_null(Auth::user()->account()->first()) || is_null(Auth::user()->account()->first()->accountStation()->first()))
 			return '<span class="w3-text-red">!stn</span>';
 		
-		$account_stations = $this->ext->getAccountStations();
+		$account_stations = $this->ext->getAccountStations(); //return var_dump($account_stations);
 		if(!is_object($account_stations)) 
 				return '<span class="w3-text-red">!acc stn</span>';
 		
 		if(count($account_stations)){
-			$error_notifications = $this->ext->getNotifiedErrors($account_stations); 
+			$error_notifications = $this->ext->getNotifiedErrors($account_stations); //return var_dump($error_notifications);
 			if(!is_object($error_notifications)){
 				return '<span class="w3-text-red">Error!</span>';
 			}

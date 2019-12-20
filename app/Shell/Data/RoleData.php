@@ -2,7 +2,7 @@
 namespace App\Shell\Data;
 
 class RoleData{
-	public $rows = 2;
+	public $rows = 15;
 	
 	public $name_key = 'name';
 	public $display_name_key = 'display_name';
