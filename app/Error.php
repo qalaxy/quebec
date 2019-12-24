@@ -13,7 +13,7 @@ class Error extends Model
 	
 	protected $table = 'errors';
 	
-	protected $fillable = ['uuid', 'user_id', 'function_id', 'station_id', 'number', 'date_time_created', 'description', 'impact', 'state_id', 'remarks', 'responsibility'];
+	protected $fillable = ['uuid', 'user_id', 'function_id', 'station_id', 'number', 'description', 'impact', 'state_id', 'remarks', 'responsibility'];
 
 	
 	public function user(){
@@ -44,22 +44,12 @@ class Error extends Model
 		return $this->belongsToMany('App\Status', 'error_status', 'error_id', 'status_id');
 	}
 	
-	public function aioError(){
-		return $this->hasOne('App\AioError', 'error_id');
-	}
-	
-	public function externalError(){
-		return $this->hasOne('App\ExternalError', 'error_id');
-	}
-	
 	public static function boot(){
 		parent::boot();
 		Error::deleted(function($error){
 			$error->affectedProduct()->delete();
 			$error->errorNotification()->delete();
 			$error->errorCorrection()->delete();
-			$error->aioError()->delete();
-			$error->externalError()->delete();
 		});
 	}
 }

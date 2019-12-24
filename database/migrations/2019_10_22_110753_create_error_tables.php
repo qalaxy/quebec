@@ -23,7 +23,6 @@ class CreateErrorTables extends Migration
 			$table->unsignedBigInteger('function_id');
 			$table->unsignedBigInteger('station_id');
 			$table->integer('number');
-			$table->dateTime('date_time_created');
 			$table->string('description');
 			$table->string('impact');
 			$table->string('remarks')->nullable();
@@ -122,7 +121,6 @@ class CreateErrorTables extends Migration
 			$table->unsignedBigInteger('user_id');
 			$table->unsignedBigInteger('station_id');
 			$table->boolean('source');
-			$table->dateTime('date_time_created');
 			$table->string('corrective_action');
 			$table->string('cause');
 			$table->string('remarks')->nullable();
@@ -143,12 +141,12 @@ class CreateErrorTables extends Migration
 		Schema::create('aio_errors', function(Blueprint $table){
 			$table->bigIncrements('id');
 			$table->uuid('uuid');
-			$table->unsignedBigInteger('error_id');
+			$table->unsignedBigInteger('error_correction_id');
 			$table->unsignedBigInteger('user_id');
 			$table->unsignedBigInteger('originator_id');
 			$table->timestamps();
 			$table->softDeletes();
-			$table->foreign('error_id')->references('id')->on('errors')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('originator_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 			
@@ -159,7 +157,7 @@ class CreateErrorTables extends Migration
 			$table->uuid('uuid');
 			$table->unsignedBigInteger('error_correction_id');
 			$table->boolean('status');
-			$table->string('remarks');
+			$table->string('remarks')->nullable();
 			$table->timestamps();
 			$table->softDeletes();
 			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
@@ -168,12 +166,12 @@ class CreateErrorTables extends Migration
 		Schema::create('external_errors', function(Blueprint $table){
 			$table->bigIncrements('id');
 			$table->uuid('uuid');
-			$table->unsignedBigInteger('error_id');
+			$table->unsignedBigInteger('error_correction_id');
 			$table->unsignedBigInteger('user_id');
 			$table->string('description');
 			$table->timestamps();
 			$table->softDeletes();
-			$table->foreign('error_id')->references('id')->on('errors')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 		});
 		
@@ -182,7 +180,7 @@ class CreateErrorTables extends Migration
 			$table->uuid('uuid');
 			$table->unsignedBigInteger('error_correction_id');
 			$table->boolean('status');
-			$table->string('remarks');
+			$table->string('remarks')->nullable();
 			$table->timestamps();
 			$table->softDeletes();
 			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');

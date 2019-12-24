@@ -81,13 +81,13 @@ class ErrorMnt extends ErrorExe{
 		}
 		
 		if(isset($data[$this->error_data->originator_id_key])){
-			$origin = $this->storeAioError($error, $correction);
+			$origin = $this->storeAioError($correction);
 			if(is_null($origin)){
 				DB::rollback();
 				return $this->error;
 			}
 		}else if(isset($data[$this->error_data->originator_key])){
-			$origin = $this->storeOtherError($error, $correction);
+			$origin = $this->storeOtherError($correction);
 			if(is_null($origin)){
 				DB::rollback();
 				return $this->error;
@@ -99,6 +99,19 @@ class ErrorMnt extends ErrorExe{
 			return $this->error;
 		}
 		
+		DB::commit();
+		return $this->success;
+	}
+	
+	public function createErrorOriginatorReaction(array $data, object $error_correction){
+		$this->data = $data;
+		
+		DB::beginTransaction();
+		$originator_reaction = $this->storeErrorOriginatorReaction($error_correction);
+		if(is_null($originator_reaction)){
+			DB::rollback();
+			return $this->error;
+		}
 		DB::commit();
 		return $this->success;
 	}

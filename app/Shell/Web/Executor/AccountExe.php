@@ -44,9 +44,11 @@ class AccountExe extends Base{
 		try{
 			$user = User::firstOrCreate(array($this->acc_data->email_key=>$this->data[$this->acc_data->email_key], 'deleted_at' => null), 
 						array('uuid'=>Uuid::generate(),
-			$this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key].' '.$this->data[$this->acc_data->middle_name_key].' '.$this->data[$this->acc_data->last_name_key],
+							$this->acc_data->name_key=>ucfirst($this->data[$this->acc_data->first_name_key])
+										.' '.ucfirst($this->data[$this->acc_data->middle_name_key])
+										.' '.ucfirst($this->data[$this->acc_data->last_name_key]),
 							$this->acc_data->email_key=>$this->data[$this->acc_data->email_key],
-							$this->acc_data->password_key=>Hash::make(Str::random(8)),//Send a login link to the email
+							$this->acc_data->password_key=>Hash::make(Str::random(8)),
 							$this->acc_data->status_key=>0,
 							$this->acc_data->level_id_key=>Level::where('order', Level::max('order'))->first()->id,
 						));
@@ -66,9 +68,9 @@ class AccountExe extends Base{
 			$account = Account::firstOrCreate(array($this->acc_data->p_number_key => $this->data[$this->acc_data->p_number_key], 'deleted_at' => null), 
 							array('uuid'=>Uuid::generate(),
 									$this->acc_data->user_id_key => Auth::id(),
-									$this->acc_data->first_name_key => $this->data[$this->acc_data->first_name_key],
-									$this->acc_data->middle_name_key => $this->data[$this->acc_data->middle_name_key],
-									$this->acc_data->last_name_key => $this->data[$this->acc_data->last_name_key],
+									$this->acc_data->first_name_key => ucfirst($this->data[$this->acc_data->first_name_key]),
+									$this->acc_data->middle_name_key => ucfirst($this->data[$this->acc_data->middle_name_key]),
+									$this->acc_data->last_name_key => ucfirst($this->data[$this->acc_data->last_name_key]),
 									$this->acc_data->p_number_key => $this->data[$this->acc_data->p_number_key],
 								)
 							);
@@ -129,7 +131,9 @@ class AccountExe extends Base{
 		try{
 			$user = $account->user()->first()->
 				update(array(
-		$this->acc_data->name_key=>$this->data[$this->acc_data->first_name_key].' '.$this->data[$this->acc_data->middle_name_key].' '.$this->data[$this->acc_data->last_name_key]));
+							$this->acc_data->name_key=>ucfirst($this->data[$this->acc_data->first_name_key])
+										.' '.ucfirst($this->data[$this->acc_data->middle_name_key])
+										.' '.ucfirst($this->data[$this->acc_data->last_name_key]),));
 			if(is_null($user)){
 				throw new Exception('User has not been edited successfully');
 			}
@@ -143,9 +147,9 @@ class AccountExe extends Base{
 	protected function updateAccount($account){
 		try{
 			$acc = $account->update(array($this->acc_data->user_id_key => Auth::id(),
-									$this->acc_data->first_name_key => $this->data[$this->acc_data->first_name_key],
-									$this->acc_data->middle_name_key => $this->data[$this->acc_data->middle_name_key],
-									$this->acc_data->last_name_key => $this->data[$this->acc_data->last_name_key],
+									$this->acc_data->first_name_key => ucfirst($this->data[$this->acc_data->first_name_key]),
+									$this->acc_data->middle_name_key => ucfirst($this->data[$this->acc_data->middle_name_key]),
+									$this->acc_data->last_name_key => ucfirst($this->data[$this->acc_data->last_name_key]),
 									$this->acc_data->p_number_key => $this->data[$this->acc_data->p_number_key],
 								)
 							);
@@ -371,9 +375,9 @@ class AccountExe extends Base{
 	protected function storeAccountRole($user, $role){
 		try{
 			if($role->user()->attach($user)){
-				throw new Exception('Role has not been added to the user succesfsfully');
+				throw new Exception('Role has not been added to the user successfully');
 			}else{
-				$this->success = array('indicator'=>'success', 'message'=>'Role has been added to the user succesfsfully');
+				$this->success = array('indicator'=>'success', 'message'=>'Role has been added to the user successfully');
 			}
 		}catch(Exception $e){
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
@@ -386,9 +390,9 @@ class AccountExe extends Base{
 		try{
 			$del_role = $role->user()->detach($user);
 			if(is_null($del_role)){
-				throw new Exception('Role has not been removed from user succesfsfully');
+				throw new Exception('Role has not been removed from user successfully');
 			}else{
-				$this->success = array('indicator'=>'success', 'message'=>'Role has been removed from user succesfsfully');
+				$this->success = array('indicator'=>'success', 'message'=>'Role has been removed from user successfully');
 			}
 		}catch(Exception $e){
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());

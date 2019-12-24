@@ -151,6 +151,9 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('get-account-station/{uuid}', 'Web\ErrorController@getAccountStation');
 	Route::post('store-error-corrective-action/{uuid}', 'Web\ErrorController@storeCorrectiveAction');
 	
+	Route::get('create-error-originator-reaction/{uuid}', 'Web\ErrorController@createErrorOriginatorReaction');
+	Route::post('store-error-originator-reaction/{uuid}', 'Web\ErrorController@storeErrorOriginatorReaction');
+	
 	/*
 	 * ========================================================================================================================
 	 * Station routes

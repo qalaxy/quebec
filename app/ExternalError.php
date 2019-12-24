@@ -10,10 +10,10 @@ class ExternalError extends Model
 {
     protected $table = 'external_errors';
 	
-	protected $fillable = ['uuid', 'error_id', 'user_id', 'description'];
+	protected $fillable = ['uuid', 'error_correction_id', 'user_id', 'description'];
 	
-	public function error(){
-		return $this->belongsTo('App\Error', 'error_id');
+	public function errorCorrection(){
+		return $this->belongsTo('App\ErrorCorrection', 'error_correction_id');
 	}
 	
 	public function user(){

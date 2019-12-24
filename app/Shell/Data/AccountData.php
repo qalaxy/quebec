@@ -24,8 +24,8 @@ class AccountData{
 	public $level_id_key = 'level_id';
 	public $role_id_key = 'role_id';
 	
-	public $name_req = 'required|regex:/[a-zA-Z\ \']/|min:3';
-	public $optional_name_req = 'nullable|regex:/[a-zA-Z\ \']/|min:3';
+	public $name_req = 'required|regex:/^([a-zA-Z\']+)$/|min:3';
+	public $optional_name_req = 'nullable|regex:/^([a-zA-Z\']+)$/|min:3';
 	public $p_number_req = 'required|digits:9';
 	public $station_id_req = 'required|uuid';
 	public $phone_number_req = 'required|digits:10|starts_with:07,08';
@@ -37,12 +37,12 @@ class AccountData{
 	
 	public $validation_msgs = [
 		'first_name.required'=>'You have not entered first name',
-		'first_name.regex'=>'First name should have alphabets, apostrophe and spaces only',
+		'first_name.regex'=>'First name should have alphabets and apostrophe  only',
 		'first_name.min'=>'First name should not have less than 3 characters',
-		'middle_name.regex'=>'Middle name should have alphabets, apostrophe and spaces only',
+		'middle_name.regex'=>'Middle name should have alphabets and apostrophe only',
 		'middle_name.min'=>'Middle name should not have less than 3 characters',
 		'last_name.required'=>'You have not entered last name',
-		'last_name.regex'=>'Last name should have alphabets, apostrophe and spaces only',
+		'last_name.regex'=>'Last name should have alphabets and apostrophe only',
 		'last_name.min'=>'Last name should not have less than 3 characters',
 		'p_number.required'=>'You have not entered personal number',
 		'p_number.digits'=>'Personal number should be numeric and have 9 digits',

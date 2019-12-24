@@ -29,6 +29,10 @@ class ErrorData{
 	public $source_key = 'source';
 	public $aio_key = 'aio';
 	public $state_id_key = 'state_id';
+	public $originator_reaction_key = 'originator_reaction';
+	public $supervisor_reaction_key = 'supervisor_reaction';
+	public $error_correction_id_key = 'error_correction_id';
+	
 	
 	public $function_id_req = 'required|uuid';
 	public $station_id_req = 'required|uuid';
@@ -47,6 +51,8 @@ class ErrorData{
 	public $originator_id_req = 'sometimes|required|uuid';
 	public $originator_req = 'sometimes|required|max:255';
 	public $error_origin_req = 'required|boolean';
+	public $originator_reaction_req = 'required|boolean';
+	public $supervisor_reaction_req = 'required|digits:1/';
 	
 	public $corrective_action_validation_msgs = [
 		'corrective_action.required' => 'You have not entered corrective action to the error',
@@ -102,6 +108,20 @@ class ErrorData{
 		'product_id.uuid'=>'Value for the product affected should be uuid type',
 		
 		'product_identification.max'=>'Identification of affected product should not have more tha 255 characters',
+	];
+	
+	public $validate_error_originator_reaction_msgs = [
+		'originator_reaction.required' => 'You have not selected your reaction to the corrective action given',
+		'originator_reaction.boolean' => 'Reaction value can either be 1 or 0',
+		
+		'remarks.max'=>'Characters in remarks should not be more than 255',
+	];
+	
+	public $validate_error_supervisor_reaction_msgs = [
+		'originator_reaction.required' => 'You have not selected your reaction',
+		'originator_reaction.digits' => 'Reaction value should be one digit',
+		
+		'remarks.max'=>'Characters in remarks should not be more than 255',
 	];
 }
 ?>

@@ -6,11 +6,12 @@ use App\AioError;
 use App\Error;
 use App\ErrorCorrection;
 use App\ErrorNotification;
+use App\ExternalError;
 use App\State;
 use App\Status;
-use App\ExternalError;
 use App\Message;
 use App\NotificationRecipient;
+use App\OriginatorReaction;
 use Uuid;
 
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +37,7 @@ class ErrorExe extends Base{
 						$this->error_data->function_id_key => $function->id,
 						$this->error_data->station_id_key => $station->id,
 						$this->error_data->number_key => $this->data[$this->error_data->number_key],
-						$this->error_data->date_time_created_key => $this->data[$this->error_data->date_time_created_key],
+						//$this->error_data->date_time_created_key => $this->data[$this->error_data->date_time_created_key],
 						$this->error_data->description_key => $this->data[$this->error_data->description_key],
 						$this->error_data->impact_key => $this->data[$this->error_data->impact_key],
 						$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
@@ -152,7 +153,7 @@ class ErrorExe extends Base{
 							$this->error_data->user_id_key => Auth::id(),
 							$this->error_data->station_id_key => $error->station()->first()->id,
 							$this->error_data->source_key => $this->data[$this->error_data->error_origin_key],
-							$this->error_data->date_time_created_key => $this->data[$this->error_data->date_time_created_key],
+							//$this->error_data->date_time_created_key => $this->data[$this->error_data->date_time_created_key],
 							$this->error_data->corrective_action_key => $this->data[$this->error_data->corrective_action_key],
 							$this->error_data->cause_key => $this->data[$this->error_data->cause_key],
 							$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
@@ -187,11 +188,11 @@ class ErrorExe extends Base{
 		return $status;
 	}
 	
-	protected function storeAioError($error, $correction){
+	protected function storeAioError($correction){
 		try{
-			$aio_error = AioError::firstOrCreate(array($this->error_data->error_id_key => $error->id), 
+			$aio_error = AioError::firstOrCreate(array($this->error_data->error_correction_id_key => $correction->id), 
 						array('uuid' => Uuid::generate(),
-							$this->error_data->error_id_key => $error->id,
+							$this->error_data->error_correction_id_key => $correction->id,
 							$this->error_data->user_id_key => Auth::id(),
 							$this->error_data->originator_id_key => $this->data[$this->error_data->aio_key]));
 			if(is_null($aio_error)){
@@ -204,11 +205,11 @@ class ErrorExe extends Base{
 		return $aio_error;
 	}
 	
-	protected function storeOtherError($error, $correction){
+	protected function storeOtherError($correction){
 		try{
-			$external_error = ExternalError::firstOrCreate(array($this->error_data->error_id_key => $error->id), 
+			$external_error = ExternalError::firstOrCreate(array($this->error_data->error_correction_id_key => $correction->id), 
 					array('uuid' => Uuid::generate(),
-							$this->error_data->error_id_key => $error->id,
+							$this->error_data->error_correction_id_key => $correction->id,
 							$this->error_data->user_id_key => Auth::id(),
 							$this->error_data->description_key => $this->data[$this->error_data->originator_key]));
 			if(is_null($external_error)){
@@ -232,6 +233,25 @@ class ErrorExe extends Base{
 			return null;
 		}
 		return $error_status;
+	}
+	
+	protected function storeErrorOriginatorReaction($error_correction){
+		try{
+			$originator_reaction = OriginatorReaction::firstOrCreate(array($this->error_data->error_correction_id_key => $error_correction->id), 
+								array('uuid' => Uuid::generate(),
+									$this->error_data->error_correction_id_key => $error_correction->id,
+									$this->error_data->status_key => $this->data[$this->error_data->originator_reaction_key],
+									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],));
+			if(is_null($originator_reaction)){
+				throw new Exception('Originator reaction has not been created successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Originator reaction has been created successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $originator_reaction;
 	}
 	
 }

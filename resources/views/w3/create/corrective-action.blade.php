@@ -42,7 +42,7 @@
 							<textarea class="w3-input w3-border {{($errors->has('corrective_action')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="Give a corrective action done to the error"
 										name="corrective_action"
-										rows="4">{{old('corrective_action')}}</textarea>
+										rows="2">{{old('corrective_action')}}</textarea>
 							@if($errors->has('corrective_action'))
 								<span class="w3-small w3-text-red">{{$errors->first('corrective_action')}}</span>
 							@else
@@ -56,7 +56,7 @@
 							<textarea class="w3-input w3-border {{($errors->has('cause')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="What was the cause of the error?"
 										name="cause"
-										rows="4">{{old('cause')}}</textarea>
+										rows="2">{{old('cause')}}</textarea>
 							@if($errors->has('cause'))
 								<span class="w3-small w3-text-red">{{$errors->first('cause')}}</span>
 							@else
@@ -116,7 +116,7 @@
 							@endif
 						</div>
 					</div>	
-					<div class="w3-row w3-padding-small">
+					<!--<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Date of reporting<span class="w3-text-red">*</span></label>
 							<input class="w3-input w3-border {{($errors->has('date_time_created')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
@@ -131,14 +131,14 @@
 								<span>&nbsp;</span>
 							@endif
 						</div>
-					</div>
+					</div>-->
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Remarks</label>
 							<textarea class="w3-input w3-border-dark-gray w3-border" 
 									placeholder="Give your remarks" 
 									name="remarks" 
-									rows="2">{{old('remarks')}}</textarea>
+									rows="4">{{old('remarks')}}</textarea>
 							@if($errors->has('remarks'))
 								<span class="w3-small w3-text-red">{{$errors->first('remarks')}}</span>
 							@elseif($errors->has('remarks'))
@@ -150,7 +150,7 @@
 			</div>
 			<div class="w3-row">
 				<div class="w3-col w3-padding-small">
-					<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Report a new error">Report&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
+					<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Submit error correction">Submit&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
 				</div>
 			</div>
 		</form>

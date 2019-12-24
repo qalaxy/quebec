@@ -63,7 +63,7 @@
 							<textarea class="w3-input w3-border {{($errors->has('description')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="Describe the error"
 										name="description"
-										rows="6">{{old('description')}}</textarea>
+										rows="3">{{old('description')}}</textarea>
 							@if($errors->has('description'))
 								<span class="w3-small w3-text-red">{{$errors->first('description')}}</span>
 							@else
@@ -79,7 +79,7 @@
 							<textarea class="w3-input w3-border {{($errors->has('impact')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									placeholder="Describe the impact of the error" 
 									name="impact"
-									rows="2">{{old('impact')}}</textarea>
+									rows="3">{{old('impact')}}</textarea>
 							@if($errors->has('function_id'))
 								<span class="w3-small w3-text-red">{{$errors->first('impact')}}</span>
 							@else
@@ -87,7 +87,7 @@
 							@endif
 						</div>
 					</div>
-					<div class="w3-row w3-padding-small">
+					<!--<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Date and time of reporting<span class="w3-text-red">*</span></label>
 							<input class="w3-input w3-border {{($errors->has('date_time_created')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
@@ -102,7 +102,7 @@
 								<span>&nbsp;</span>
 							@endif
 						</div>
-					</div>
+					</div>-->
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Remarks</label>

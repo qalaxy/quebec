@@ -62,7 +62,7 @@ class ErrorController extends Controller
 			
 			if(View::exists('w3.create.error')){
 				return view('w3.create.error')->with(compact('functions', 'stations', 'status'))
-							->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank. Use Chrome browser v20.0'));
+							->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
 			}else{
 				return back()->with('notification', $this->missing_view);
 			}
@@ -142,8 +142,6 @@ class ErrorController extends Controller
 					return redirect('/')->with('notification', array('indicator'=>'warning', 'message'=>$error));
 				else return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
 			}
-			
-			//return $error->aioError()->first()->user()->first()->id;
 			
 			if(View::exists('w3.show.error')){
 				return view('w3.show.error')->with(compact('error'));
@@ -251,7 +249,9 @@ class ErrorController extends Controller
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error)); 
 			
 			if($error->errorCorrection()->first())
-				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Error has been provided with a corrective action already'))->withInput();
+				return redirect('error-corrective-action/'.$uuid)
+						->with('notification', array('indicator'=>'warning', 'message'=>'Error has been provided with a corrective action already'))
+						->withInput();
 			
 			$stations = $this->ext->getStations();
 			if(!is_object($stations)) 
@@ -415,12 +415,12 @@ class ErrorController extends Controller
 		if(is_null(Auth::user()->account()->first()) || is_null(Auth::user()->account()->first()->accountStation()->first()))
 			return '<span class="w3-text-red">!stn</span>';
 		
-		$account_stations = $this->ext->getAccountStations(); //return var_dump($account_stations);
+		$account_stations = $this->ext->getAccountStations();
 		if(!is_object($account_stations)) 
 				return '<span class="w3-text-red">!acc stn</span>';
 		
 		if(count($account_stations)){
-			$error_notifications = $this->ext->getNotifiedErrors($account_stations); //return var_dump($error_notifications);
+			$error_notifications = $this->ext->getNotifiedErrors($account_stations);
 			if(!is_object($error_notifications)){
 				return '<span class="w3-text-red">Error!</span>';
 			}
@@ -429,6 +429,60 @@ class ErrorController extends Controller
 		}
 	}
 	
+	public function createErrorOriginatorReaction($uuid){
+		if(Auth::user()->can('create_errors')){
+			$func_error = $this->ext->getError($uuid);
+			if(!is_object($func_error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$func_error));
+			
+			if($func_error->errorCorrection()->first()->originatorReaction()->first())
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Originator reaction has been given'));
+			
+			if(is_null($func_error->errorCorrection()->first()))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Error has not been given correction action'));
+			
+			if($func_error->errorCorrection()->first()->aioError()->first() 
+				&& $func_error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->id != Auth::id())
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'You are not the originator of this error'));
+			
+			if(View::exists('w3.create.originator-reaction')){
+				return view('w3.create.originator-reaction')
+						->with(compact('func_error'))
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide originator reaction to the error'));
+		}
+	}
 	
+	public function storeErrorOriginatorReaction(Request $request, $uuid){
+		if(Auth::user()->can('create_errors')){
+			$validation = $this->ext->validateErrorOriginatorReactionData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+						->withInput()->with('notification', $this->ext->validation);
+			}
+			
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error))->withInput();
+			
+			if(is_null($error->errorCorrection()->first()))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Error has not been given correction action'))->withInput();
+			
+			$notification = $this->mnt->createErrorOriginatorReaction($request->all(), $error->errorCorrection()->first());
+			if(in_array('success', $notification)){
+				if(view::exists('w3.show.error'))
+					return redirect('error/'.$uuid)->with(compact('notification'));
+				else
+					return back()->with('notification', $this->ext->missing_view)->withInput();
+			}else{
+				return back()->with(compact('notification'))->withInput();
+			}
+			
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide originator reaction to the error'));
+		}
+	}
 	
 }

@@ -121,7 +121,7 @@ class ErrorExt extends Base{
 		$rules = [
 				$this->error_data->station_id_key => $this->error_data->station_id_req,
 				$this->error_data->function_id_key => $this->error_data->function_id_req,
-				$this->error_data->date_time_created_key => $this->error_data->date_time_created_req,
+				//$this->error_data->date_time_created_key => $this->error_data->date_time_created_req,
 				$this->error_data->description_key => $this->error_data->description_req,
 				$this->error_data->impact_key => $this->error_data->impact_req,
 				$this->error_data->remarks_key => $this->error_data->remarks_req,
@@ -129,10 +129,10 @@ class ErrorExt extends Base{
 				$this->error_data->notification_message_key => $this->error_data->notification_message_req,
 		];
 		
-		$this->error_data->error_data_validation_msgs['date_time_created.before'] = Str::replaceArray('?', 
+		/*$this->error_data->error_data_validation_msgs['date_time_created.before'] = Str::replaceArray('?', 
 								[date_format(date_create($data[$this->error_data->date_time_created_key]), 'd/m/Y H:i:s'), 
 								date('d/m/Y H:i:s', strtotime(strval(today()).' + 1days'))],
-								$this->error_data->error_data_validation_msgs['date_time_created.before']);
+								$this->error_data->error_data_validation_msgs['date_time_created.before']);*/
 								
 		return Validator::make($data, $rules, $this->error_data->error_data_validation_msgs);
 	}
@@ -278,15 +278,15 @@ class ErrorExt extends Base{
 			$this->error_data->cause_key => $this->error_data->cause_req,
 			$this->error_data->error_origin_key => $this->error_data->error_origin_req,
 			$this->error_data->remarks_key => $this->error_data->remarks_req,
-			$this->error_data->date_time_created_key => $this->error_data->date_time_created_req,
+			//$this->error_data->date_time_created_key => $this->error_data->date_time_created_req,
 			$this->error_data->originator_id_key => $this->error_data->originator_id_req,
 			$this->error_data->originator_key => $this->error_data->originator_req,
 		];
 		
-		$this->error_data->corrective_action_validation_msgs['date_time_created.before'] = Str::replaceArray('?', 
+		/*$this->error_data->corrective_action_validation_msgs['date_time_created.before'] = Str::replaceArray('?', 
 								[date_format(date_create($data[$this->error_data->date_time_created_key]), 'd/m/Y H:i:s'), 
 								date('d/m/Y H:i:s', strtotime(strval(today()).' + 1days'))],
-								$this->error_data->corrective_action_validation_msgs['date_time_created.before']);
+								$this->error_data->corrective_action_validation_msgs['date_time_created.before']);*/
 								
 		return Validator::make($data, $rules, $this->error_data->corrective_action_validation_msgs);
 	}
@@ -305,10 +305,10 @@ class ErrorExt extends Base{
 	
 	public function sendOriginatorEmail($error){
 		try{
-			$email = Mail::to($error->aioError()->first()->errorOriginator()->first()->email)
+			$email = Mail::to($error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->email)
 							->send(new ErrorOriginatorNotification($error));
 			if($email){
-				throw new Exception('Email to '.$error->aioError()->first()->errorOriginator()->first()->name.' has not been sent successfully');
+				throw new Exception('Email to '.$error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->name.' has not been sent successfully');
 			}
 		}catch(Exception $e){
 			return $e->getMessage();
@@ -550,7 +550,7 @@ class ErrorExt extends Base{
 			$this->pdf->MultiCell(80, 6, $error->errorCorrection()->first()->remarks, 0);
 			$this->pdf->Ln();
 		}
-		if($error->aioError()->first() || $error->externalError()->first()){
+		if($error->aioError()->first() || $error->errorCorrection()->first()->externalError()->first()){
 			$this->pdf->SetFontSize(16);
 			$this->pdf->Cell(50, 6, 'Error source: ', 0);
 			$this->pdf->SetFontSize(13);
@@ -559,8 +559,8 @@ class ErrorExt extends Base{
 						$error->aioError()->first()->errorOriginator()->first()->account()->first()->first_name.' '
 						.$error->aioError()->first()->errorOriginator()->first()->account()->first()->middle_name.' '
 						.$error->aioError()->first()->errorOriginator()->first()->account()->first()->last_name,0);
-			else if($error->externalError()->first())
-				$this->pdf->MultiCell(80, 6, $error->externalError()->first()->description, 0);
+			else if($error->errorCorrection()->first()->externalError()->first())
+				$this->pdf->MultiCell(80, 6, $error->errorCorrection()->first()->externalError()->first()->description, 0);
 			$this->pdf->Ln();
 		}
 		if(isset($error->date_time_created)){
@@ -573,19 +573,19 @@ class ErrorExt extends Base{
 	}
 	
 	public function errorPdfData($error){
-		$products = array(); $correction = array(); $reported_error = array();
+		$products = array(); $correction = array(); $reported_error = array(); $originator_reaction = array();
 		
 		$reported_error = [
 				'number' => $error->station()->first()->abbreviation.'/'
 					.$error->func()->first()->abbreviation.'/'
 					.$error->number.'/'
-					.date_format(date_create($error->date_time_created), 'y'), 
+					.date_format(date_create($error->created_at), 'y'), 
 				
 				'function' => $error->func()->first()->name,
 				'description' => $error->description,
 				'impact' => $error->impact,
 				'station' => $error->station()->first()->name,
-				'date_reported' => date_format(date_create($error->date_time_created), 'd/m/Y H:i:s'),
+				'date_reported' => date_format(date_create($error->created_at), 'd/m/Y H:i:s'),
 				'responsibility' => ($error->responsibility)?$error->user()->first()->name:null,
 				'user' => $error->user()->first()->name,
 				'remarks' => $error->remarks,
@@ -596,27 +596,37 @@ class ErrorExt extends Base{
 		}
 		
 		if($error->errorCorrection()->first()){
-			if($error->aioError()->first()){
-				$source = $error->aioError()->first()->errorOriginator()->first()->account()->first()->first_name.' '
-				.$error->aioError()->first()->errorOriginator()->first()->account()->first()->middle_name.' '
-				.$error->aioError()->first()->errorOriginator()->first()->account()->first()->last_name;
-			}else if($error->externalError()->first()){
-				$source = $error->externalError()->first()->description;
+			if($error->errorCorrection()->first()->aioError()->first()){
+				$source = $error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->name;
+			}else if($error->errorCorrection()->first()->externalError()->first()){
+				$source = $error->errorCorrection()->first()->externalError()->first()->description;
 			}
 			$correction = [
 				'cause'=>$error->errorCorrection()->first()->cause,
 				'corrective_action'=>$error->errorCorrection()->first()->corrective_action,
 				'remarks'=>$error->errorCorrection()->first()->remarks,
 				'source'=>$source,
-				'date_responded' =>date_format(date_create($error->errorCorrection()->first()->date_time_created), 'd/m/Y H:i:s'),
+				'date_responded' =>date_format(date_create($error->errorCorrection()->first()->created_at), 'd/m/Y H:i:s'),
 				'corrector'=>$error->errorCorrection()->first()->user()->first()->name,
 			];
+			
+			if($error->errorCorrection()->first()->originatorReaction()->first()){
+				$originator_reaction = [
+					'status'=>(boolval($error->errorCorrection()->first()->originatorReaction()->first()->status))
+								? 'I agree with the corrective action'
+								: 'I disagree with the corrective action',
+					'remarks'=>$error->errorCorrection()->first()->originatorReaction()->first()->remarks,
+				];
+			}
 		}
+		
+		
 		
 		return [
 			'reported_error' => $reported_error,
 			'products' => $products,
 			'correction' => $correction,
+			'originator_reaction' => $originator_reaction,
 		];
 	}
 	
@@ -652,7 +662,7 @@ class ErrorExt extends Base{
 									:'error_notifications.station_id='.$account_station->station()->first()->id.' OR ';
 			}
 		}else{
-			$query .= 'error_notifications.station_id='.$account_stations->first()->id;
+			$query .= 'error_notifications.station_id='.$account_stations->first()->station()->first()->id;
 		}
 		return $query;
 	}
@@ -697,6 +707,13 @@ class ErrorExt extends Base{
 		//
 	}
 	
-	
+	public function validateErrorOriginatorReactionData(array $data){
+		$rules = [
+			$this->error_data->originator_reaction_key => $this->error_data->originator_reaction_req,
+			$this->error_data->remarks_key => $this->error_data->remarks_req,
+		];
+		
+		return Validator::make($data, $rules, $this->error_data->validate_error_originator_reaction_msgs);
+	}
 }
 ?>

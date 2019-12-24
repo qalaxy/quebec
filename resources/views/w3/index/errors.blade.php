@@ -12,7 +12,7 @@
 		<div class="w3-row">
 			<div class="w3-dropdown-hover w3-right w3-white">
 				<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-				<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
+				<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
 					<a class="w3-bar-item w3-button  w3-hover-light-blue" href="{{url('/create-error')}}">Create</a>
 					<button href="javascript:void(0)" class="w3-bar-item w3-button  w3-hover-light-blue" 
 									onclick="document.getElementById('search').style.display='block'">Search</button>
@@ -224,7 +224,7 @@
 					<td>{{$error->station()->first()->name}}</td>
 					<td>{{$error->description}}</td>
 					<td>{{$error->status()->first()->state()->first()->name}}</td>
-					<td>{{date_format(date_create($error->date_time_created), 'd/m/Y H:i:s')}}</td>
+					<td>{{date_format(date_create($error->created_at), 'd/m/Y H:i:s')}}</td>
 					<td><a class="w3-button" href="{{url('edit-error/'.$error->uuid)}}"><i class="fa fa-edit fa-lg"></i></a></td>
 					<td><button class="w3-button" onclick="deleteError('{{$error->uuid}}');">
 						<i class="fa fa-trash fa-lg"></i>

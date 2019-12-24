@@ -103,10 +103,31 @@
 					<td class="w3-padding" style="text-align: justify;">{{$correction['source']}}</td>
 				</tr>
 				<tr>
+					<td class="w3-padding">Response from: </td>
+					<td class="w3-padding" style="text-align: justify;">{{$correction['corrector']}}</td>
+				</tr>
+				<tr>
 					<td class="w3-padding">Date of response: </td>
 					<td class="w3-padding" style="text-align: justify;">{{$correction['date_responded']}}</td>
 				</tr>
 			</table>
+			@endif
+			
+			@if(count($originator_reaction))
+			<p class="w3-text-dark-grey w3-large">Error source opinion</p>
+			
+			<table class="w3-table w3-border" border="0" width="100%" style="width:100%">
+				<tr>
+					<th class="w3-padding" style="width:25%; font-weight: normal;">Opinion: </td>
+					<th class="w3-padding" style="text-align: justify; font-weight: normal;">{{$originator_reaction['status']}}</td>
+				</tr>
+				<tr>
+					<td class="w3-padding">Remarks: </td>
+					<td class="w3-padding" style="text-align: justify;">{{$originator_reaction['remarks']}}</td>
+				</tr>
+			</table>
+			@else
+				<p class="w3-text-dark-grey w3-large">Error source opinion: <span class="w3-medium">Nill</span></p>
 			@endif
 		</div>
 	</body>
