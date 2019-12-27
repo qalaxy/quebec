@@ -9,6 +9,7 @@ use App\ErrorNotification;
 use App\ExternalError;
 use App\State;
 use App\Status;
+use App\SupervisorReaction;
 use App\Message;
 use App\NotificationRecipient;
 use App\OriginatorReaction;
@@ -252,6 +253,40 @@ class ErrorExe extends Base{
 			return null;
 		}
 		return $originator_reaction;
+	}
+	
+	protected function updateStatus($status, $state){
+		try{
+			$error_status = $status->update(array($this->error_data->state_id_key => $state->id,
+										$this->error_data->user_id_key => Auth::id(),
+										$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key]));
+			if(is_null($error_status)){
+				throw new Exception('Error status has not been updated successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $error_status;
+	}
+	
+	protected function storeSupervisorReaction($error_correction, $status){
+		try{
+			$supervisor_reaction = SupervisorReaction::firstOrCreate(array($this->error_data->error_correction_id_key => $error_correction->id), 
+								array('uuid' => Uuid::generate(),
+									$this->error_data->error_correction_id_key => $error_correction->id,
+									$this->error_data->status_id_key => $status->id));
+			
+			if(is_null($supervisor_reaction)){
+				throw new Exception('Supervisor reaction has not been created successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Supervisor reaction has been created successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $supervisor_reaction;
 	}
 	
 }

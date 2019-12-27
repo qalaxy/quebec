@@ -208,11 +208,11 @@
 												onmouseout="document.getElementById('{{$affected_product->uuid}}').style.display='none'">
 												<span onclick="loadAffectedProduct('{{$affected_product->uuid}}');">{{$affected_product->product()->first()->name}}</span>
 								<span id="{{$affected_product->uuid}}" style="display:none;">
-								<a class="w3-hover-blue" 
-									onclick="deleteAffectedProduct('{{$error->uuid}}', '{{$affected_product->uuid}}');"
-									title="Remove {{$affected_product->product()->first()->name}}">
-									<i class="fa fa-close fa-lg"></i>
-								</a>
+									<a class="w3-hover-blue" 
+										onclick="deleteAffectedProduct('{{$error->uuid}}', '{{$affected_product->uuid}}');"
+										title="Remove {{$affected_product->product()->first()->name}}">
+										<i class="fa fa-close fa-lg"></i>
+									</a>
 								</span>,
 							</span>
 						@endforeach
@@ -230,7 +230,8 @@
 						@if($error->errorCorrection()->first() && $error->errorCorrection()->first()->status()->first()->state()->first()->code == 3)
 								
 							@if(($error->errorCorrection()->first()->aioError()->first() 
-								&& $error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->id == Auth::id())
+								&& $error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->id == Auth::id()
+								&& is_null($error->errorCorrection()->first()->originatorReaction()->first()))
 								|| ($error->station()->first()->supervisor()->first() 
 									&& $error->station()->first()->supervisor()->first()->account()->first()->user()->first()->id == Auth::id()))
 								<i class="fa fa-bell w3-text-red"></i>
@@ -254,25 +255,26 @@
 							@elseif($error->station()->first()->supervisor()->first() 
 									&& $error->station()->first()->supervisor()->first()->account()->first()->user()->first()->id == Auth::id())
 								@if($error->errorCorrection()->first()->originatorReaction()->first())
-									<a href="{{url('/error-supervisor-reaction/'.$error->uuid)}}" 
+									<a href="{{url('/create-error-supervisor-reaction/'.$error->uuid)}}" 
 										class="w3-bar-item w3-button w3-hover-light-blue">
 										Supervisor comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
 									</a>
 								@else
 									<button class="w3-bar-item w3-button w3-hover-light-blue" 
-											onclick="confirmSupervisorReaction('{{url('/error-supervisor-reaction/'.$error->uuid)}}')">
+											onclick="confirmSupervisorReaction('{{url('/create-error-supervisor-reaction/'.$error->uuid)}}')">
 										Supervisor comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
 									</button>
 								@endif
 							@endif
-							@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
-								@if($account_station->station()->first()->id == $error->station()->first()->id)
-									<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>						
-									<span class="w3-bar-item w3-button w3-hover-light-blue" onclick="">Delete</span>
-									@php continue; @endphp
-								@endif
-							@endforeach
-													
+							@if($error->errorCorrection()->first()->status()->first()->state()->first()->code != 3)
+								@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
+									@if($account_station->station()->first()->id == $error->station()->first()->id)
+										<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>						
+										<span class="w3-bar-item w3-button w3-hover-light-blue" onclick="">Delete</span>
+										@php continue; @endphp
+									@endif
+								@endforeach
+							@endif						
 						</div>
 					  </div>
 				</div>
@@ -326,9 +328,7 @@
 						<div class="w3-col s12 m12 l10 w3-left">
 							@if($error->errorCorrection()->first()->aioError()->first())
 								<span class="">
-								{{$error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->account()->first()->first_name}} 
-								{{$error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->account()->first()->middle_name}} 
-								{{$error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->account()->first()->last_name}}
+								{{$error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->name}}
 								</span>
 							@elseif($error->externalError()->first())
 								<span class="">{{$error->externalError()->first()->description}}</span>

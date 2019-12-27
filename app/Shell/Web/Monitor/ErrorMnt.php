@@ -115,5 +115,33 @@ class ErrorMnt extends ErrorExe{
 		DB::commit();
 		return $this->success;
 	}
+	
+	public function createErrorSupervisorReaction(array $data, object $error, object $state){
+		$this->data = $data;
+		
+		DB::beginTransaction();
+		if($state->code == 1 || $state->code == 4){
+			$error_status = $this->updateStatus($error->status()->first(), $state);
+			if(is_null($error_status)){
+				DB::rollback();
+				return $this->error;
+			}
+		}
+		
+		$error_correction_status = $this->updateStatus($error->errorCorrection()->first()->status()->first(), $state);
+		if(is_null($error_correction_status)){
+			DB::rollback();
+			return $this->error;
+		}
+		
+		$supervisor_reaction = $this->storeSupervisorReaction($error->errorCorrection()->first(), $error_correction_status);
+		if(is_null($supervisor_reaction)){
+			DB::rollback();
+			return $this->error;
+		}
+		
+		DB::rollback();
+		return $this->success;
+	}
 }
 ?>

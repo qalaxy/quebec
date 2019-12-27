@@ -80,7 +80,7 @@
 									placeholder="Describe the impact of the error" 
 									name="impact"
 									rows="3">{{old('impact')}}</textarea>
-							@if($errors->has('function_id'))
+							@if($errors->has('impact'))
 								<span class="w3-small w3-text-red">{{$errors->first('impact')}}</span>
 							@else
 								<span>&nbsp;</span>

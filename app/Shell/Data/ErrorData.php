@@ -52,7 +52,8 @@ class ErrorData{
 	public $originator_req = 'sometimes|required|max:255';
 	public $error_origin_req = 'required|boolean';
 	public $originator_reaction_req = 'required|boolean';
-	public $supervisor_reaction_req = 'required|digits:1/';
+	public $supervisor_reaction_req = 'required|digits:1';
+	public $state_id_req = 'required|uuid';
 	
 	public $corrective_action_validation_msgs = [
 		'corrective_action.required' => 'You have not entered corrective action to the error',
@@ -118,8 +119,8 @@ class ErrorData{
 	];
 	
 	public $validate_error_supervisor_reaction_msgs = [
-		'originator_reaction.required' => 'You have not selected your reaction',
-		'originator_reaction.digits' => 'Reaction value should be one digit',
+		'state_id.required' => 'You have not made any selection',
+		'state_id.uuid' => 'Value should be uuid',
 		
 		'remarks.max'=>'Characters in remarks should not be more than 255',
 	];

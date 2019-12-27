@@ -34,7 +34,7 @@ class ErrorController extends Controller
 						return view('w3.index.errors')->with(compact('errors'));
 					else
 						return view('w3.index.errors')->with(compact('errors'))
-								->with('notification', array('indicator'=>'warning', 'message'=>'Errors(s) not found'));
+								->with('notification', array('indicator'=>'warning', 'message'=>'Error(s) not found'));
 				else{
 					return back()->with('notification', $this->ext->missing_view);
 				}
@@ -435,11 +435,11 @@ class ErrorController extends Controller
 			if(!is_object($func_error))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$func_error));
 			
-			if($func_error->errorCorrection()->first()->originatorReaction()->first())
-				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Originator reaction has been given'));
-			
 			if(is_null($func_error->errorCorrection()->first()))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Error has not been given correction action'));
+			
+			if($func_error->errorCorrection()->first()->originatorReaction()->first())
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Originator reaction has been given'));
 			
 			if($func_error->errorCorrection()->first()->aioError()->first() 
 				&& $func_error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->id != Auth::id())
@@ -482,6 +482,67 @@ class ErrorController extends Controller
 			
 		}else{
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide originator reaction to the error'));
+		}
+	}
+	
+	public function createErrorSupervisorReaction($uuid){
+		if(Auth::user()->can('create_errors')){
+			$func_error = $this->ext->getError($uuid);
+			if(!is_object($func_error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$func_error));
+			
+			if(is_null($func_error->errorCorrection()->first()))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Error has not been given correction action'));
+			
+			if($func_error->errorCorrection()->first()->supervisorReaction()->first())
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Supervisor reaction has been given'));
+			
+			if($func_error->errorCorrection()->first()->station()->first()->id != Auth::user()->account()->first()->supervisor()->first()->station()->first()->id)
+				return back()
+				->with('notification', array('indicator'=>'warning', 'message'=>'You are not a supervisor at '.$func_error->errorCorrection()->first()->station()->first()->name));
+				
+			$states = $this->ext->getStates();
+			if(!is_object($states))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$states));
+			
+			if(View::exists('w3.create.supervisor-reaction')){
+				return view('w3.create.supervisor-reaction')
+						->with(compact('func_error', 'states'))
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide supervisor reaction to the error'));
+		}
+	}
+	
+	public function storeErrorSupervisorReaction(Request $request, $uuid){
+		if(Auth::user()->can('create_errors')){
+			$validation = $this->ext->validateSupervisorReactionData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+						->withInput()
+						->with('notification', $this->ext->validation);
+			}
+			
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
+				
+			$state = $this->ext->getState($request['state_id']);
+			if(!is_object($state))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$state));
+			
+			$notification = $this->mnt->createErrorSupervisorReaction($request->all(), $error, $state);
+			if(in_array('success', $notification)){
+				if(view::exists('w3.show.error'))
+					return redirect('error/'.$uuid)->with(compact('notification'));
+				else
+					return back()->with('notification', $this->ext->missing_view)->withInput();
+			}else{
+				return back()->with(compact('notification'))->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide supervisor reaction to the error'));
 		}
 	}
 	

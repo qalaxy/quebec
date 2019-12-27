@@ -123,7 +123,7 @@ class ErrorExt extends Base{
 				$this->error_data->function_id_key => $this->error_data->function_id_req,
 				//$this->error_data->date_time_created_key => $this->error_data->date_time_created_req,
 				$this->error_data->description_key => $this->error_data->description_req,
-				$this->error_data->impact_key => $this->error_data->impact_req,
+				$this->error_data->impact_key => $this->error_data->impact_req, //MAKE THIS WORK
 				$this->error_data->remarks_key => $this->error_data->remarks_req,
 				$this->error_data->responsibility_key => $this->error_data->responsibility_req,
 				$this->error_data->notification_message_key => $this->error_data->notification_message_req,
@@ -714,6 +714,27 @@ class ErrorExt extends Base{
 		];
 		
 		return Validator::make($data, $rules, $this->error_data->validate_error_originator_reaction_msgs);
+	}
+	
+	public function getStates(){
+		try{
+			$states = State::all();
+			if(is_null($states)){
+				throw new Exception('States have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $states;
+	}
+	
+	public function validateSupervisorReactionData(array $data){
+		$rules = [
+			$this->error_data->state_id_key => $this->error_data->state_id_req,
+			$this->error_data->remarks_key => $this->error_data->remarks_req,
+		];
+		
+		return Validator::make($data, $rules, $this->error_data->validate_error_supervisor_reaction_msgs);
 	}
 }
 ?>

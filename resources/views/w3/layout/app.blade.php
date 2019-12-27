@@ -143,7 +143,7 @@ function myFunction() {
   }
 }
 
-//var interval = setInterval(countErrorNotifications, 5000);
+var interval = setInterval(countErrorNotifications, 5000);
 countErrorNotifications();
 
 function countErrorNotifications(){

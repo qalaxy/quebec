@@ -179,11 +179,11 @@ class CreateErrorTables extends Migration
 			$table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->unsignedBigInteger('error_correction_id');
-			$table->boolean('status');
-			$table->string('remarks')->nullable();
+			$table->unsignedBigInteger('status_id');
 			$table->timestamps();
 			$table->softDeletes();
 			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('status_id')->references('id')->on('status')->onUpdate('cascade')->onDelete('cascade');
 		});
 		
 		Schema::create('recipients', function (Blueprint $table) {

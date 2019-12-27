@@ -154,6 +154,9 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('create-error-originator-reaction/{uuid}', 'Web\ErrorController@createErrorOriginatorReaction');
 	Route::post('store-error-originator-reaction/{uuid}', 'Web\ErrorController@storeErrorOriginatorReaction');
 	
+	Route::get('create-error-supervisor-reaction/{uuid}', 'Web\ErrorController@createErrorSupervisorReaction');
+	Route::post('store-error-supervisor-reaction/{uuid}', 'Web\ErrorController@storeErrorSupervisorReaction');
+	
 	/*
 	 * ========================================================================================================================
 	 * Station routes
