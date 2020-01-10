@@ -150,12 +150,26 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('error-corrective-action/{uuid}', 'Web\ErrorController@addCorrectiveAction');
 	Route::get('get-account-station/{uuid}', 'Web\ErrorController@getAccountStation');
 	Route::post('store-error-corrective-action/{uuid}', 'Web\ErrorController@storeCorrectiveAction');
+	Route::get('delete-corrective-action/{uuid}', 'Web\ErrorController@deleteCorrectiveAction');
+	Route::get('destroy-corrective-action/{uuid}', 'Web\ErrorController@destroyCorrectiveAction');
 	
 	Route::get('create-error-originator-reaction/{uuid}', 'Web\ErrorController@createErrorOriginatorReaction');
 	Route::post('store-error-originator-reaction/{uuid}', 'Web\ErrorController@storeErrorOriginatorReaction');
 	
 	Route::get('create-error-supervisor-reaction/{uuid}', 'Web\ErrorController@createErrorSupervisorReaction');
 	Route::post('store-error-supervisor-reaction/{uuid}', 'Web\ErrorController@storeErrorSupervisorReaction');
+	
+	Route::get('edit-error-corrective-action/{uuid}', 'Web\ErrorController@editCorrectiveAction');
+	Route::post('update-error-corrective-action/{uuid}', 'Web\ErrorController@updateCorrectiveAction');
+	
+	Route::get('edit-error-supervisor-reaction/{uuid}', 'Web\ErrorController@editErrorSupervisorReaction');
+	Route::post('update-error-supervisor-reaction/{uuid}', 'Web\ErrorController@updateErrorSupervisorReaction');
+
+	Route::get('get-affected-product/{uuid}', 'Web\ErrorController@getAffectedProduct');
+	Route::get('delete-affected-product/{uuid}', 'Web\ErrorController@deleteAffectedProduct');
+	Route::get('destroy-affected-product/{uuid}', 'Web\ErrorController@destroyAffectedProduct');
+
+	
 	
 	/*
 	 * ========================================================================================================================

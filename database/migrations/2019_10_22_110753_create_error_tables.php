@@ -21,17 +21,18 @@ class CreateErrorTables extends Migration
 			$table->uuid('uuid');
 			$table->unsignedBigInteger('user_id');
 			$table->unsignedBigInteger('function_id');
-			$table->unsignedBigInteger('station_id');
+			$table->unsignedBigInteger('reported_station_id');
+			$table->unsignedBigInteger('reporting_station_id');
 			$table->integer('number');
 			$table->string('description');
 			$table->string('impact');
 			$table->string('remarks')->nullable();
-			$table->boolean('responsibility');
             $table->timestamps();
 			$table->softDeletes();
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('function_id')->references('id')->on('functions')->onUpdate('cascade')->onDelete('cascade');
-			$table->foreign('station_id')->references('id')->on('stations')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('reported_station_id')->references('id')->on('stations')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('reporting_station_id')->references('id')->on('stations')->onUpdate('cascade')->onDelete('cascade');
         });
 		
 		Schema::create('status', function(Blueprint $table){
@@ -156,11 +157,13 @@ class CreateErrorTables extends Migration
 			$table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->unsignedBigInteger('error_correction_id');
+			$table->unsignedBigInteger('aio_error_id');
 			$table->boolean('status');
 			$table->string('remarks')->nullable();
 			$table->timestamps();
 			$table->softDeletes();
 			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
+			$table->foreign('aio_error_id')->references('id')->on('aio_errors')->onUpdate('cascade')->onDelete('cascade');
 		});
 		
 		Schema::create('external_errors', function(Blueprint $table){
@@ -178,12 +181,14 @@ class CreateErrorTables extends Migration
 		Schema::create('supervisor_reactions', function(Blueprint $table){
 			$table->bigIncrements('id');
 			$table->uuid('uuid');
+			$table->unsignedBigInteger('user_id');
 			$table->unsignedBigInteger('error_correction_id');
-			$table->unsignedBigInteger('status_id');
+			$table->boolean('status');
+			$table->string('remarks')->nullable();
 			$table->timestamps();
 			$table->softDeletes();
+			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
-			$table->foreign('status_id')->references('id')->on('status')->onUpdate('cascade')->onDelete('cascade');
 		});
 		
 		Schema::create('recipients', function (Blueprint $table) {

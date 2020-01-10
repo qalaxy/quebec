@@ -20,10 +20,6 @@ class Supervisor extends Model
 		return $this->belongsTo('App\Station', 'station_id');
 	}
 	
-	public function user(){
-		return $this->belongsTo('App\User', 'user_id');
-	}
-	
 	public function account(){
 		return $this->belongsTo('App\Account', 'account_id');
 	}

@@ -21,6 +21,48 @@ function showMessageInput(responsibility){
 	
 }
 
-function loadAffectedProduct(affected_product){
-	alert('View: '+affected_product);
+function loadAffectedProduct(affected_product, url){
+	let show = document.getElementById('show');
+	let paragraph = '';
+	let xhr = new XMLHttpRequest();
+	xhr.open("GET", url);
+	xhr.send();
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			let data = JSON.parse(xhr.responseText);
+			show.children[0].children[0].children[1].innerHTML = 'Product affected by error: '+data.error;
+			paragraph += '<p><strong>Product:</strong> '+data.product;
+			paragraph += '</p><p><strong>Identification:</strong> '+data.identification;
+			paragraph += '</p><p><strong>Added by:</strong> '+data.user;
+			paragraph += '</p><p><strong>Date added:</strong> '+data.created_at+'</p>';
+			show.children[0].children[1].innerHTML = paragraph;
+			show.children[0].children[2].children[0].children[0].children[0].setAttribute('autofocus', true);
+			console.log(show);
+			show.style.display = 'block';
+		}
+	}
+}
+
+function deleteAffectedProduct(product, url){
+	let xhr = new XMLHttpRequest();
+	xhr.open("GET", url);
+	xhr.send();
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById("delete").innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block';
+		}
+	}
+}
+
+function deleteErrorCorrection(error, url){
+	let xhr = new XMLHttpRequest();
+	xhr.open("GET", url);
+	xhr.send();
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById("delete").innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block';
+		}
+	} 
 }

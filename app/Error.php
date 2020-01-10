@@ -13,7 +13,7 @@ class Error extends Model
 	
 	protected $table = 'errors';
 	
-	protected $fillable = ['uuid', 'user_id', 'function_id', 'station_id', 'number', 'description', 'impact', 'state_id', 'remarks', 'responsibility'];
+	protected $fillable = ['uuid', 'user_id', 'function_id', 'reported_station_id', 'reporting_station_id', 'number', 'description', 'impact', 'state_id', 'remarks'];
 
 	
 	public function user(){
@@ -24,8 +24,13 @@ class Error extends Model
 		return $this->belongsTo('App\Func', 'function_id');
 	}
 	
-	public function station(){
-		return $this->belongsTo('App\Station', 'station_id');
+	public function reportedStation(){
+		return $this->belongsTo('App\Station', 'reported_station_id');
+	}
+	
+	
+	public function reportingStation(){
+		return $this->belongsTo('App\Station', 'reporting_station_id');
 	}
 	
 	public function affectedProduct(){

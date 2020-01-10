@@ -3,6 +3,7 @@ namespace App\Shell\Web\Extension;
 
 use Exception;
 use App\Account;
+use App\AffectedProduct;
 use App\Error;
 use App\ErrorNotification;
 use App\State;
@@ -13,6 +14,8 @@ use App\Station;
 use Illuminate\Support\Str;
 use App\Mail\ErrorNotificationEmail;
 use App\Mail\ErrorOriginatorNotification;
+use App\Mail\SupervisorReactionEmail;
+use App\Mail\ErrorSupervisorNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +40,7 @@ class ErrorExt extends Base{
 	
 	public function searchErrors(array $data){
 		try{
-			$errors = Error::where($this->prepareSearchParam($data, ['user_id', 'function_id', 'station_id', 'date_created', 'time_created', 'responsibility']))
+			$errors = Error::where($this->prepareSearchParam($data, ['user_id', 'function_id', 'station_id', 'created_at']))
 								->orderBy('id', 'desc')
 								->paginate($this->error_data->rows);
 			if(is_null($errors)){
@@ -119,14 +122,15 @@ class ErrorExt extends Base{
 	
 	public function validateErrorData(array $data){
 		$rules = [
-				$this->error_data->station_id_key => $this->error_data->station_id_req,
-				$this->error_data->function_id_key => $this->error_data->function_id_req,
+				$this->error_data->reported_station_id_key => 'sometimes|'.$this->error_data->station_id_req,
+				$this->error_data->reporting_station_id_key => $this->error_data->station_id_req,
+				$this->error_data->function_id_key => 'sometimes|'.$this->error_data->function_id_req,
 				//$this->error_data->date_time_created_key => $this->error_data->date_time_created_req,
 				$this->error_data->description_key => $this->error_data->description_req,
-				$this->error_data->impact_key => $this->error_data->impact_req, //MAKE THIS WORK
+				$this->error_data->impact_key => $this->error_data->impact_req, 
 				$this->error_data->remarks_key => $this->error_data->remarks_req,
-				$this->error_data->responsibility_key => $this->error_data->responsibility_req,
-				$this->error_data->notification_message_key => $this->error_data->notification_message_req,
+				//$this->error_data->responsibility_key => $this->error_data->responsibility_req,
+				//$this->error_data->notification_message_key => $this->error_data->notification_message_req,
 		];
 		
 		/*$this->error_data->error_data_validation_msgs['date_time_created.before'] = Str::replaceArray('?', 
@@ -176,7 +180,7 @@ class ErrorExt extends Base{
 	public function getErrorNumber($station_id, $function_id){
 		try{
 			$number = Error::withTrashed()->where($this->error_data->function_id_key, $function_id)
-								->where($this->error_data->station_id_key, $station_id)
+								->where($this->error_data->reported_station_id_key, $station_id)
 								->where('created_at', '>=', date_create(date('Y').'-01-01 00:00:00'))
 								->where('created_at', '<', date_create(date('Y', strtotime(' + 1 year')).'-01-01 00:00:00'))
 								->count();
@@ -197,8 +201,8 @@ class ErrorExt extends Base{
 		
 		$addresses = $this->prepareRecipientEmails($recipients, $error);
 		
-		if($error->station()->first()->email()->first()){
-			array_push($addresses, $error->station()->first()->email()->first()->address);
+		if($error->reportedStation()->first()->email()->first()){
+			array_push($addresses, $error->reportedStation()->first()->email()->first()->address);
 		}
 		
 		if(count($addresses)){
@@ -219,8 +223,10 @@ class ErrorExt extends Base{
 	private function prepareRecipientEmails($recipients, $error){
 		$addresses = array();
 		foreach($recipients as $recipient){
-			foreach($recipient->user()->first()->account()->first()->email()->get() as $email){
-				array_push($addresses, $email->address);
+			if($recipient->station()->first()->accountStation()->where('account_id', $recipient->user()->first()->account()->first()->id)->first()->status == 1){
+				foreach($recipient->user()->first()->account()->first()->email()->get() as $email){
+					array_push($addresses, $email->address);
+				}
 			}
 		}
 		
@@ -237,6 +243,31 @@ class ErrorExt extends Base{
 			return $e->getMessage();
 		}
 		return $error;
+	}
+
+	public function deleteError($error){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete error</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-8 w3-large">Your are about to delete an error:</p>
+						<p><strong>Number:</strong> '.$error->reportedStation()->first()->abbreviation.'/'
+						.$error->func()->first()->abbreviation.'/'
+						.$error->number.'/'
+						.date_format(date_create($error->created_at), 'y')
+						.'<br /> <br /><strong>Description:</strong> '.$error->description.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-error').'/'.$error->uuid.'" title="Delete error">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
 	}
 	
 	public function validateErrorProductData(array $data){
@@ -259,10 +290,61 @@ class ErrorExt extends Base{
 		}
 		return $product;
 	}
+
+	public function getAffectedProduct($uuid){
+		try{
+			$product = AffectedProduct::withUuid($uuid)->first();
+			if(is_null($product)){
+				throw new Exception('Affected product has not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $product;
+	}
+
+	public function prepAffectedProduct($product){
+		return array('product'=>$product->product()->first()->name, 
+					'error'=>$product->error()->first()->reportedStation()->first()->abbreviation
+						.'/'.$product->error()->first()->func()->first()->abbreviation
+						.'/'.$product->error()->first()->number
+						.'/'.date_format(date_create($product->error()->first()->created_at), 'y'),
+					'identification'=>$product->product_identification,
+					'user'=>$product->user()->first()->name,
+					'created_at'=>date_format(date_create($product->created_at), 'd/m/Y H:i:s')
+					);
+	}
+
+	public function deleteAffectedProduct($product){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete product affected by error: '
+							.$product->error()->first()->reportedStation()->first()->abbreviation
+							.'/'.$product->error()->first()->func()->first()->abbreviation
+							.'/'.$product->error()->first()->number
+							.'/'.date_format(date_create($product->error()->first()->created_at), 'y')
+						.'</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-8 w3-large">Your are about to delete affected product:</p>
+						<p><strong>Product:</strong> '.$product->product()->first()->name
+						.'<br /> <br /><strong>Identification:</strong> '.$product->product_identification.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-affected-product').'/'.$product->uuid.'" title="Delete affected product">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
 	
 	public function getJsonStationAccounts(object $station){
 		$accounts = array();
-		foreach($station->accountStation()->get() as $account_station){
+		foreach($station->accountStation()->where('status', 1)->get() as $account_station){
 			array_push($accounts, 
 					['id'=>$account_station->account()->first()->uuid, 
 					'name'=>$account_station->account()->first()->first_name.' '
@@ -313,6 +395,33 @@ class ErrorExt extends Base{
 		}catch(Exception $e){
 			return $e->getMessage();
 		}	
+	}
+
+	public function deleteCorrectiveAction($error){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete corrective action to error: '
+							.$error->reportedStation()->first()->abbreviation
+							.'/'.$error->func()->first()->abbreviation
+							.'/'.$error->number
+							.'/'.date_format(date_create($error->created_at), 'y')
+						.'</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-8 w3-large">Your are about to delete corrective action to an error:</p>
+						<p><strong>Correction:</strong> '.$error->errorCorrection()->first()->corrective_action
+						.'<br /> <br /><strong>Cause:</strong> '.$error->errorCorrection()->first()->cause.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-corrective-action').'/'.$error->uuid.'" title="Delete corrective action">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
 	}
 	
 	
@@ -398,7 +507,7 @@ class ErrorExt extends Base{
 			$this->pdf->Cell(50, 6, 'Number: ', 0);
 			$this->pdf->SetFontSize(13);
 			$this->pdf->MultiCell(80, 6, 
-			$error->station()->first()->abbreviation.'/'
+			$error->reportedStation()->first()->abbreviation.'/'
 				.$error->func()->first()->abbreviation.'/'
 				.$error->number.'/'
 				.date_format(date_create($error->date_time_created), 'y'), 0);
@@ -432,7 +541,7 @@ class ErrorExt extends Base{
 			$this->pdf->SetFontSize(16);
 			$this->pdf->Cell(50, 6, 'Station of Origin:', 0);
 			$this->pdf->SetFontSize(13);
-			$this->pdf->MultiCell(120, 6, $error->station()->first()->name, 0);
+			$this->pdf->MultiCell(120, 6, $error->reportedStation()->first()->name, 0);
 			$this->pdf->Ln();
 		}
 		
@@ -441,14 +550,6 @@ class ErrorExt extends Base{
 			$this->pdf->Cell(50, 6, 'Date reported:', 0);
 			$this->pdf->SetFontSize(13);
 			$this->pdf->MultiCell(120, 6, date_format(date_create($error->date_time_created), 'd/m/Y H:i:s'), 0);
-			$this->pdf->Ln();
-		}
-		
-		if(isset($error->responsibility)){
-			$this->pdf->SetFontSize(16);
-			$this->pdf->Cell(50, 6, 'Responsibility:', 0);
-			$this->pdf->SetFontSize(13);
-			$this->pdf->MultiCell(120, 6, ($error->responsibility == 1)? $error->user()->first()->name : $error->station()->first()->name, 0);
 			$this->pdf->Ln();
 		}
 		if(isset($error->user_id)){
@@ -573,10 +674,10 @@ class ErrorExt extends Base{
 	}
 	
 	public function errorPdfData($error){
-		$products = array(); $correction = array(); $reported_error = array(); $originator_reaction = array();
+		$products = array(); $correction = array(); $reported_error = array(); $originator_reaction = array(); $supervisor_reaction = array();
 		
 		$reported_error = [
-				'number' => $error->station()->first()->abbreviation.'/'
+				'number' => $error->reportedStation()->first()->abbreviation.'/'
 					.$error->func()->first()->abbreviation.'/'
 					.$error->number.'/'
 					.date_format(date_create($error->created_at), 'y'), 
@@ -584,9 +685,9 @@ class ErrorExt extends Base{
 				'function' => $error->func()->first()->name,
 				'description' => $error->description,
 				'impact' => $error->impact,
-				'station' => $error->station()->first()->name,
-				'date_reported' => date_format(date_create($error->created_at), 'd/m/Y H:i:s'),
-				'responsibility' => ($error->responsibility)?$error->user()->first()->name:null,
+				'station' => $error->reportedStation()->first()->name,
+				'date_reported' => date_format(date_create($error->updated_at), 'd/m/Y H:i:s'),
+				//'responsibility' => ($error->responsibility)?$error->user()->first()->name:null,
 				'user' => $error->user()->first()->name,
 				'remarks' => $error->remarks,
 		];
@@ -606,7 +707,7 @@ class ErrorExt extends Base{
 				'corrective_action'=>$error->errorCorrection()->first()->corrective_action,
 				'remarks'=>$error->errorCorrection()->first()->remarks,
 				'source'=>$source,
-				'date_responded' =>date_format(date_create($error->errorCorrection()->first()->created_at), 'd/m/Y H:i:s'),
+				'date_responded' =>date_format(date_create($error->errorCorrection()->first()->updated_at), 'd/m/Y H:i:s'),
 				'corrector'=>$error->errorCorrection()->first()->user()->first()->name,
 			];
 			
@@ -618,6 +719,15 @@ class ErrorExt extends Base{
 					'remarks'=>$error->errorCorrection()->first()->originatorReaction()->first()->remarks,
 				];
 			}
+			
+			if($error->errorCorrection()->first()->supervisorReaction()->first()){
+				$supervisor_reaction = [
+					'status'=>(boolval($error->errorCorrection()->first()->supervisorReaction()->first()->status))
+								? 'I agree with the corrective action'
+								: 'I disagree with the corrective action',
+					'remarks'=>$error->errorCorrection()->first()->supervisorReaction()->first()->remarks,
+				];
+			}
 		}
 		
 		
@@ -627,6 +737,7 @@ class ErrorExt extends Base{
 			'products' => $products,
 			'correction' => $correction,
 			'originator_reaction' => $originator_reaction,
+			'supervisor_reaction' => $supervisor_reaction,
 		];
 	}
 	
@@ -667,7 +778,121 @@ class ErrorExt extends Base{
 		return $query;
 	}
 	
+	//Counting notifications 
+	public function getNotifications($account_stations){
+		try{
+			$station_errors = DB::table('errors')
+							->join('error_notifications', 'errors.id', '=', 'error_notifications.error_id')
+							->join('error_status', 'errors.id', '=', 'error_status.error_id')
+							->join('status', 'error_status.status_id', '=', 'status.id')
+							->join('states', 'status.state_id', '=', 'states.id')
+							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+							->join('functions', 'errors.function_id', '=', 'functions.id')
+							->where('states.code', 1)
+							->whereRaw($this->prepareNotificationErrorQuery($account_stations))
+							->whereNull('errors.deleted_at')
+							->select('errors.number', 
+									'errors.uuid', 
+									'stations.name as station', 
+									'stations.abbreviation as station_abbreviation', 
+									'errors.description', 
+									'errors.created_at',
+									'functions.abbreviation as function_abbreviation',
+									'states.name as state',
+									'states.code as code');
+					
+			$originator_errors = DB::table('errors')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
+								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+								->join('status', 'error_correction_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->where('aio_errors.originator_id', Auth::id())
+								->where('states.code', '<>', 4)
+								->whereNull('errors.deleted_at')
+								->whereNotIn('error_corrections.id', function($query){
+									$query->select(DB::raw('error_correction_id'))
+										->from('originator_reactions')
+										->whereNull('deleted_at');
+								})
+								->select('errors.number', 
+										'errors.uuid', 
+										'stations.name as station', 
+										'stations.abbreviation as station_abbreviation', 
+										'errors.description', 
+										'errors.created_at',
+										'functions.abbreviation as function_abbreviation',
+										'states.name as state',
+										'states.code as code');
+			
+			$supervisor_reactions = DB::table('errors')
+									->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+									->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+									->join('status', 'error_correction_status.status_id', '=', 'status.id')
+									->join('states', 'status.state_id', '=', 'states.id')
+									->join('stations', 'error_corrections.station_id', '=', 'stations.id')
+									->join('supervisors', 'stations.id', '=', 'supervisors.station_id')
+									->join('functions', 'errors.function_id', '=', 'functions.id')
+									->where('supervisors.account_id', Auth::user()->account()->first()->id)
+									->where('states.code', 3)
+									->whereNull('errors.deleted_at')
+									->select('errors.number', 
+											'errors.uuid', 
+											'stations.name as station', 
+											'stations.abbreviation as station_abbreviation', 
+											'errors.description', 
+											'errors.created_at',
+											'functions.abbreviation as function_abbreviation',
+											'states.name as state',
+											'states.code as code');
+									
+			$rejected_error_corrections = DB::table('errors')
+										->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+										->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+										->join('status', 'error_correction_status.status_id', '=', 'status.id')
+										->join('states', 'status.state_id', '=', 'states.id')
+										->join('stations', 'error_corrections.station_id', '=', 'stations.id')
+										->join('error_notifications', 'errors.id', '=', 'error_notifications.error_id')
+										->join('functions', 'errors.function_id', '=', 'functions.id')
+										->whereNull('errors.deleted_at')
+										->whereRaw($this->prepareNotificationErrorQuery($account_stations))
+										->where('states.code', 2)
+										->select('errors.number', 
+												'errors.uuid', 
+												'stations.name as station', 
+												'stations.abbreviation as station_abbreviation', 
+												'errors.description', 
+												'errors.created_at',
+												'functions.abbreviation as function_abbreviation',
+												'states.name as state',
+												'states.code as code');
+			
+			
+			$notifications = $rejected_error_corrections
+							->union($supervisor_reactions)
+							->union($originator_errors)
+							->union($station_errors);
+							//->orderBy('errors.updated_at')
+							//->paginate($this->error_data->rows);
+							
+			if(is_null($notifications)){
+				throw new Exception('Notifications cannot be retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $notifications;
+	}
+	
 	public function getPaginatedNotifiedErrors($account_stations){
+		$notifications = $this->getNotifications($account_stations);
+		
+		if(is_object($notifications))
+			return $notifications->paginate($this->error_data->rows);
+		
+		else return $notifications;
 		
 		try{			
 			$error_notification = ErrorNotification::whereRaw($this->prepareNotificationErrorQuery($account_stations))->orderBy('id', 'desc')->paginate($this->error_data->rows);
@@ -681,6 +906,14 @@ class ErrorExt extends Base{
 	}
 	
 	public function getNotifiedErrors($account_stations){
+		
+		$notifications = $this->getNotifications($account_stations);
+		
+		if(is_object($notifications))
+			return $notifications->get();
+		
+		else return $notifications;
+		
 		try{			
 			$error_notification = ErrorNotification::whereRaw($this->prepareNotificationErrorQuery($account_stations))->orderBy('id', 'desc')->get();
 			if(is_null($error_notification)){
@@ -730,11 +963,49 @@ class ErrorExt extends Base{
 	
 	public function validateSupervisorReactionData(array $data){
 		$rules = [
-			$this->error_data->state_id_key => $this->error_data->state_id_req,
+			$this->error_data->supervisor_reaction_key => $this->error_data->supervisor_reaction_req,
 			$this->error_data->remarks_key => $this->error_data->remarks_req,
 		];
 		
 		return Validator::make($data, $rules, $this->error_data->validate_error_supervisor_reaction_msgs);
+	}
+	
+	public function sendSupervisorEmail(object $error){
+		try{
+			$supervisors = $error->reportedStation()->first()->supervisor()->where('status', 1)->get();
+			if(count($supervisors)){
+				foreach($supervisors as $supervisor){
+					$email = Mail::to($supervisor->account()->first()->user()->first()->email) //This line is no longer giving issues
+								->send(new ErrorSupervisorNotification($error));
+					if($email){
+						throw new Exception('Email to '.$supervisor->user()->first()->name.' has not been sent successfully');
+					}
+				}
+			}else{
+				throw new Exception('No supervisor to receive notification email');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}	
+	}
+	
+	public function sendSupReactionEmail(object $error){
+		try{
+			$recipients = $error->errorNotification()->first()->notificationRecipient()->get();
+			if(count($recipients)){
+				foreach($recipients as $recipient){
+					$email = Mail::to($recipient->user()->first()->email)
+								->send(new SupervisorReactionEmail($error));
+					if($email){
+						throw new Exception('Email to '.$recipient->user()->first()->name.' has not been sent successfully');
+					}
+				}
+			}else{
+				throw new Exception('No station notification recipient to receive notification email');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
 	}
 }
 ?>

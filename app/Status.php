@@ -30,8 +30,4 @@ class Status extends Model
 	public function errorCorrection(){
 		return $this->belongsToMany('App\ErrorCorrection', 'error_correction_status', 'status_id', 'error_correction_id');
 	}
-	
-	public function supervisorReaction(){
-		return $this->hasOne('App\SupervisorReaction', 'status_id');
-	}
 }

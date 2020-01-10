@@ -218,10 +218,10 @@
 				@foreach($errors as $error)
 				<tr>
 					<td><a href="{{url('error/'.$error->uuid)}}" style="text-decoration:none;">
-		{{$error->station()->first()->abbreviation}}/{{$error->func()->first()->abbreviation}}/{{$error->number}}/{{date_format(date_create($error->date_time_created), 'y')}}
+		{{$error->reportedStation()->first()->abbreviation}}/{{$error->func()->first()->abbreviation}}/{{$error->number}}/{{date_format(date_create($error->date_time_created), 'y')}}
 						</a>
 					</td>
-					<td>{{$error->station()->first()->name}}</td>
+					<td>{{$error->reportedStation()->first()->name}}</td>
 					<td>{{$error->description}}</td>
 					<td>{{$error->status()->first()->state()->first()->name}}</td>
 					<td>{{date_format(date_create($error->created_at), 'd/m/Y H:i:s')}}</td>

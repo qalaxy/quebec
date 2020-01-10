@@ -35,8 +35,12 @@ class Station extends Model
 		return $this->belongsToMany('App\Func', 'station_function', 'station_id', 'function_id');
 	}
 	
-	public function error(){
-		return $this->hasMany('App\Error', 'station_id');
+	public function reportedError(){
+		return $this->hasMany('App\Error', 'reported_station_id');
+	}
+	
+	public function reportingError(){
+		return $this->hasMany('App\Error', 'reporting_station_id');
 	}
 	
 	public function errorNotification(){

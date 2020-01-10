@@ -93,25 +93,25 @@
 				</tr>
 				@foreach($error_notifications as $error_notification)
 				<tr>
-					<td class="{{($error_notification->error->status()->first()->state()->first()->code == 1)?'w3-text-blue':'w3-text-black'}}">
-						<a href="{{url('error/'.$error_notification->error()->first()->uuid)}}" style="text-decoration:none;">
-		{{$error_notification->error()->first()->station()->first()->abbreviation}}/
-		{{$error_notification->error()->first()->func()->first()->abbreviation}}/
-		{{$error_notification->error()->first()->number}}/
-		{{date_format(date_create($error_notification->error()->first()->created_at), 'y')}}
+					<td class="w3-text-blue">
+						<a href="{{url('error/'.$error_notification->uuid)}}" style="text-decoration:none;">
+		{{$error_notification->station_abbreviation}}/
+		{{$error_notification->function_abbreviation}}/
+		{{$error_notification->number}}/
+		{{date_format(date_create($error_notification->created_at), 'y')}}
 						</a>
 					</td>
-					<td class="{{($error_notification->error->status()->first()->state()->first()->code == 1)?'w3-text-blue':'w3-text-black'}}">
-						{{$error_notification->error()->first()->station()->first()->name}}
+					<td class="w3-text-blue">
+						{{$error_notification->station}}
 					</td>
-					<td class="{{($error_notification->error->status()->first()->state()->first()->code == 1)?'w3-text-blue':'w3-text-black'}}">
-						{{$error_notification->error()->first()->description}}
+					<td class="w3-text-blue">
+						{{$error_notification->description}}
 					</td>
-					<td class="{{($error_notification->error->status()->first()->state()->first()->code == 1)?'w3-text-blue':'w3-text-black'}}">
-						{{$error_notification->error->status()->first()->state()->first()->name}}
+					<td class="w3-text-blue">
+						{{$error_notification->state}}
 					</td>
-					<td class="{{($error_notification->error->status()->first()->state()->first()->code == 1)?'w3-text-blue':'w3-text-black'}}">
-						{{date_format(date_create($error_notification->error()->first()->created_at), 'd/m/Y H:i:s')}}
+					<td class="w3-text-blue">
+						{{date_format(date_create($error_notification->created_at), 'd/m/Y H:i:s')}}
 					</td>
 					
 				</tr>

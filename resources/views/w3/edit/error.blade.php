@@ -1,30 +1,40 @@
 @extends('w3.layout.app')
 
 @section('title')
-<title>Error reporting</title>
+<title>Edit reported error</title>
 @endsection
 
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Error reporting</h1>
+  <h1 class="w3-xlarge">Edit error</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		@include('w3.components.notification')
-		<form class="w3-container" method="POST" action="{{url('/store-error')}}">
+		<form class="w3-container" method="POST" action="{{url('/update-error/'.$error->uuid)}}">
 			@csrf
 			<div class="w3-row">
 				<div class="w3-col s12 m6 l6">
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
-							<label class="w3-text-dark-gray">Station of origin<span class="w3-text-red">*</span></label>
+							<label class="w3-text-dark-gray">Station of origin</label>
 							<select class="w3-select w3-border {{($errors->has('reported_station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									name="reported_station_id"
 									onchange="getStationFunctions(this.value);">
 								<option value="" disabled selected>Select a station which the error originated</option>
 								@if($stations)
+									@php $selected = null; @endphp
 									@foreach($stations as $station)
-										<option value="{{$station->uuid}}" {{(old('reported_station_id') == $station->uuid)? 'selected':null}}>{{$station->name}}</option>
-											
+										<option value="{{$station->uuid}}" disabled
+											@if(old('reported_station_id') == $station->uuid && is_null($seleceted))
+												@php $selected = 'selected'; @endphp
+												{{$selected}}
+
+											@elseif(is_null($selected) && $error->reportedStation()->first()->uuid == $station->uuid)
+												@php $selected = 'selected'; @endphp
+												{{$selected}}
+											@endif
+											>{{$station->name}}
+										</option>
 									@endforeach
 								@endif
 							 </select>
@@ -43,9 +53,23 @@
 									name="function_id">
 								<option value="" disabled selected>Select a functional unit</option>
 								@if($functions)
+									@php $selection = null; @endphp
 									@foreach($functions as $func)
-										
-										<option value="{{$func->uuid}}" {{(old('function_id') == $func->uuid)? 'selected':null}}>{{$func->name}}</option>
+
+										<option value="{{$func->uuid}}" disabled
+
+											@if(old('function_id') == $func->uuid && is_null($selection))
+												@php $selection = 'selected'; @endphp
+												{{$selection}}
+											@elseif(is_null($selection) && $error->func()->first()->uuid == $func->uuid)
+												@php $selection = 'selected'; @endphp
+												{{$selection}}
+
+											@endif
+
+											>{{$func->name}}
+
+										</option>
 											
 									@endforeach
 								@endif
@@ -63,7 +87,7 @@
 							<textarea class="w3-input w3-border {{($errors->has('description')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="Describe the error"
 										name="description"
-										rows="4">{{old('description')}}</textarea>
+										rows="4">{{(old('description'))?old('description'):$error->description}}</textarea>
 							@if($errors->has('description'))
 								<span class="w3-small w3-text-red">{{$errors->first('description')}}</span>
 							@else
@@ -79,7 +103,7 @@
 							<textarea class="w3-input w3-border {{($errors->has('impact')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									placeholder="Describe the impact of the error" 
 									name="impact"
-									rows="3">{{old('impact')}}</textarea>
+									rows="3">{{(old('impact'))?old('impact'):$error->impact}}</textarea>
 							@if($errors->has('impact'))
 								<span class="w3-small w3-text-red">{{$errors->first('impact')}}</span>
 							@else
@@ -94,10 +118,18 @@
 									name="reporting_station_id">
 								<option value="" disabled selected>Select a station reporting the error</option>
 								@if($account_stations)
+								@php $selection = null; @endphp
 									@foreach($account_stations as $account_station)
 										<option value="{{$account_station->station()->first()->uuid}}" 
-												{{(old('reporting_station_id') == $account_station->station()->first()->uuid)? 'selected':null}}>
-											{{$account_station->station()->first()->name}}
+											@if(old('reporting_station_id') == $account_station->station->first()->uuid && is_null($selection))
+												@php $selection = 'selected'; @endphp
+												{{$selection}}
+											@elseif(is_null($selection) 
+													&& $account_station->station->first()->uuid == $error->reportingStation()->first()->uuid)
+												@php $selection = 'selected'; @endphp
+												{{$selection}}
+											@endif
+											>{{$account_station->station()->first()->name}}
 										</option>
 											
 									@endforeach
@@ -116,7 +148,7 @@
 							<textarea class="w3-input w3-border-dark-gray w3-border" 
 									placeholder="Give your remarks" 
 									name="remarks" 
-									rows="2">{{old('remarks')}}</textarea>
+									rows="2">{{(old('remarks'))?old('remarks'):$error->remarks}}</textarea>
 							@if($errors->has('remarks'))
 								<span class="w3-small w3-text-red">{{$errors->first('remarks')}}</span>
 							@elseif($errors->has('remarks'))
@@ -124,39 +156,6 @@
 							@endif
 						</div>
 					</div>
-					<!--<div class="w3-row w3-padding-small">
-						<div class="w3-col s12 m10 l10 w3-left">
-							<label class="w3-text-dark-gray">Responsibility<span class="w3-text-red">*</span></label>
-							<select class="w3-select w3-border {{($errors->has('responsibility')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
-									name="responsibility" onchange="showMessageInput(this.value);">
-								<option value="" disabled selected>Are you giving corrective action to the error?</option>
-								<option value="0" {{(old('responsibility') == '0')? 'selected':null}}>No</option>
-								<option value="1" {{(old('responsibility') == '1')? 'selected':null}}>Yes</option>
-							 </select>
-							@if($errors->has('responsibility'))
-								<span class="w3-small w3-text-red">{{$errors->first('responsibility')}}</span>
-							@else
-								<span>&nbsp;</span>
-							@endif
-						</div>
-					</div>
-					<div class="w3-row w3-padding-small" id="message" style="display:{{(old('notification_message') || (old('responsibility') == '0'))?'inline':'none'}};">
-						<div class="w3-col s12 m10 l10 w3-left">
-							@if(old('notification_message') || (old('responsibility') == '0'))
-								<label class="w3-text-dark-gray">Notification message<span class="w3-text-red">*</span></label>
-								<textarea class="w3-input w3-border {{($errors->has('notification_message')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
-										placeholder="Write a notification message to persons giving corrective action to the error" 
-										name="notification_message" 
-										rows="2">{{old('notification_message')}}</textarea>
-								
-								@if($errors->has('notification_message'))
-									<span class="w3-small w3-text-red">{{$errors->first('notification_message')}}</span>
-								@else
-									<span>&nbsp;</span>
-								@endif
-							@endif
-						</div>
-					</div>-->
 				</div>
 			</div>
 			<div class="w3-row">

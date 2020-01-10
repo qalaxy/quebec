@@ -13,14 +13,14 @@ class SupervisorReaction extends Model
 	
 	protected $table = 'supervisor_reactions';
 	
-	protected $fillable = ['uuid', 'error_correction_id', 'status_id'];
+	protected $fillable = ['uuid', 'user_id', 'error_correction_id', 'status', 'remarks'];
 	
 	public function errorCorrection(){
-		$this->belongsTo('App\ErrorCorrection', 'error_correction_id');
+		return $this->belongsTo('App\ErrorCorrection', 'error_correction_id');
 	}
 	
-	public function status(){
-		$this->belongsTo('App\Status', 'status_id');
+	public function user(){
+		return $this->belongsTo('App\User', 'user_id');
 	}
 	
 	

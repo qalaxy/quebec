@@ -120,6 +120,10 @@ class User extends Authenticatable
 	public function status(){
 		return $this->hasMany('App\Status', 'user_id');
 	}
+
+	public function supervisorReaction(){
+		return $this->hasMany('App\SupervisorReaction', 'user_id');
+	}
 	
 	public static function boot(){
 		parent::boot();
@@ -141,6 +145,7 @@ class User extends Authenticatable
 			$user->externalError()->delete();
 			$user->recipient()->delete();
 			$user->status()->delete();
+			$user->supervisorReaction()->delete();
 		});
 	}
 }

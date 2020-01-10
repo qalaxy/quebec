@@ -2,6 +2,7 @@
 <html>
 @yield('title')
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--<meta http-equiv="refresh" content="5"/>-->
 <link rel="stylesheet" href="{{asset('public/css/w3.css')}}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" type="text/css" href="{{asset('public/css/style.css')}}" >
@@ -17,7 +18,9 @@
   <div class="w3-bar w3-theme w3-large" style="z-index:4;">
     <a class="w3-bar-item w3-button w3-left w3-hide-large w3-hover-light-blue w3-large w3-theme w3-padding-16" href="javascript:void(0)" onclick="w3_open()">&#9776;</a>
 	<a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-light-blue w3-padding-16" href="javascript:void(0)" onclick="w3_show_nav('menuHome')">HOME</a>
-    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-light-blue w3-padding-16" href="javascript:void(0)" onclick="w3_show_nav('menuQMS')">QMS</a>
+    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-light-blue w3-padding-16" href="javascript:void(0)" 
+		onclick="w3_show_nav('menuQMS')"
+		id="qms-bar-item">QMS</a>
 	
 	<div class=" w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-light-blue w3-padding-16 w3-right w3-dropdown-hover">
 	  <span ><i class="fa fa-user fa-lg"></i>&nbsp;{{(Auth::user()) ? Auth::user()->name : null}}&nbsp;<i class="fa fa-caret-down"></i></span>
@@ -31,7 +34,6 @@
         </form>
 	  </div>
 	</div>
-    
 </div>
 </div>
 
@@ -155,8 +157,11 @@ function countErrorNotifications(){
 	xhr.onreadystatechange = function(){
 		if(xhr.readyState == 4 && xhr.status == 200){
 			document.getElementById('notifications').children[0].innerHTML = xhr.responseText;
-			//document.getElementById('funtion-error').style.fontWeight = 'bold';
-			//alert(document.getElementById('funtion-error').innerHTML);
+			if(xhr.responseText >= 1){
+				let qms = document.getElementById('qms-bar-item');
+				//qms.style.color = 'yellow';
+				qms.innerHTML = 'QMS<sup><span class="w3-badge w3-large">'+xhr.responseText+'</span></sup>';
+			}
 		}
 	}
 }

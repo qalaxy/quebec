@@ -1,33 +1,50 @@
 @extends('w3.layout.app')
 
 @section('title')
-<title>Originator reaction</title>
+<title>Edit supervisor reaction</title>
 @endsection
 
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Error originator reaction to error: <a class="w3-hover-text-blue" href="{{url('error/'.$func_error->uuid)}}" style="text-decoration:none;"  target="_blank">
+  <h1 class="w3-xlarge">Edit supervisor reaction to error: <a class="w3-hover-text-blue" href="{{url('error/'.$func_error->uuid)}}" style="text-decoration:none;" target="_blank">
 {{$func_error->reportedStation()->first()->abbreviation}}/{{$func_error->func()->first()->abbreviation}}/{{$func_error->number}}/{{date_format(date_create($func_error->created_at), 'y')}} </a>
   </h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		@include('w3.components.notification')
-		<form class="w3-container" method="POST" action="{{url('/store-error-originator-reaction/'.$func_error->uuid)}}">
+		<form class="w3-container" method="POST" action="{{url('/update-error-supervisor-reaction/'.$func_error->uuid)}}">
 			@csrf
 			<div class="w3-row">
 				<div class="w3-col s12 m6 l6">
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Reaction<span class="w3-text-red">*</span></label>
-							<select class="w3-select w3-border {{($errors->has('originator_reaction')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
-									name="originator_reaction"
+							<select class="w3-select w3-border {{($errors->has('supervisor_reaction')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+									name="supervisor_reaction"
 									onchange="document.getElementById('remarks').value = null;">
 								<option value="" disabled selected>Do you agree with the corretive action given?</option>
-								<option value="0" {{(old('originator_reaction') == '0')? 'selected':null}}>No</option>
-								<option value="1" {{(old('originator_reaction') == '1')? 'selected':null}}>Yes</option>
-							 </select>
-							@if($errors->has('originator_reaction'))
-								<span class="w3-small w3-text-red">{{$errors->first('originator_reaction')}}</span>
+								@php $selection = null; @endphp
+								<option value="0" 
+									@if(is_null($selection) && old('supervisor_reaction') == '0')
+										@php $selection = 'selected'; @endphp
+										{{$selection}}
+									@elseif(is_null($selection) && !boolval($func_error->errorCorrection()->first()->supervisorReaction()->first()->status))
+										@php $selection = 'selected'; @endphp
+										{{$selection}}
+									@endif
+								>No</option>
+								<option value="1" 
+									@if(is_null($selection) && old('supervisor_reaction') == '1')
+										@php $selection = 'selected'; @endphp
+										{{$selection}}
+									@elseif(is_null($selection) && boolval($func_error->errorCorrection()->first()->supervisorReaction()->first()->status))
+										@php $selection = 'selected'; @endphp
+										{{$selection}}
+									@endif
+								>Yes</option>
+							</select>
+							@if($errors->has('supervisor_reaction'))
+								<span class="w3-small w3-text-red">{{$errors->first('supervisor_reaction')}}</span>
 							@else
 								<span>&nbsp;</span>
 							@endif
@@ -40,7 +57,7 @@
 										placeholder="Give your remarks" 
 										id="remarks"
 										name="remarks"
-										rows="3">{{old('remarks')}}</textarea>
+										rows="3">{{(old('remarks'))?old('remarks'):$func_error->errorCorrection()->first()->supervisorReaction()->first()->remarks}}</textarea>
 							@if($errors->has('remarks'))
 								<span class="w3-small w3-text-red">{{$errors->first('remarks')}}</span>
 							@else

@@ -9,6 +9,30 @@
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
   <h1 class="w3-xlarge">Error</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
+		<div id="show" class="w3-modal">
+			<div class="w3-modal-content w3-animate-top w3-card-4">
+				<header class="w3-container w3-theme"> 
+					<span onclick="document.getElementById('show').style.display='none'" 
+					class="w3-button w3-display-topright">&times;</span>
+					<h2>&nbsp;</h2>
+				</header>
+				<div class="w3-container">
+					&nbsp;
+				</div>
+				<footer class="w3-container ">
+					<div class="w3-row w3-padding-16">
+						<div class="w3-col">
+							<button class="w3-button w3-large w3-theme w3-hover-light-blue" 
+								title="Dismiss"
+								type="button" 
+								onclick="document.getElementById('show').style.display='none'">OK&nbsp;
+								<i class="fa fa-angle-right fa-lg"></i>
+							</button>
+						</div>
+					</div>
+				</footer>
+			</div>
+		</div>
 		<div id="delete" class="w3-modal">
 			
 		</div>
@@ -46,40 +70,38 @@
 			<div class="w3-col l8">
 				<div class="w3-row">
 					<div class="w3-dropdown-hover w3-right w3-white">
-						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
+						<button class="w3-button w3-xlarge">
+							@php $stn = false; @endphp
 							@if(is_null($error->errorCorrection()->first()))
-								@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
-									@if($account_station->station()->first()->id == $error->station()->first()->id)
-										<a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Corrective action</a>
-										@php continue; @endphp
-									@endif
-								@endforeach
+								@if(Auth::user()->account()->first()->accountStation()->where('station_id', $error->reportedStation()->first()->id)->first())
+									<i class="fa fa-bell w3-text-blue"></i>
+									@php $stn = true; @endphp
+								@else
+									<i class="fa fa-bars"></i></button>
+								@endif
+							@else
+								<i class="fa fa-bars"></i></button>
+							@endif
+						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
+							@if($stn)
+								<a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">
+									Corrective action
+									<sup class="w3-text-blue"><i class="fa fa-bell"></i></sup>
+								</a>
 							@endif
 							@if(is_null($error->affectedProduct()->first()))
-								@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
-									@if($account_station->station()->first()->id == $error->station()->first()->id)
-										<a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Affected product</a>
-										@php continue; @endphp
-									@endif
-								@endforeach
-							@endif
-							@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
-								@if($account_station->station()->first()->id == $error->station()->first()->id)
-									@if($error->status()->first()->state()->first()->code == 2)
-										<a href="{{url('error-reject/'.$error->uuid)}}"  class="w3-bar-item w3-button w3-hover-light-blue">Open</a>
-									@else
-										<a href="{{url('error-reject/'.$error->uuid)}}"  class="w3-bar-item w3-button w3-hover-light-blue">Reject</a>
-									@endif
-									@php continue; @endphp
+								@if(Auth::user()->account()->first()->accountStation()->where('station_id', $error->reportingStation()->first()->id)->first())
+									<a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Affected product</a>
 								@endif
-							@endforeach
+							@endif
 							
 							<a href="{{url('error-pdf/'.$error->uuid)}}"  target="_blank" class="w3-bar-item w3-button w3-hover-light-blue">PDF format</a>
 							
-							@if($error->user()->first()->id == Auth::id())
-							<a href="{{url('/edit-error/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>
-							<a href="javascript:void(0)" onclick="deleteError('{{$error->uuid}}');" class="w3-bar-item w3-button w3-hover-light-blue">Delete</a>
+							@if($error->user()->first()->id == Auth::id() 
+								&& $error->errorCorrection()->first()
+								&& $error->errorCorrection()->first()->status()->first()->state()->first()->code != 4)
+								<a href="{{url('/edit-error/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>
+								<a href="javascript:void(0)" onclick="deleteError('{{$error->uuid}}');" class="w3-bar-item w3-button w3-hover-light-blue">Delete</a>
 							@endif
 						</div>
 					  </div>
@@ -92,7 +114,7 @@
 						</div>
 						<div class="w3-col s12 m12 l9 w3-left">
 							<span class="">
-				{{$error->station()->first()->abbreviation}}/{{$error->func()->first()->abbreviation}}/{{$error->number}}/{{date_format(date_create($error->created_at), 'y')}}
+				{{$error->reportedStation()->first()->abbreviation}}/{{$error->func()->first()->abbreviation}}/{{$error->number}}/{{date_format(date_create($error->created_at), 'y')}}
 							</span>
 						</div>
 					</div>
@@ -127,13 +149,23 @@
 						</div>
 					</div>
 					@endif
-					@if($error->station()->first()->name)
+					@if($error->reportedStation()->first()->name)
 					<div class="w3-row w3-padding">
 						<div class="w3-col s12 m12 l2 w3-left">
 							<span class=""><strong>Station of origin: </strong></span>
 						</div>
 						<div class="w3-col s12 m12 l10 w3-left">
-							<span class="">{{$error->station()->first()->name}}</span>
+							<span class="">{{$error->reportedStation()->first()->name}}</span>
+						</div>
+					</div>
+					@endif
+					@if($error->reportedStation()->first()->name)
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Reporting Station: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{$error->reportingStation()->first()->name}}</span>
 						</div>
 					</div>
 					@endif
@@ -143,17 +175,7 @@
 							<span class=""><strong>Date reported: </strong></span>
 						</div>
 						<div class="w3-col s12 m12 l10 w3-left">
-							<span class="">{{date_format(date_create($error->created_at), 'd/m/Y H:i:s')}}</span>
-						</div>
-					</div>
-					@endif
-					@if($error->responsibility || !$error->responsibility)
-					<div class="w3-row w3-padding">
-						<div class="w3-col s12 m12 l2 w3-left">
-							<span class=""><strong>Responsibility: </strong></span>
-						</div>
-						<div class="w3-col s12 m12 l10 w3-left">
-							<span class="">{{($error->responsibility == 1)? $error->user()->first()->name : $error->station()->first()->name}}</span>
+							<span class="">{{date_format(date_create($error->updated_at), 'd/m/Y H:i:s')}}</span>
 						</div>
 					</div>
 					@endif
@@ -182,17 +204,26 @@
 				@if($error->affectedProduct()->first())
 				<div class="w3-row">
 					<div class="w3-dropdown-hover w3-right w3-white">
-						<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
-							@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
-								@if($account_station->station()->first()->id == $error->station()->first()->id)
-									<a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Add a product</a>
-									@php continue; @endphp
+					
+						@php $stn = false; @endphp
+						@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
+							@if($account_station->station()->first()->id == $error->reportingStation()->first()->id)
+								@if($error->errorCorrection()->first() 
+									&& $error->errorCorrection()->first()->status()->first()->state()->first()->code == 4)
+									<br />
+								@else	
+								<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
+								@php $stn = true; continue; @endphp
 								@endif
-							@endforeach
-													
+							@endif
+						@endforeach
+						@if(!$stn) <br /> @endif
+						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
+							@if($stn)
+								<a href="{{url('/add-error-affected-product/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Add a product</a>
+							@endif				
 						</div>
-					  </div>
+					</div>
 				</div>
 				@if($error->affectedProduct()->get())
 				<div class="w3-light-gray w3-topbar w3-border-gray">
@@ -206,10 +237,11 @@
 							<span class="w3-hover-text-blue" 
 									onmouseover="document.getElementById('{{$affected_product->uuid}}').style.display='inline'; this.style.cursor='pointer';" 
 												onmouseout="document.getElementById('{{$affected_product->uuid}}').style.display='none'">
-												<span onclick="loadAffectedProduct('{{$affected_product->uuid}}');">{{$affected_product->product()->first()->name}}</span>
+												<span onclick="loadAffectedProduct('{{$affected_product->uuid}}', '{{url('/get-affected-product/'.$affected_product->uuid)}}');">
+															{{$affected_product->product()->first()->name}}</span>
 								<span id="{{$affected_product->uuid}}" style="display:none;">
 									<a class="w3-hover-blue" 
-										onclick="deleteAffectedProduct('{{$error->uuid}}', '{{$affected_product->uuid}}');"
+										onclick="deleteAffectedProduct('{{$affected_product->uuid}}', '{{url('/delete-affected-product/'.$affected_product->uuid)}}');"
 										title="Remove {{$affected_product->product()->first()->name}}">
 										<i class="fa fa-close fa-lg"></i>
 									</a>
@@ -224,59 +256,91 @@
 				@endif
 				@if($error->errorCorrection()->first())
 				<div class="w3-row">
-					
 					<div class="w3-dropdown-hover w3-right w3-white">
-						<button class="w3-button w3-xlarge">
-						@if($error->errorCorrection()->first() && $error->errorCorrection()->first()->status()->first()->state()->first()->code == 3)
-								
-							@if(($error->errorCorrection()->first()->aioError()->first() 
-								&& $error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->id == Auth::id()
-								&& is_null($error->errorCorrection()->first()->originatorReaction()->first()))
-								|| ($error->station()->first()->supervisor()->first() 
-									&& $error->station()->first()->supervisor()->first()->account()->first()->user()->first()->id == Auth::id()))
-								<i class="fa fa-bell w3-text-red"></i>
-							@else
-								<i class="fa fa-bars"></i>
+						@php 
+							$stn = false;
+							$originator = false;
+							$supervisor = false;
+							$rejected = false;
+							$code = $error->errorCorrection()->first()->status()->first()->state()->first()->code; 
+						@endphp
+						
+						@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
+							@if($account_station->station()->first()->id == $error->reportedStation()->first()->id)
+								@php 
+									$stn = true; continue; 
+								@endphp
 							@endif
-							
+						@endforeach
+						
+						@if($code == 1 || $code == 2 || $code == 3)
+							@if($stn)
+								<button class="w3-button w3-xlarge">
+								@if($error->errorCorrection()->first()->aioError()->first() 
+									&& $error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->id == Auth::id()
+									&& is_null($error->errorCorrection()->first()->originatorReaction()->first()))
+									<i class="fa fa-bell w3-text-red"></i>
+									@php $originator = true; @endphp
+								@elseif($error->reportedStation()->first()->supervisor()->first() 
+									&& $error->reportedStation()->first()->supervisor()->where('status', 1)->where('account_id', Auth::user()->account()->first()->id)->first()
+									&& (is_null($error->errorCorrection()->first()->supervisorReaction()->first()) 
+										|| $error->errorCorrection()->first()->status()->first()->state()->first()->code == 3))
+									<i class="fa fa-bell w3-text-red"></i>
+									@php $supervisor = true; @endphp
+								@elseif($code == 2)
+									<i class="fa fa-bell w3-text-red"></i>
+									@php $rejected = true; @endphp
+								@else
+									<i class="fa fa-bars"></i>
+								@endif
+								</button>
+							@else
+								<br />
+							@endif
 						@else
-							<i class="fa fa-bars"></i>
+							<br />
 						@endif
-						</button>
+						
+						
 						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">		
-							@if(($error->errorCorrection()->first()->aioError()->first() 
-								&& $error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->id == Auth::id()
-								&& is_null($error->errorCorrection()->first()->originatorReaction()->first())))
+							@if($originator)
 							<a href="{{url('/create-error-originator-reaction/'.$error->uuid)}}" 
 								class="w3-bar-item w3-button w3-hover-light-blue">
 								Originator comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
 								
 							</a>
-							@elseif($error->station()->first()->supervisor()->first() 
-									&& $error->station()->first()->supervisor()->first()->account()->first()->user()->first()->id == Auth::id())
-								@if($error->errorCorrection()->first()->originatorReaction()->first())
-									<a href="{{url('/create-error-supervisor-reaction/'.$error->uuid)}}" 
-										class="w3-bar-item w3-button w3-hover-light-blue">
-										Supervisor comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
-									</a>
-								@else
-									<button class="w3-bar-item w3-button w3-hover-light-blue" 
-											onclick="confirmSupervisorReaction('{{url('/create-error-supervisor-reaction/'.$error->uuid)}}')">
-										Supervisor comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
-									</button>
-								@endif
-							@endif
-							@if($error->errorCorrection()->first()->status()->first()->state()->first()->code != 3)
-								@foreach(Auth::user()->account()->first()->accountStation()->get() as $account_station)
-									@if($account_station->station()->first()->id == $error->station()->first()->id)
-										<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>						
-										<span class="w3-bar-item w3-button w3-hover-light-blue" onclick="">Delete</span>
-										@php continue; @endphp
+							@elseif($supervisor)
+									@if($error->errorCorrection()->first()->externalError()->first() 
+										|| ($error->errorCorrection()->first()->originatorReaction()->first()
+											&& $error->errorCorrection()->first()->supervisorReaction()->first())
+										|| ($error->errorCorrection()->first()->originatorReaction()->first()
+											&& is_null($error->errorCorrection()->first()->supervisorReaction()->first())))
+										<a href="{{($error->errorCorrection()->first()->supervisorReaction()->first())
+											? url('/edit-error-supervisor-reaction/'.$error->uuid)
+											: url('/create-error-supervisor-reaction/'.$error->uuid)}}" 
+											class="w3-bar-item w3-button w3-hover-light-blue">
+											Supervisor comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
+										</a>
+									@else
+										<button class="w3-bar-item w3-button w3-hover-light-blue" 
+												onclick="confirmSupervisorReaction('{{($error->errorCorrection()->first()->supervisorReaction()->first())
+																						? url('/edit-error-supervisor-reaction/'.$error->uuid)
+																						: url('/create-error-supervisor-reaction/'.$error->uuid)}}')">
+											Supervisor comments<sup class="w3-text-red"><i class="fa fa-bell"></i></sup>
+										</button>
 									@endif
-								@endforeach
+							@endif
+							@if($stn)
+								<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">
+									Edit
+									@if($rejected) <sup class="w3-text-red"><i class="fa fa-bell"></i></sup>@endif
+								</a>						
+								<span class="w3-bar-item w3-button w3-hover-light-blue" 
+									onclick="deleteErrorCorrection('{{$error->uuid}}', '{{url('/delete-corrective-action/'.$error->uuid)}}');"
+									>Delete</span>
 							@endif						
 						</div>
-					  </div>
+					</div>
 				</div>
 				<div class="w3-light-gray w3-topbar w3-border-gray">
 					@if($error->errorCorrection()->first())
@@ -320,7 +384,7 @@
 					</div>
 					@endif
 					
-					@if($error->errorCorrection()->first()->aioError()->first() || $error->externalError()->first())
+					@if($error->errorCorrection()->first()->aioError()->first() || $error->errorCorrection()->first()->externalError()->first())
 					<div class="w3-row w3-padding">
 						<div class="w3-col s12 m12 l2 w3-left">
 							<span class=""><strong>Source: </strong></span>
@@ -330,8 +394,8 @@
 								<span class="">
 								{{$error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->name}}
 								</span>
-							@elseif($error->externalError()->first())
-								<span class="">{{$error->externalError()->first()->description}}</span>
+							@elseif($error->errorCorrection()->first()->externalError()->first())
+								<span class="">{{$error->errorCorrection()->first()->externalError()->first()->description}}</span>
 							@endif
 						</div>
 					</div>
@@ -346,20 +410,32 @@
 						</div>
 					</div>
 					@endif
+					
+					@if($error->errorCorrection()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Status: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{$error->errorCorrection()->first()->status()->first()->state()->first()->name}}</span>
+						</div>
+					</div>
+					@endif
 					@if($error->errorCorrection()->first())
 					<div class="w3-row w3-padding">
 						<div class="w3-col s12 m12 l2 w3-left">
 							<span class=""><strong>Date of response: </strong></span>
 						</div>
 						<div class="w3-col s12 m12 l10 w3-left">
-							<span class="">{{date_format(date_create($error->errorCorrection()->first()->created_at), 'd/m/Y H:i:s')}}</span>
+							<span class="">{{date_format(date_create($error->errorCorrection()->first()->updated_at), 'd/m/Y H:i:s')}}</span>
 						</div>
 					</div>
 					@endif
 				</div>
 				@endif
 				@if($error->errorCorrection()->first() && $error->errorCorrection()->first()->originatorReaction()->first())
-					@if($error->errorCorrection->first()->aioError()->first()->errorOriginator()->first()->id == Auth::id())
+					@if($error->errorCorrection->first()->aioError()->first()->errorOriginator()->first()->id == Auth::id()
+						&& $error->errorCorrection->first()->status()->first()->state()->first()->code != 4)
 					<div class="w3-row">
 						<div class="w3-dropdown-hover w3-right w3-white">
 							<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
@@ -370,7 +446,7 @@
 						  </div>
 					</div>
 					@else
-						<br /><br />
+						<br />
 					@endif
 				<div class="w3-light-gray w3-topbar w3-border-gray">
 					
@@ -398,7 +474,65 @@
 						</div>
 					</div>
 					@endif
+				</div>
+				@endif
+				@if($error->errorCorrection()->first() && $error->errorCorrection()->first()->supervisorReaction()->first())
+					@php $sup = false; @endphp
+					@foreach($error->reportedStation()->first()->supervisor()->get() as $supervisor)
+						@if($supervisor->account()->first()->user()->first()->id == Auth::id())
+							<div class="w3-row">
+								<div class="w3-dropdown-hover w3-right w3-white">
+									<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
+									<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
+										<a href="{{url('/edit-error-supervisor-reaction/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>
+										<a href="{{url('/delete-error-originator-reaction/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Delete</a>						
+									</div>
+								  </div>
+							</div>
+							@php $sup = true; continue; @endphp
+						@endif
+					@endforeach
+					@if(!$sup)
+						<br />
+					@endif
+				<div class="w3-light-gray w3-topbar w3-border-gray">
 					
+					@if($error->errorCorrection()->first()->supervisorReaction()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Supervisor: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">
+								{{$error->errorCorrection()->first()->supervisorReaction()->first()->uuid}}
+							</span>
+						</div>
+					</div>
+					@endif
+					@if($error->errorCorrection()->first()->supervisorReaction()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Opinion: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">
+								{{(boolval($error->errorCorrection()->first()->supervisorReaction()->first()->status))
+								?'I agree with the corrective action'
+								:'I disagree with the corrective action'}}
+							</span>
+						</div>
+					</div>
+					@endif
+					@if($error->errorCorrection()->first()->supervisorReaction()->first())
+					<div class="w3-row w3-padding">
+						<div class="w3-col s12 m12 l2 w3-left">
+							<span class=""><strong>Remarks: </strong></span>
+						</div>
+						<div class="w3-col s12 m12 l10 w3-left">
+							<span class="">{{$error->errorCorrection()->first()->supervisorReaction()->first()->remarks}}</span>
+						</div>
+					</div>
+					@endif
 				</div>
 				@endif
 			</div>
@@ -420,7 +554,6 @@ document.getElementById('errors').className += " w3-text-blue";
 document.getElementById('menu-error').className += " w3-text-blue";
 menuAcc('error');
 w3_show_nav('menuQMS');
-
 
 
 function deleteError(uuid){

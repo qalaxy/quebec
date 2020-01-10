@@ -12,10 +12,10 @@ class StatesTableSeeder extends Seeder
      */
     public function run()
     {
-        $states = array(array('name'=>'open', 'code'=>1, 'description'=>''),
-				array('name'=>'rejected', 'code'=>2, 'description'=>''),
-				array('name'=>'pending', 'code'=>3, 'description'=>''),
-				array('name'=>'closed', 'code'=>4, 'description'=>''),
+        $states = array(array('name'=>'Captured', 'code'=>1, 'description'=>''),
+				array('name'=>'Rejected', 'code'=>2, 'description'=>''),
+				array('name'=>'Pending', 'code'=>3, 'description'=>''),
+				array('name'=>'Closed', 'code'=>4, 'description'=>''),
 		);
 		
 		for($i = 0; $i < count($states); $i++){

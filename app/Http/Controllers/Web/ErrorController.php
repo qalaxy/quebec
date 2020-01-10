@@ -48,6 +48,9 @@ class ErrorController extends Controller
 	
 	public function createError(){
 		if(Auth::user()->can('create_errors')){
+			if(is_null(Auth::user()->account()->first()))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'You do not have a proper account'));
+			
 			$functions = $this->ext->getFunctions();
 			if(!is_object($functions))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$functions));
@@ -56,12 +59,15 @@ class ErrorController extends Controller
 			if(!is_object($stations))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
 			
-			$status = $this->ext->getErrorStatus();
-			if(!is_object($status))
-				return back()->with('notification', array('indicator'=>'warning', 'message'=>$status));
+			$account_stations = $this->ext->getAccountStations(); 
+			if(!is_object($account_stations)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account_stations));
+			
+			if(!count($account_stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'You have not been assigned a station'));
 			
 			if(View::exists('w3.create.error')){
-				return view('w3.create.error')->with(compact('functions', 'stations', 'status'))
+				return view('w3.create.error')->with(compact('functions', 'stations', 'account_stations'))
 							->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
 			}else{
 				return back()->with('notification', $this->missing_view);
@@ -98,23 +104,27 @@ class ErrorController extends Controller
 			if(!is_object($function))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$function)); 
 			
-			$station = $this->ext->getStation($request['station_id']);
-			if(!is_object($station))
-				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations)); 
+			$reported_station = $this->ext->getStation($request['reported_station_id']);
+			if(!is_object($reported_station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$reported_station)); 
 			
-			$recipients = $this->ext->getNotificationRecipients($station);
+			$reporting_station = $this->ext->getStation($request['reporting_station_id']);
+			if(!is_object($reporting_station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$reporting_station)); 
+			
+			$recipients = $this->ext->getNotificationRecipients($reported_station);
 			if(!is_object($recipients))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$recipients));
 			
-			$number = $this->ext->getErrorNumber($station->id, $function->id); 
+			$number = $this->ext->getErrorNumber($reported_station->id, $function->id); 
 			if(is_null($number))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$number));
 			else
 				$request['number'] = $number;
 				
-			$notification = $this->mnt->createError($request->all(), $function, $station, $recipients); 
+			$notification = $this->mnt->createError($request->all(), $function, $reported_station, $reporting_station, $recipients); 
 			if(in_array('success', $notification)){
-				if($request['responsibility'] == 0 && count($recipients)){
+				if(count($recipients)){
 					$error_email = $this->ext->sendErrorNotificationEmail($notification['uuid'], $recipients); 
 					if(is_string($error_email)) $notification['message'] .= '. '.$error_email;
 				}			
@@ -143,6 +153,8 @@ class ErrorController extends Controller
 				else return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
 			}
 			
+			//return var_dump($error->errorCorrection()->first()->status()->first()->state()->first()->code);
+			
 			if(View::exists('w3.show.error')){
 				return view('w3.show.error')->with(compact('error'));
 			}else{
@@ -160,31 +172,103 @@ class ErrorController extends Controller
 	
 	public function editError($uuid){
 		if(Auth::user()->can('edit_errors')){
+
+			if(is_null(Auth::user()->account()->first()))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'You do not have a proper account'));
+
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
 			
+			$functions = $this->ext->getFunctions();
+			if(!is_object($functions))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$functions));
+			
+			$stations = $this->ext->getStations();
+			if(!is_object($stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			$account_stations = $this->ext->getAccountStations(); 
+			if(!is_object($account_stations)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account_stations));
+			
+			if(!count($account_stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>'You have not been assigned a station'));
+			
+			if(View::exists('w3.edit.error')){
+				return view('w3.edit.error')->with(compact('error', 'functions', 'stations', 'account_stations'))
+							->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
+			}else{
+				return back()->with('notification', $this->missing_view);
+			}
 		}else{
-			
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to edit functional errors'));
 		}
 	}
 	public function updateError(Request $request, $uuid){
 		if(Auth::user()->can('edit_errors')){
+			$validation = $this->ext->validateErrorData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+						->withInput()
+						->with('notification', $this->ext->validation);
+			}
+
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
 			
+			$reporting_station = $this->ext->getStation($request['reporting_station_id']);
+			if(!is_object($reporting_station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$reporting_station)); 
+
+			$notification = $this->mnt->editError($request->all(), $error, $reporting_station); 
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.error'))
+					return redirect('error/'.$error->uuid)->with(compact('notification'));
+				else
+					return back()->with('notification', $this->ext->missing_view)->withInput();
+			}else{
+				return back()->with(compact('notification'))->withInput();
+			}
 		}else{
-			
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to edit functional errors'));
 		}
 	}
 	
 	public function deleteError($uuid){
+		if(session()->has('params')) session()->reflash();
+
 		if(Auth::user()->can('delete_errors')){
-			
+			$error = $this->ext->getError($uuid);
+			if(is_object($error)){
+				return $this->ext->deleteError($error);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
 		}else{
 			
 		}
 	}
 	public function destroyError($uuid){
 		if(Auth::user()->can('delete_errors')){
-			
+			$error = $this->ext->getError($uuid);
+			if(is_object($error)){
+				$notification = $this->mnt->deleteError($error);
+				if(in_array('success', $notification)){
+					if(View::exists('w3.index.errors')){
+						return redirect('errors')
+									->with(compact('notification'));
+					}else
+						return back()->with(compact('notification'));
+				}else{
+					return back()->with(compact('notification'));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $error));
+			}
 		}else{
-			
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete an error'));
 		}
 	}
 	
@@ -193,10 +277,6 @@ class ErrorController extends Controller
 			$func_error = $this->ext->getError($uuid);
 			if(!is_object($func_error))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$func_error));
-			
-			/*foreach($func_error->affectedProduct()->get() as $affected_product){
-				var_dump($affected_product->product()->first()->uuid);
-			}return;*/
 			
 			if(View::exists('w3.create.affected-product')){
 				return view('w3.create.affected-product')->with(compact('func_error'))
@@ -209,7 +289,6 @@ class ErrorController extends Controller
 		}
 	}
 	public function storeErrorProduct(Request $request, $uuid){
-		//return var_dump($request->all());
 		if(Auth::user()->can('create_errors')){
 			$validation = $this->ext->validateErrorProductData($request->all());
 			if($validation->fails()){
@@ -220,11 +299,11 @@ class ErrorController extends Controller
 			}
 			
 			
-			$error = $this->ext->getError($uuid); //return var_dump($error->description);
+			$error = $this->ext->getError($uuid); 
 			if(!is_object($error)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error)); 
 			
-			$product = $this->ext->getProduct($request['product_id']); //return var_dump($product->name);
+			$product = $this->ext->getProduct($request['product_id']); 
 			if(!is_object($product)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$product));
 			
@@ -241,8 +320,58 @@ class ErrorController extends Controller
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add affected products for the errors'));
 		}
 	}
+
+	public function getAffectedProduct($uuid){
+
+		if(session()->has('params')) session()->reflash();
+
+		if(Auth::user()->can('view_errors')){
+			$product = $this->ext->getAffectedProduct($uuid);
+			if(is_object($product))
+				return response()->json($this->ext->prepAffectedProduct($product));
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view affected product'));
+		}
+	}
+
+	public function deleteAffectedProduct($uuid){
+		if(session()->has('params')) session()->reflash();
+
+		if(Auth::user()->can('delete_errors')){
+			$product = $this->ext->getAffectedProduct($uuid);
+			if(is_object($product)){
+				return $this->ext->deleteAffectedProduct($product);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			
+		}
+	}
+
+	public function destroyAffectedProduct($uuid){
+		if(Auth::user()->can('delete_errors')){
+			$product = $this->ext->getAffectedProduct($uuid);
+			if(is_object($product)){
+				$notification = $this->mnt->deleteAffectedProduct($product);
+				if(in_array('success', $notification)){
+					if(View::exists('w3.show.error')){
+						return redirect('error/'.$product->error()->first()->uuid)
+									->with(compact('notification'));
+					}else
+						return back()->with(compact('notification'));
+				}else{
+					return back()->with(compact('notification'));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $product));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete an error'));
+		}
+	}
 	
-	public function addCorrectiveAction(Request $request, $uuid){
+	public function addCorrectiveAction($uuid){
 		if(Auth::user()->can('create_errors')){
 			$error = $this->ext->getError($uuid);
 			if(!is_object($error)) 
@@ -250,8 +379,7 @@ class ErrorController extends Controller
 			
 			if($error->errorCorrection()->first())
 				return redirect('error-corrective-action/'.$uuid)
-						->with('notification', array('indicator'=>'warning', 'message'=>'Error has been provided with a corrective action already'))
-						->withInput();
+						->with('notification', array('indicator'=>'warning', 'message'=>'Error has been provided with a corrective action already'));
 			
 			$stations = $this->ext->getStations();
 			if(!is_object($stations)) 
@@ -264,7 +392,7 @@ class ErrorController extends Controller
 				return back()->with('notification', $this->ext->missing_view)->withInput();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add affected products for the errors'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add corrective for the errors'));
 		}
 	}
 	
@@ -303,7 +431,7 @@ class ErrorController extends Controller
 			
 			if(isset($request['originator_id'])){
 				$account = $this->ext->getAccount($request['originator_id']);
-				if(!is_object($error)) 
+				if(!is_object($account)) 
 					return back()->with('notification', array('indicator'=>'warning', 'message'=>$account))->withInput();
 				$request['aio'] = $account->user()->first()->id;
 			}
@@ -311,9 +439,11 @@ class ErrorController extends Controller
 			$notification = $this->mnt->createCorrectiveAction($request->all(), $error);
 			if(in_array('success', $notification)){
 				//Send email to the aio who caused the error
-				$originator_email = $this->ext->sendOriginatorEmail($error);
-				if(is_string($originator_email))
-					$notification['message'] .= '. ' . $originator_email;
+				if(in_array('aio', $request->all())){
+					$originator_email = $this->ext->sendOriginatorEmail($error);
+					if(is_string($originator_email))
+						$notification['message'] .= '. ' . $originator_email;
+				}
 				
 				if(View::exists('w3.show.error'))
 					return redirect('error/'.$uuid)->with(compact('notification'));
@@ -328,13 +458,116 @@ class ErrorController extends Controller
 		}
 	}
 	
+	public function editCorrectiveAction($uuid){
+		if(Auth::user()->can('edit_errors')){
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error)); 
+			
+			$stations = $this->ext->getStations();
+			if(!is_object($stations)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+			
+			if(View::exists('w3.edit.corrective-action')){
+				return view('w3.edit.corrective-action')->with(compact('error', 'stations'))
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view)->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to edit corrective for the errors'));
+		}
+	}
+	
+	public function updateCorrectiveAction(Request $request, $uuid){
+		if(Auth::user()->can('edit_errors')){
+			
+			$validation = $this->ext->validateCorrectiveActionData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+						->withInput()
+						->with('notification', array('indicator'=>'warning', 'message'=>'Correct the input fields appropriately'));
+			}
+			
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error)) 
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error))->withInput();
+			
+			if(isset($request['originator_id'])){
+				$account = $this->ext->getAccount($request['originator_id']);
+				if(!is_object($account)) 
+					return back()->with('notification', array('indicator'=>'warning', 'message'=>$account))->withInput();
+				$request['aio'] = $account->user()->first()->id;
+			}
+			
+			
+			$notification = $this->mnt->editCorrectiveAction($request->all(), $error);
+			if(in_array('success', $notification)){
+				//Send email to the aio who caused the error
+				//Check if the aio is different from the earlier one
+				if(in_array('aio', $request->all())){
+					$originator_email = $this->ext->sendOriginatorEmail($error);
+					if(is_string($originator_email))
+						$notification['message'] .= '. ' . $originator_email;
+				}
+				
+				if(View::exists('w3.show.error'))
+					return redirect('error/'.$uuid)->with(compact('notification'));
+				else 
+					return back()->with('notification', $this->ext->missing_view)->withInput();
+			}else{
+				return redirect('error-corrective-action/'.$uuid)->with(compact('notification'))->withInput();
+			}
+			
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide corrective action for the errors'));
+		}
+	}
+
+	public function deleteCorrectiveAction($uuid){
+		if(session()->has('params')) session()->reflash();
+
+		if(Auth::user()->can('delete_errors')){
+			$error = $this->ext->getError($uuid);
+			if(is_object($error)){
+				return $this->ext->deleteCorrectiveAction($error);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			
+		}
+	}
+
+	public function destroyCorrectiveAction($uuid){
+		if(Auth::user()->can('delete_errors')){
+			$error = $this->ext->getError($uuid);
+			if(is_object($error)){
+				$notification = $this->mnt->deleteCorrectiveAction($error);
+				if(in_array('success', $notification)){
+					if(View::exists('w3.show.error')){
+						return redirect('error/'.$uuid)
+									->with(compact('notification'));
+					}else
+						return back()->with(compact('notification'));
+				}else{
+					return back()->with(compact('notification'));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $error));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete an error correction'));
+		}
+	}
+	
 	public function pdfError($uuid){
 		
 		if(Auth::user()->can('view_errors')){
 			$error = $this->ext->getError($uuid); //return var_dump($error);
 			if(!is_object($error)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error))->withInput();
-			//return var_dump($this->ext->pdfError($error));
+			
 			return response($this->ext->pdfError($error))
 					->header('Content-Type', 'application/pdf');
 		}else{
@@ -420,12 +653,12 @@ class ErrorController extends Controller
 				return '<span class="w3-text-red">!acc stn</span>';
 		
 		if(count($account_stations)){
-			$error_notifications = $this->ext->getNotifiedErrors($account_stations);
+			$error_notifications = $this->ext->getNotifiedErrors($account_stations); //return var_dump($error_notifications);
 			if(!is_object($error_notifications)){
 				return '<span class="w3-text-red">Error!</span>';
 			}
-			
-			return $this->ext->countErrorNotifications($error_notifications);
+			return count($error_notifications);
+			//return $this->ext->countErrorNotifications($error_notifications);
 		}
 	}
 	
@@ -472,6 +705,11 @@ class ErrorController extends Controller
 			
 			$notification = $this->mnt->createErrorOriginatorReaction($request->all(), $error->errorCorrection()->first());
 			if(in_array('success', $notification)){
+				//Send supervisor email
+				$supervisor_email = $this->ext->sendSupervisorEmail($error);
+				if(is_string($supervisor_email))
+					$notification['message'] .= '. ' . $supervisor_email;
+				
 				if(view::exists('w3.show.error'))
 					return redirect('error/'.$uuid)->with(compact('notification'));
 				else
@@ -494,20 +732,17 @@ class ErrorController extends Controller
 			if(is_null($func_error->errorCorrection()->first()))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Error has not been given correction action'));
 			
-			if($func_error->errorCorrection()->first()->supervisorReaction()->first())
+			if($func_error->errorCorrection()->first()->supervisorReaction()->first() 
+				&& $func_error->errorCorrection()->first()->status()->first()->state()->first()->code == 4)
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>'Supervisor reaction has been given'));
 			
 			if($func_error->errorCorrection()->first()->station()->first()->id != Auth::user()->account()->first()->supervisor()->first()->station()->first()->id)
 				return back()
 				->with('notification', array('indicator'=>'warning', 'message'=>'You are not a supervisor at '.$func_error->errorCorrection()->first()->station()->first()->name));
-				
-			$states = $this->ext->getStates();
-			if(!is_object($states))
-				return back()->with('notification', array('indicator'=>'warning', 'message'=>$states));
 			
 			if(View::exists('w3.create.supervisor-reaction')){
 				return view('w3.create.supervisor-reaction')
-						->with(compact('func_error', 'states'))
+						->with(compact('func_error'))
 						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank.'));
 			}
 		}else{
@@ -516,7 +751,7 @@ class ErrorController extends Controller
 	}
 	
 	public function storeErrorSupervisorReaction(Request $request, $uuid){
-		if(Auth::user()->can('create_errors')){
+		if(Auth::user()->can('edit_errors')){
 			$validation = $this->ext->validateSupervisorReactionData($request->all());
 			if($validation->fails()){
 				return back()->withErrors($validation)
@@ -527,13 +762,63 @@ class ErrorController extends Controller
 			$error = $this->ext->getError($uuid);
 			if(!is_object($error))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
-				
-			$state = $this->ext->getState($request['state_id']);
-			if(!is_object($state))
-				return back()->with('notification', array('indicator'=>'warning', 'message'=>$state));
 			
-			$notification = $this->mnt->createErrorSupervisorReaction($request->all(), $error, $state);
+			
+			$notification = $this->mnt->createErrorSupervisorReaction($request->all(), $error);
 			if(in_array('success', $notification)){
+				if($error->errorCorrection()->first()->status()->first()->state()->first()->code == 2){
+					$sup_reaction = $this->ext->sendSupReactionEmail($error);
+					if(is_string($sup_reaction))
+						$notification['message'] .= '. ' . $sup_reaction;
+				}
+				if(view::exists('w3.show.error'))
+					return redirect('error/'.$uuid)->with(compact('notification'));
+				else
+					return back()->with('notification', $this->ext->missing_view)->withInput();
+			}else{
+				return back()->with(compact('notification'))->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide supervisor reaction to the error'));
+		}
+	}
+	
+	public function editErrorSupervisorReaction($uuid){ 
+		if(Auth::user()->can('edit_errors')){
+			$func_error = $this->ext->getError($uuid);
+			if(!is_object($func_error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$func_error));
+			
+			if(View::exists('w3.edit.supervisor-reaction')){
+				return view('w3.edit.supervisor-reaction')
+						->with(compact('func_error'));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide supervisor reaction to the error'));
+		}
+	}
+	
+	public function updateErrorSupervisorReaction(Request $request, $uuid){
+		if(Auth::user()->can('edit_errors')){
+			$validation = $this->ext->validateSupervisorReactionData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+						->withInput()
+						->with('notification', $this->ext->validation);
+			}
+			
+			$error = $this->ext->getError($uuid);
+			if(!is_object($error))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error));
+			
+			
+			$notification = $this->mnt->editErrorSupervisorReaction($request->all(), $error);
+			if(in_array('success', $notification)){
+				if($error->errorCorrection()->first()->status()->first()->state()->first()->code == 2){
+					$sup_reaction = $this->ext->sendSupReactionEmail($error);
+					if(is_string($sup_reaction))
+						$notification['message'] .= '. ' . $sup_reaction;
+				}
 				if(view::exists('w3.show.error'))
 					return redirect('error/'.$uuid)->with(compact('notification'));
 				else

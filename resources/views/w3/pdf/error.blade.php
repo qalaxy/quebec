@@ -46,12 +46,6 @@
 					<td class="w3-padding">Date reported: </td>
 					<td class="w3-padding" style="text-align: justify;">{{$reported_error['date_reported']}}</td>
 				</tr>
-				@if($reported_error['responsibility'])
-				<tr>
-					<td class="w3-padding">Correction by : </td>
-					<td class="w3-padding" style="text-align: justify;">{{$reported_error['responsibility']}}</td>
-				</tr>
-				@endif
 				<tr>
 					<td class="w3-padding">Reported by: </td>
 					<td class="w3-padding" style="text-align: justify;">{{$reported_error['user']}}</td>
@@ -114,7 +108,7 @@
 			@endif
 			
 			@if(count($originator_reaction))
-			<p class="w3-text-dark-grey w3-large">Error source opinion</p>
+			<p class="w3-text-dark-grey w3-large">Originator's opinion</p>
 			
 			<table class="w3-table w3-border" border="0" width="100%" style="width:100%">
 				<tr>
@@ -126,8 +120,21 @@
 					<td class="w3-padding" style="text-align: justify;">{{$originator_reaction['remarks']}}</td>
 				</tr>
 			</table>
-			@else
-				<p class="w3-text-dark-grey w3-large">Error source opinion: <span class="w3-medium">Nill</span></p>
+			@endif
+			
+			@if(count($supervisor_reaction))
+			<p class="w3-text-dark-grey w3-large">Supervisor's opinion</p>
+			
+			<table class="w3-table w3-border" border="0" width="100%" style="width:100%">
+				<tr>
+					<th class="w3-padding" style="width:25%; font-weight: normal;">Opinion: </td>
+					<th class="w3-padding" style="text-align: justify; font-weight: normal;">{{$supervisor_reaction['status']}}</td>
+				</tr>
+				<tr>
+					<td class="w3-padding">Remarks: </td>
+					<td class="w3-padding" style="text-align: justify;">{{$supervisor_reaction['remarks']}}</td>
+				</tr>
+			</table>
 			@endif
 		</div>
 	</body>

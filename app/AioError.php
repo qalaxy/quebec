@@ -26,4 +26,15 @@ class AioError extends Model
 	public function errorOriginator(){
 		return $this->belongsTo('App\User', 'originator_id');
 	}
+	
+	public function originatorReaction(){
+		return $this->hasOne('App\OriginatorReaction', 'aio_error_id');
+	}
+	
+	public static function boot(){
+		parent::boot();
+		AioError::deleted(function($aio_error){
+			$aio_error->originatorReaction()->delete();
+		});
+	}
 }

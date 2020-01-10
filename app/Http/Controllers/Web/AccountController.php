@@ -21,7 +21,7 @@ class AccountController extends Controller
 	}
 	
 	public function accountFirstLogin($uuid){
-		$user = $this->ext->getUser(decrypt($uuid)); //return var_dump($user->status);
+		$user = $this->ext->getUser(decrypt($uuid)); //return var_dump(decrypt($uuid));
 		if(is_object($user)){
 			if($user->status == 1)
 				abort(403);
@@ -106,10 +106,10 @@ class AccountController extends Controller
 			$notification = $this->mnt->createAccount($request->all()); 
 			if(in_array('success', $notification)){
 				//Send email to user to log in for the first time
-				$first_login = $this->ext->sendFirstLoginEmail($notification['uuid']);
+				//$first_login = $this->ext->sendFirstLoginEmail($notification['uuid']);
 				//$first_login = null;
 				
-				if(is_string($first_login)) $notification['message'] .= '. '.$first_login;
+				//if(is_string($first_login)) $notification['message'] .= '. '.$first_login;
 				
 				if(View::exists('w3.show.account')){
 					return redirect('account/'.$notification['uuid'])

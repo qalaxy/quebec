@@ -11,7 +11,7 @@ class FunctionsTableSeeder extends Seeder
      */
     public function run()
     {
-        $functions = array(array('name'=>'AIS Products Management', 'abbreviation'=>'AIMP', 'description'=>''),
+        $functions = array(array('name'=>'AIM Products Management', 'abbreviation'=>'AIMP', 'description'=>''),
 						array('name'=>'Flight Planning Management', 'abbreviation'=>'FPL', 'description'=>''),
 						array('name'=>'Maps and Charts Management', 'abbreviation'=>'MC', 'description'=>''),
 						array('name'=>'Terrain and Obstacle Data Management', 'abbreviation'=>'TOD', 'description'=>''),

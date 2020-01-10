@@ -11,38 +11,17 @@
   </h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		@include('w3.components.notification')
-		<form class="w3-container" method="POST" action="{{url('/store-error-corrective-action/'.$error->uuid)}}">
+		<form class="w3-container" method="POST" action="{{url('/update-error-corrective-action/'.$error->uuid)}}">
 			@csrf
 			<div class="w3-row">
 				<div class="w3-col s12 m6 l6">
-					<!--<div class="w3-row w3-padding-small">
-						<div class="w3-col s12 m10 l10 w3-left">
-							<label class="w3-text-dark-gray">Station responsible<span class="w3-text-red">*</span></label>
-							<select class="w3-select w3-border {{($errors->has('station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" name="station_id">
-								<option value="" disabled selected>Select a functional unit</option>
-								@if($stations)
-									@php $selection = (old('station_id'))? 'selected' : null; @endphp
-									@foreach($stations as $station)
-										
-										<option value="{{$station->uuid}}" {{(is_null($selection) && ($station->uuid == $error->reportedStation()->first()->uuid))? 'selected':$selection}}>{{$station->name}}</option>
-											
-									@endforeach
-								@endif
-							 </select>
-							@if($errors->has('station_id'))
-								<span class="w3-small w3-text-red">{{$errors->first('station_id')}}</span>
-							@else
-								<span>&nbsp;</span>
-							@endif
-						</div>
-					</div>-->
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Corrective action<span class="w3-text-red">*</span></label>
 							<textarea class="w3-input w3-border {{($errors->has('corrective_action')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="Give a corrective action done to the error"
 										name="corrective_action"
-										rows="3">{{old('corrective_action')}}</textarea>
+										rows="3">{{(old('corrective_action'))?old('corrective_action'):$error->errorCorrection()->first()->corrective_action}}</textarea>
 							@if($errors->has('corrective_action'))
 								<span class="w3-small w3-text-red">{{$errors->first('corrective_action')}}</span>
 							@else
@@ -56,7 +35,7 @@
 							<textarea class="w3-input w3-border {{($errors->has('cause')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="What was the cause of the error?"
 										name="cause"
-										rows="2">{{old('cause')}}</textarea>
+										rows="4">{{(old('cause'))?old('cause'):$error->errorCorrection()->first()->cause}}</textarea>
 							@if($errors->has('cause'))
 								<span class="w3-small w3-text-red">{{$errors->first('cause')}}</span>
 							@else
@@ -72,9 +51,14 @@
 							<select class="w3-select w3-border {{($errors->has('error_origin')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									name="error_origin"
 									onchange="getOriginator(this.value)">
-								<option value="" disabled selected>Did the error originate from the station?</option>
-								<option value="0" {{(old('error_origin') == '0')? 'selected':null}}>Not from the station</option>
-								<option value="1" {{(old('error_origin') == '1')? 'selected':null}}>Yes, from the station</option>
+								<option value="" disabled selected>Did the error originate from officers in this station?</option>
+								@php $selected = null; @endphp
+								
+								<option value="0" @if(old('error_origin') == '0')@php $selected = 'selected'; @endphp {{$selected}}
+										@elseif(is_null($selected) && !boolval($error->errorCorrection()->first()->source)) @php $selected = 'selected';@endphp {{$selected}}@endif>Not from the officers</option>
+										
+								<option value="1" @if(old('error_origin') == '1')@php $selected = 'selected'; @endphp {{$selected}}
+										@elseif(is_null($selected) && boolval($error->errorCorrection()->first()->source)) @php $selected = 'selected';@endphp {{$selected}}@endif>Yes, from the officers</option>
 							 </select>
 							@if($errors->has('error_origin'))
 								<span class="w3-small w3-text-red">{{$errors->first('error_origin')}}</span>
@@ -85,26 +69,38 @@
 					</div>
 					<div class="w3-row w3-padding-small" 
 						id="originator" 
-						style="display:{{(strval(old('error_origin')) == '0' || strval(old('error_origin')) == '1')?'block':'none'}};">
+						style="display:{{(strval(old('error_origin')) || $error->errorCorrection()->first())?'block':'none'}};">
 						<div class="w3-col s12 m10 l10 w3-left">
-							@if(old('error_origin') == '1')
+							@if(old('error_origin') == '1' || (is_null(old('error_origin')) && $error->errorCorrection()->first()->aioError()->first()))
 							<label class="w3-text-dark-gray">Error causing AIO<span class="w3-text-red">*</span></label>
 							<select class="w3-select w3-border {{($errors->has('originator_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" name="originator_id">
-								<option value="" selected>Select the officer who caused the error</option>
+								<option value="" disabled>Select the officer who caused the error</option>
 								@if($error->reportedStation()->first()->accountStation()->get())
 									@foreach($error->reportedStation()->first()->accountStation()->get() as $account_station)
-										
-										<option value="{{$account_station->account()->first()->uuid}}" {{(old('originator_id') == $account_station->account()->first()->uuid)? 'selected':null}}>{{$account_station->account()->first()->first_name}} {{$account_station->account()->first()->last_name}}</option>
+										@php $selected = null; @endphp
+										<option value="{{$account_station->account()->first()->uuid}}" 
+											@if(old('originator_id') == $account_station->account()->first()->uuid)
+												@php $selected = 'selected' ;@endphp
+												{{$selected}}
+											@elseif(is_null($selected) && $error->errorCorrection()->first()->aioError()->first()
+															&& $error->errorCorrection()->first()->aioError()->first()
+																->errorOriginator()->first()->account()->first()->uuid == $account_station->account()->first()->uuid)
+												@php $selected = 'selected' ;@endphp
+												{{$selected}}
+											@endif>{{$account_station->account()->first()->user()->first()->name}}</option>
 											
 									@endforeach
 								@endif<!-- AJAX call based on station responsible-->
 							 </select>
-							@elseif(old('error_origin') == '0')
+							@elseif(old('error_origin') == '0' || (is_null(old('error_origin')) && $error->errorCorrection()->first()->externalError()->first()))
+							@php $description = ($error->errorCorrection()->first()->externalError()->first())?
+									$error->errorCorrection()->first()->externalError()->first()->description:null; @endphp
+									
 							<label class="w3-text-dark-gray">Originator<span class="w3-text-red">*</span></label>
 							<textarea class="w3-input w3-border {{($errors->has('originator')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 										placeholder="Describe the originator of the error"
 										name="originator"
-										rows="2">{{old('originator')}}</textarea>
+										rows="2">{{(old('originator'))?old('originator'):$description}}</textarea>
 							@endif
 							
 							@if($errors->has('originator_id'))
@@ -116,29 +112,13 @@
 							@endif
 						</div>
 					</div>	
-					<!--<div class="w3-row w3-padding-small">
-						<div class="w3-col s12 m10 l10 w3-left">
-							<label class="w3-text-dark-gray">Date of reporting<span class="w3-text-red">*</span></label>
-							<input class="w3-input w3-border {{($errors->has('date_time_created')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
-									type="datetime-local" 
-									name="date_time_created"
-									placeholder="Enter the date and time you are reporting the error"
-									autocomplete="off"
-									value="{{old('date_time_created')}}">
-							@if($errors->has('date_time_created'))
-								<span class="w3-small w3-text-red">{{$errors->first('date_time_created')}}</span>
-							@else
-								<span>&nbsp;</span>
-							@endif
-						</div>
-					</div>-->
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Remarks</label>
 							<textarea class="w3-input w3-border-dark-gray w3-border" 
 									placeholder="Give your remarks" 
 									name="remarks" 
-									rows="4">{{old('remarks')}}</textarea>
+									rows="2">{{(old('remarks'))?old('remarks'):$error->errorCorrection()->first()->remarks}}</textarea>
 							@if($errors->has('remarks'))
 								<span class="w3-small w3-text-red">{{$errors->first('remarks')}}</span>
 							@elseif($errors->has('remarks'))
@@ -150,7 +130,7 @@
 			</div>
 			<div class="w3-row">
 				<div class="w3-col w3-padding-small">
-					<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Submit error correction">Submit&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
+					<button class="w3-button w3-large w3-theme w3-hover-light-blue" type="submit" title="Update error correction">Update&nbsp;<i class="fa fa-angle-right fa-lg"></i></button>
 				</div>
 			</div>
 		</form>

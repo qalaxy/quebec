@@ -6,6 +6,8 @@ class ErrorData{
 	
 	public $function_id_key = 'function_id';
 	public $station_id_key = 'station_id';
+	public $reported_station_id_key = 'reported_station_id';
+	public $reporting_station_id_key = 'reporting_station_id';
 	public $date_time_created_key = 'date_time_created';
 	public $description_key = 'description';
 	public $impact_key = 'impact';
@@ -32,6 +34,7 @@ class ErrorData{
 	public $originator_reaction_key = 'originator_reaction';
 	public $supervisor_reaction_key = 'supervisor_reaction';
 	public $error_correction_id_key = 'error_correction_id';
+	public $aio_error_id_key = 'aio_error_id';
 	
 	
 	public $function_id_req = 'required|uuid';
@@ -52,7 +55,7 @@ class ErrorData{
 	public $originator_req = 'sometimes|required|max:255';
 	public $error_origin_req = 'required|boolean';
 	public $originator_reaction_req = 'required|boolean';
-	public $supervisor_reaction_req = 'required|digits:1';
+	public $supervisor_reaction_req = 'required|boolean';
 	public $state_id_req = 'required|uuid';
 	
 	public $corrective_action_validation_msgs = [
@@ -82,10 +85,13 @@ class ErrorData{
 		'function_id.required'=>'You have not selected functional unit',
 		'function_id.uuid'=>'Functional unit value should be a uuid',
 		
-		'station_id.required'=>'You have not selected station where the error occurred',
-		'station_id.uuid'=>'Station value should be a uuid',
+		'reported_station_id.required'=>'You have not selected station which caused the error',
+		'reported_station_id.uuid'=>'Station value should be a uuid',
 		
-		'date_time_created.required'=>'You have not enetered date and time when the error occuered',
+		'reporting_station_id.required'=>'You have not selected station which is reporting the error',
+		'reporting_station_id.uuid'=>'Station value should be a uuid',
+		
+		'date_time_created.required'=>'You have not entered date and time when the error occuered',
 		'date_time_created.date'=>'Date and time should have a date format',
 		'date_time_created.before'=>'Date and time ? should be before ?',
 		
@@ -119,8 +125,8 @@ class ErrorData{
 	];
 	
 	public $validate_error_supervisor_reaction_msgs = [
-		'state_id.required' => 'You have not made any selection',
-		'state_id.uuid' => 'Value should be uuid',
+		'supervisor_reaction.required' => 'You have not made any selection',
+		'supervisor_reaction.uuid' => 'Value should be uuid',
 		
 		'remarks.max'=>'Characters in remarks should not be more than 255',
 	];

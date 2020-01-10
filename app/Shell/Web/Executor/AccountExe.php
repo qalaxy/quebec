@@ -48,8 +48,8 @@ class AccountExe extends Base{
 										.' '.ucfirst($this->data[$this->acc_data->middle_name_key])
 										.' '.ucfirst($this->data[$this->acc_data->last_name_key]),
 							$this->acc_data->email_key=>$this->data[$this->acc_data->email_key],
-							$this->acc_data->password_key=>Hash::make(Str::random(8)),
-							$this->acc_data->status_key=>0,
+							$this->acc_data->password_key=>Hash::make('12345678'),//Str::random(8)
+							$this->acc_data->status_key=>1,
 							$this->acc_data->level_id_key=>Level::where('order', Level::max('order'))->first()->id,
 						));
 						
