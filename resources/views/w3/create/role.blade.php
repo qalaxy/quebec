@@ -86,7 +86,7 @@
 							@endif
 						</div>
 					</div>
-					<div class="w3-row w3-padding-small" id="stations" style="display:{{(old('global') == '1' || old('global') == '2')?'block':'none'}};">
+					<div class="w3-row w3-padding-small" id="role_stations" style="display:{{(old('global') == '1' || old('global') == '2')?'block':'none'}};">
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Stations<span class="w3-text-red">*</span></label>
 							@if(old('global') == '1' || old('global') == '2')
@@ -151,7 +151,8 @@ w3_show_nav('menuQMS');
 
 
 function getStations(global){
-	let stations_div = document.getElementById('stations');
+	let stations_div = document.getElementById('role_stations');
+	//console.log(stations_div);
 	if(global == 2 || global == 1){
 		let input = '<label class="w3-text-dark-gray">Stations<span class="w3-text-red">*</span></label>';
 		input += '<select class="w3-select w3-border w3-border-dark-gray" name="stations[]" multiple size="6">';

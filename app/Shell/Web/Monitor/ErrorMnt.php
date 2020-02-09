@@ -287,5 +287,29 @@ class ErrorMnt extends ErrorExe{
 		DB::rollback();
 		return $this->success;
 	}
+
+	public function editErrorOriginatorReaction(array $data, object $error){
+		$this->data = $data;
+		DB::beginTransaction();
+		$func_error = $this->updateErrorOriginatorReaction($error->errorCorrection()->first()->originatorReaction()->first());
+		if(is_null($func_error)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::commit();
+		return $this->success;
+	}
+
+	public function deleteErrorOriginatorReaction(object $error){
+		DB::beginTransaction();
+		$originator_reaction = $this->destroyErrorOriginatorReaction($error->errorCorrection()->first()->originatorReaction()->first());
+		if(is_null($originator_reaction)){
+			DB::rollback();
+			return $this->error;
+		}
+		
+		DB::rollback();
+		return $this->success;
+	}
 }
 ?>

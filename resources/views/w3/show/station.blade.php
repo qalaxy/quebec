@@ -17,7 +17,7 @@
 			<div class="w3-row">
 				<div class="w3-dropdown-hover w3-right w3-white">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
+					<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
 					  <a href="{{url('/edit-station/'.$station->uuid)}}" class="w3-bar-item w3-button">Edit</a>
 					  <a href="javascript:void(0)" onclick="deleteStation('{{$station->uuid}}');" class="w3-bar-item w3-button">Delete</a>
 					  @if(is_null($station->func()->first()))
@@ -55,7 +55,7 @@
 			<div class="w3-row ">
 				<div class="w3-dropdown-hover w3-right w3-white">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
+					<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
 					  <a href="{{($station)?url('/add-station-function/'.$station->uuid):null}}" class="w3-bar-item w3-button">Add a function</a>
 					</div>
 				  </div>
@@ -83,6 +83,41 @@
 				@endif
 			</div>
 			@endif
+
+			@if($station->func()->first())
+			<div class="w3-row ">
+				<div class="w3-dropdown-hover w3-right w3-white">
+					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
+					<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
+					  <a href="{{($station)?url('/add-station-supervisor/'.$station->uuid):null}}" class="w3-bar-item w3-button">Add a supervisor</a>
+					</div>
+				  </div>
+			</div>
+			<div class="w3-light-gray w3-topbar w3-border-gray">
+				@if($station)
+				<div class="w3-row w3-padding-small">
+					<div class="w3-col s12 m12 l2 w3-left">
+						<span class=""><strong>Supervisor(s): </strong></span>
+					</div>
+					<div class="w3-col s12 m12 l10 w3-left">
+						@foreach($station->supervisor()->get() as $supervisor)
+							<span class="w3-hover-text-blue" onmouseover="document.getElementById('{{$supervisor->account()->first()->uuid}}').style.display='inline';  this.style.cursor='pointer';" 
+												onmouseout="document.getElementById('{{$supervisor->account()->first()->uuid}}').style.display='none'">
+												<span onclick="loadStationSupervisor('{{url('show-station-supervisor/').'/'.$supervisor->uuid}}')" title="click on supervisor">
+													{{$supervisor->account()->first()->user()->first()->name}}
+												</span>
+								<span id="{{$supervisor->account()->first()->uuid}}" style="display:none;">
+									<a href="{{url('/edit-station-supervisor/'.$station->uuid.'/'.$supervisor->account()->first()->uuid)}}" class="w3-hover-blue"><i class="fa fa-edit fa-lg"></i></a>
+									<a class="w3-hover-blue" onclick="deleteSupervisor('{{$station->uuid}}', '{{$supervisor->account()->first()->uuid}}');"><i class="fa fa-close fa-lg"></i></a>
+								</span>,
+							</span>
+						@endforeach
+					</div>
+				</div>
+				@endif
+			</div>
+			@endif
+
 			@if($station->recipient()->first())
 			<div class="w3-row ">
 				<div class="w3-dropdown-hover w3-right w3-white">
@@ -136,21 +171,6 @@ w3_show_nav('menuQMS');
 
 
 
-function deleteAccount(uuid){
-	let xhr = new XMLHttpRequest();
-	
-	xhr.open("GET", "{{url('delete-account')}}/"+uuid);
-	xhr.send();
-	
-	xhr.onreadystatechange = function(){
-		if(xhr.readyState == 4 && xhr.status == 200){
-			document.getElementById("delete").innerHTML = xhr.responseText;
-			document.getElementById('delete').style.display='block';
-			
-		}
-	}
-}
-
 function deleteFunction(station,func){ 
 	let xhr = new XMLHttpRequest();
 	
@@ -166,22 +186,21 @@ function deleteFunction(station,func){
 	}
 }
 
-function loadAccountStation(event, station){
-	if(event.altKey){
-		let xhr = new XMLHttpRequest();
-		xhr.open("GET", "{{url('account-station')}}/"+station);
-		xhr.send();
-		
-		xhr.onreadystatechange = function(){
-			if(xhr.readyState == 4 && xhr.status == 200){
-				document.getElementById("delete").innerHTML = xhr.responseText;
-				document.getElementById('delete').style.display='block'
-				
-			}
+function deleteSupervisor(station,account){ 
+	let xhr = new XMLHttpRequest();
+	
+	xhr.open("GET", "{{url('delete-station-supervisor')}}/"+station+"/"+account);
+	xhr.send();
+	
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			document.getElementById("delete").innerHTML = xhr.responseText;
+			document.getElementById('delete').style.display='block'
+			
 		}
 	}
-	
 }
+
 
 function deleteRecipient(station, user){
 	let xhr = new XMLHttpRequest();
@@ -197,27 +216,10 @@ function deleteRecipient(station, user){
 	}
 }
 
-function loadAccountSupervisory(event, supervisory){
-	if(event.altKey){
-		let xhr = new XMLHttpRequest();
-		xhr.open("GET", "{{url('account-supervisory')}}/"+supervisory);
-		xhr.send();
-		
-		xhr.onreadystatechange = function(){
-			if(xhr.readyState == 4 && xhr.status == 200){
-				document.getElementById("delete").innerHTML = xhr.responseText;
-				document.getElementById('delete').style.display='block'
-				
-			}
-		}
-	}
-	
-}
-
-function deleteSupervisory(account, supervisory){
+function loadStationSupervisor(url){
 	let xhr = new XMLHttpRequest();
-
-	xhr.open("GET", "{{url('delete-account-supervisory')}}/"+account+"/"+supervisory);
+	
+	xhr.open("GET", url);
 	xhr.send();
 	
 	xhr.onreadystatechange = function(){
@@ -228,35 +230,6 @@ function deleteSupervisory(account, supervisory){
 	}
 }
 
-function deleteRole(account, role){
-	let xhr = new XMLHttpRequest();
-
-	xhr.open("GET", "{{url('delete-account-role')}}/"+account+"/"+role);
-	xhr.send();
-	
-	xhr.onreadystatechange = function(){
-		if(xhr.readyState == 4 && xhr.status == 200){
-			document.getElementById('delete').innerHTML = xhr.responseText;
-			document.getElementById('delete').style.display='block';
-		}
-	}
-}
-
-function loadAccountRole(event, role){
-	if(event.altKey){
-		let xhr = new XMLHttpRequest();
-		xhr.open("GET", "{{url('account-role')}}/"+role);
-		xhr.send();
-		
-		xhr.onreadystatechange = function(){
-			if(xhr.readyState == 4 && xhr.status == 200){
-				document.getElementById("delete").innerHTML = xhr.responseText;
-				document.getElementById('delete').style.display='block'
-				
-			}
-		}
-	}
-}
 </script>
 
 

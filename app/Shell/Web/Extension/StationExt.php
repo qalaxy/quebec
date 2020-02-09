@@ -2,8 +2,10 @@
 namespace App\Shell\Web\Extension;
 
 use Exception;
+use App\Account;
 use App\Func;
 use App\Station;
+use App\Supervisor;
 use App\User;
 
 use App\Shell\Web\Base;
@@ -198,6 +200,151 @@ class StationExt extends Base{
 			return $e->getMessage();
 		}
 		return $recipient;
+	}
+
+	public function getUnaddedSupervisors(object $station, $account=null){
+		try{
+			if($account){
+				$accounts = DB::table('accounts')
+								->join('account_station', 'accounts.id', '=', 'account_station.account_id')
+								->join('stations', 'account_station.station_id', '=', 'stations.id')
+								->whereNotIn('accounts.id', function($query) use ($station, $account){
+									$query->select(DB::raw('account_id'))
+										->from('supervisors')
+										->where('supervisors.station_id', $station->id)
+										->whereNull('supervisors.deleted_at')
+										->where('supervisors.account_id', '<>', $account->id);
+								})
+								->where('account_station.station_id', $station->id)
+								->whereNull('account_station.deleted_at')
+								->select('accounts.*')
+								->get();
+			}else{
+				$accounts = DB::table('accounts')
+								->join('account_station', 'accounts.id', '=', 'account_station.account_id')
+								->join('stations', 'account_station.station_id', '=', 'stations.id')
+								->whereNotIn('accounts.id', function($query) use ($station){
+									$query->select(DB::raw('account_id'))
+										->from('supervisors')
+										->whereRaw('supervisors.station_id='.$station->id)
+										->whereNull('supervisors.deleted_at');
+								})
+								->where('account_station.station_id', $station->id)
+								->whereNull('account_station.deleted_at')
+								->select('accounts.*')
+								->get();
+			}
+								
+			if(is_null($accounts)){
+				throw new Exception('Station officers have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $accounts;
+	}
+
+	public function validateStationSupervisorData(array $data){
+		$rules = [
+			$this->stn_data->account_id_key => $this->stn_data->user_id_req,
+			$this->stn_data->status_key => $this->stn_data->status_req,
+			$this->stn_data->from_key => $this->stn_data->from_req,
+			$this->stn_data->to_key => $this->stn_data->to_req,
+		];
+
+		return Validator::make($data, $rules, $this->stn_data->station_supervisor_validation_msgs);		
+	}
+
+	public function getAccount($uuid){
+		try{
+			$account = Account::withUuid($uuid)->first();
+			if(is_null($account)){
+				throw new Exception('Account has not been retrieved successfully');				
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $account;
+	}
+
+	public function deleteStationStation(object $station, object $account){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete station\'s supervisor</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-middle w3-large">Your are about to delete a supervisor from a station:</p>
+						<p><strong>Station\'s name:</strong> '.$station->name.'</p>
+						<p><strong>User\'s name:</strong> '.$account->user()->first()->name.'</p>
+						<p><strong>Status:</strong> '.(boolval(($station->supervisor()->where('account_id', $account->id)->first()->status)) ? 'Active' : 'Inactive').'</p>
+						<p><strong>From:</strong> '
+							.date_format(date_create($station->supervisor()->where('account_id', $account->id)->first()->from), 'd/m/Y H:i:s')
+							.'</p>
+						<p><strong>To:</strong> '
+							.date_format(date_create($station->supervisor()->where('account_id', $account->id)->first()->to), 'd/m/Y H:i:s')
+							.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-station-supervisor').'/'.$station->uuid.'/'.$account->uuid.'" 
+								title="Delete supervisor from the station">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
+
+	public function getStationSupervisor(object $station, object $account){
+		try{
+			$supervisor = $station->supervisor()->where('account_id', $account->id)->first();
+			if(is_null($supervisor)){
+				throw new Exception('Supervisor has not been retrieved successfully');
+				
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $supervisor;
+	}
+
+	public function getSupervisor(string $uuid){
+		try{
+			$supervisor = Supervisor::withUuid($uuid)->first();
+			if(is_null($supervisor)){
+				throw new Exception('Supervisory has not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $supervisor;
+	}
+
+	public function showStationSupervisor(object $supervisor){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-theme"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Station\'s supervisor</h2>
+					</header>
+					<div class="w3-container">
+						
+						<p><strong>User\'s name:</strong> '.$supervisor->account()->first()->user()->first()->name.'</p>
+						<p><strong>Station:</strong> '.$supervisor->station()->distinct()->first()->name.'</p>
+						<p><strong>From:</strong> '.date_format(date_create($supervisor->from), 'd/m/Y').'</p>
+						<p><strong>To:</strong> '.(($supervisor->to)? date_format(date_create($supervisor->to), 'd/m/Y'): date_format(date_create(today()), 'd/m/Y')).'</p>
+						<p><strong>Status:</strong> '.(($supervisor->status)? 'Active':'Inactive').'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<button class="w3-button w3-large w3-theme w3-hover-light-blue" title="Dismiss" onclick="document.getElementById(\'delete\').style.display=\'none\'">OK&nbsp;</button>
+							</div>
+						</div>
+					</footer>
+				</div>';
 	}
 }
 ?>

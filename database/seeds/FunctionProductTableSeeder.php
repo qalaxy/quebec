@@ -13,13 +13,13 @@ class FunctionProductTableSeeder extends Seeder
      */
     public function run()
     {
-        $func_prod = array(array('function'=>'AIS Products Management', 'product'=>'AIP AMDT'),
-						array('function'=>'AIS Products Management', 'product'=>'AIC'),
-						array('function'=>'AIS Products Management', 'product'=>'AIRAC AIP SUP'),
-						array('function'=>'AIS Products Management', 'product'=>'AIP SUP'),
-						array('function'=>'AIS Products Management', 'product'=>'Request NOTAM'),
-						array('function'=>'AIS Products Management', 'product'=>'Promulgated NOTAM'),
-						array('function'=>'AIS Products Management', 'product'=>'AIRAC AIP AMDT'),
+        $func_prod = array(array('function'=>'AIM Products Management', 'product'=>'AIP AMDT'),
+						array('function'=>'AIM Products Management', 'product'=>'AIC'),
+						array('function'=>'AIM Products Management', 'product'=>'AIRAC AIP SUP'),
+						array('function'=>'AIM Products Management', 'product'=>'AIP SUP'),
+						array('function'=>'AIM Products Management', 'product'=>'Request NOTAM'),
+						array('function'=>'AIM Products Management', 'product'=>'Promulgated NOTAM'),
+						array('function'=>'AIM Products Management', 'product'=>'AIRAC AIP AMDT'),
 						
 						array('function'=>'Flight Planning Management', 'product'=>'Station ACFT movement statistics reports'),
 						array('function'=>'Flight Planning Management', 'product'=>'Customer Service Requesition Form - CSRF'),

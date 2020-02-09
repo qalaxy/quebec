@@ -2,6 +2,7 @@
 namespace App\Shell\Web\Executor;
 
 use App\Recipient;
+use App\Supervisor;
 
 use Uuid;
 use App\Shell\Data\StationData;
@@ -77,6 +78,64 @@ class StationExe extends Base{
 			return null;
 		}
 		return $stn_recipient;
+	}
+
+	protected function storeStationSupervisor($station, $account){
+		try{
+			$supervisor = Supervisor::firstOrCreate(array($this->stn_data->station_id_key => $station->id, 
+								$this->stn_data->account_id_key => $account->id), 
+						array('uuid' => Uuid::generate(),
+								$this->stn_data->station_id_key => $station->id, 
+								$this->stn_data->account_id_key => $account->id,
+								$this->stn_data->status_key => $this->data[$this->stn_data->status_key],
+								$this->stn_data->from_key => $this->data[$this->stn_data->from_key],
+								$this->stn_data->to_key => $this->data[$this->stn_data->to_key]
+							));
+			if(is_null($supervisor)){
+				throw new Exception('Supervisor has not been added successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Supervisor has been added successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $supervisor;
+	}
+
+	protected function updateStationSupervisor($supervisor, $account){
+		try{
+			$supervisor = $supervisor->update(array('uuid' => Uuid::generate(), 
+								$this->stn_data->account_id_key => $account->id,
+								$this->stn_data->status_key => $this->data[$this->stn_data->status_key],
+								$this->stn_data->from_key => $this->data[$this->stn_data->from_key],
+								$this->stn_data->to_key => $this->data[$this->stn_data->to_key]
+							));
+			if(is_null($supervisor)){
+				throw new Exception('Supervisor has not been updated successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Supervisor has been updated successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $supervisor;
+	}
+
+	protected function destroyStationSupervisor($supervisor){
+		try{
+			$supervisor = $supervisor->delete();
+			if(is_null($supervisor)){
+				throw new Exception('Supervisor has not been deleted successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Supervisor has been deleted successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $supervisor;
 	}
 }
 

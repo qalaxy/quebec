@@ -277,6 +277,7 @@ class ErrorExe extends Base{
 			$supervisor_reaction = SupervisorReaction::firstOrCreate(array($this->error_data->error_correction_id_key => $error_correction->id), 
 								array('uuid' => Uuid::generate(),
 									$this->error_data->error_correction_id_key => $error_correction->id,
+									$this->error_data->user_id_key => Auth::id(),
 									$this->error_data->status_key => $this->data[$this->error_data->supervisor_reaction_key],
 									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key]));
 			
@@ -383,8 +384,9 @@ class ErrorExe extends Base{
 	
 	protected function updateSupervisorReaction($reaction){
 		try{
-			$sup_reaction = $reaction->update(array($this->error_data->status_key => $this->data[$this->error_data->supervisor_reaction_key],
-									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key]));
+			$sup_reaction = $reaction->update(array($this->error_data->user_id_key => Auth::id(),
+			$this->error_data->status_key => $this->data[$this->error_data->supervisor_reaction_key],
+						$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key]));
 			if(is_null($sup_reaction)){
 				throw new Exception('Supervisor reaction has not been updated successfully');
 			}else{
@@ -460,6 +462,39 @@ class ErrorExe extends Base{
 			return null;
 		}
 		return $correction;
+	}
+
+	protected function updateErrorOriginatorReaction($originator_reaction){
+		try{
+			$func_error = $originator_reaction->update(array(
+									$this->error_data->status_key => $this->data[$this->error_data->originator_reaction_key],
+									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],)
+									);
+			if(is_null($func_error)){
+				throw new  Exception("Error originator reaction has not been updated successfully");	
+			}else{
+				$this->success = array('indicator' => 'success', 'message'=>'Error originator reaction has been updated successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $func_error;
+	}
+
+	protected function destroyErrorOriginatorReaction($originator_reaction){
+		try{
+			$reaction = $originator_reaction->delete();
+			if(is_null($reaction)){
+				throw new Exception('Error originator reaction has not been deleted successfully');
+			}else{
+				$this->success = array('indicator' => 'success', 'message'=>'Error originator reaction has been deleted successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $reaction;
 	}
 }
 

@@ -57,6 +57,14 @@ class ErrorData{
 	public $originator_reaction_req = 'required|boolean';
 	public $supervisor_reaction_req = 'required|boolean';
 	public $state_id_req = 'required|uuid';
+	public $error_search_number_req = 'nullable|integer';
+	public $error_search_station_req = 'nullable|uuid';
+	public $error_search_function_req = 'nullable|uuid';
+	public $error_search_originator_req = 'nullable|uuid';
+	public $error_search_error_from_req = 'nullable|date';
+	public $error_search_error_to_req = 'nullable|date|after:error_from';
+	public $error_search_correction_from_req = 'nullable|date';
+	public $error_search_correction_to_req = 'nullable|date|after:correction_from';
 	
 	public $corrective_action_validation_msgs = [
 		'corrective_action.required' => 'You have not entered corrective action to the error',
@@ -129,6 +137,20 @@ class ErrorData{
 		'supervisor_reaction.uuid' => 'Value should be uuid',
 		
 		'remarks.max'=>'Characters in remarks should not be more than 255',
+	];
+
+	public $validate_error_search_data_msgs = [
+		'number.integer' => 'Number should be integer only',
+		'station.uuid' => 'Value for station field should be uuid',
+		'func.uuid' => 'Value for function field should be uuid',
+		'originator.uuid' => 'Value for officer origination the error field should be uuid',
+		'error_from.date' => 'Error reporting date (From) should be a date',
+		'error_to.date' => 'Error reporting date (To) should be a date',
+		'error_to.after' => 'Error reporting date (To) should be after the From date',
+		'correction_from.date' => 'Error correction date (From) should be a date',
+		'correction_to.date' => 'Error correction date (To) should be a date',
+		'correction_to.after' => 'Error correction date (To) should be after the From date',
+
 	];
 }
 ?>

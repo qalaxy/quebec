@@ -54,6 +54,44 @@ class StationMnt extends StationExe{
 		return $this->success;
 	}
 
+	public function createStationSupervisor(array $data, object $station, object $account){
+		$this->data = $data;
+		DB::beginTransaction();
+
+		$supervisor = $this->storeStationSupervisor($station, $account);
+		if(is_null($supervisor)){
+			DB::rollback();
+			return $this->error;
+		}
+
+		DB::commit();
+		return $this->success;
+	}
+
+	public function editStationSupervisor(object $supervisor, array $data, object $account){
+		$this->data = $data;
+		DB::beginTransaction();
+		$supervisor = $this->updateStationSupervisor($supervisor, $account);
+		if(is_null($supervisor)){
+			DB::rollback();
+			return $this->error;
+		}
+
+		DB::commit();
+		return $this->success;
+	}
+
+	public function deleteStationSupervisor(object $supervisor){
+		DB::beginTransaction();
+		$supervisor = $this->destroyStationSupervisor($supervisor);
+		if(is_null($supervisor)){
+			DB::rollback();
+			return $this->error;
+		}
+		DB::commit();
+		return $this->success;
+	}
+
 }
 
 ?>

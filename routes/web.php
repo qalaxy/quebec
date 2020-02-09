@@ -155,6 +155,10 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	
 	Route::get('create-error-originator-reaction/{uuid}', 'Web\ErrorController@createErrorOriginatorReaction');
 	Route::post('store-error-originator-reaction/{uuid}', 'Web\ErrorController@storeErrorOriginatorReaction');
+	Route::get('edit-error-originator-reaction/{uuid}', 'Web\ErrorController@editErrorOriginatorReaction');
+	Route::post('update-error-originator-reaction/{uuid}', 'Web\ErrorController@updateErrorOriginatorReaction');
+	Route::get('delete-error-originator-reaction/{uuid}', 'Web\ErrorController@deleteErrorOriginatorReaction');
+	Route::get('destroy-error-originator-reaction/{uuid}', 'Web\ErrorController@destroyErrorOriginatorReaction');
 	
 	Route::get('create-error-supervisor-reaction/{uuid}', 'Web\ErrorController@createErrorSupervisorReaction');
 	Route::post('store-error-supervisor-reaction/{uuid}', 'Web\ErrorController@storeErrorSupervisorReaction');
@@ -169,7 +173,7 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('delete-affected-product/{uuid}', 'Web\ErrorController@deleteAffectedProduct');
 	Route::get('destroy-affected-product/{uuid}', 'Web\ErrorController@destroyAffectedProduct');
 
-	
+	Route::get('validate-errors-search-form/{str}', 'Web\ErrorController@validateErrorsSearchForm');
 	
 	/*
 	 * ========================================================================================================================
@@ -186,6 +190,13 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('store-station-recipient/{uuid}', 'Web\StationController@storeStationRecipient');
 	Route::get('delete-station-recipient/{stn_uuid}/{user_uuid}', 'Web\StationController@deleteStationRecipient');
 	Route::get('destroy-station-recipient/{stn_uuid}/{user_uuid}', 'Web\StationController@destroyStationRecipient');
+	Route::get('add-station-supervisor/{uuid}', 'Web\StationController@addStationSupervisor');
+	Route::post('store-station-supervisor/{uuid}', 'Web\StationController@storeStationSupervisor');
+	Route::get('delete-station-supervisor/{stn_uuid}/{acc_uuid}', 'Web\StationController@deleteStationSupervisor');
+	Route::get('destroy-station-supervisor/{stn_uuid}/{acc_uuid}', 'Web\StationController@destroyStationSupervisor');
+	Route::get('edit-station-supervisor/{uuid}/{acc_id}', 'Web\StationController@editStationSupervisor');
+	Route::post('update-station-supervisor/{uuid}/{sup_uuid}', 'Web\StationController@updateStationSupervisor');
+	Route::get('show-station-supervisor/{uuid}', 'Web\StationController@showStationSupervisor');
 
 });
 

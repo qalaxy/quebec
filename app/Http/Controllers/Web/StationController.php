@@ -278,5 +278,193 @@ class StationController extends Controller
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to remove a recipient from a station'));
 		}
 	}
+
+	public function addStationSupervisor($uuid){
+		if(Auth::user()->can('create_stations')){
+			$station = $this->ext->getStation($uuid); //return var_dump($station->name);
+			if(!is_object($station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
+			
+			$accounts = $this->ext->getUnaddedSupervisors($station); //return var_dump($accounts->first()->name);
+			if(!is_object($accounts))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$accounts));
+			
+			if(View::exists('w3.create.station-supervisor')){
+				if(count($accounts)){
+					return view('w3.create.station-supervisor')
+						->with(compact('station', 'accounts'))
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * sholuld not be left blank'));
+				}else{
+					return view('w3.create.station-supervisor')
+						->with(compact('station', 'accounts'))
+						->with('notification', array('indicator'=>'warning', 'message'=>'No officer to be added to the station as supervisor'));
+				}
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add supervisor to a station'));
+		}
+	}
+
+	public function storeStationSupervisor(Request $request, $uuid){
+		if(Auth::user()->can('create_stations')){
+			$validation = $this->ext->validateStationSupervisorData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+						->withInput()
+						->with('notification', $this->ext->validation);
+			}
+			
+			$station = $this->ext->getStation($uuid);
+			if(!is_object($station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
+			
+			$account = $this->ext->getAccount($request['account_id']);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$notification = $this->mnt->createStationSupervisor($request->all(), $station, $account);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.station'))
+					return redirect('station/'.$uuid)->with(compact('notification'));
+				else
+					return back()->with('notification', $this->ext->missing_view);
+			}else{
+				return back()->with(compact('notification'))->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add supervisor to the station'));
+		}
+	}
+
+	public function editStationSupervisor($stn_uuid, $acc_uuid){
+		if(Auth::user()->can('edit_stations')){
+			$station = $this->ext->getStation($stn_uuid); //return var_dump($station->name);
+			if(!is_object($station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
+
+			$account = $this->ext->getAccount($acc_uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+
+			$supervisor = $this->ext->getStationSupervisor($station, $account);  
+			if(!is_object($supervisor))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$supervisor));
+
+			$supervisor->from = date_format(date_create($supervisor->from), 'Y-m-d'); 
+			if(isset($supervisor->to)) $supervisor->to = date_format(date_create($supervisor->to), 'Y-m-d');
+
+			$accounts = $this->ext->getUnaddedSupervisors($station, $account);
+			if(!is_object($accounts))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$accounts));
+			
+			if(View::exists('w3.edit.station-supervisor')){
+				if(count($accounts)){
+					return view('w3.edit.station-supervisor')
+						->with(compact('station', 'accounts', 'supervisor'))
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * sholuld not be left blank'));
+				}else{
+					return view('w3.create.station-supervisor')
+						->with(compact('station', 'accounts', 'supervisor'))
+						->with('notification', array('indicator'=>'warning', 'message'=>'No officer to be added to the station as supervisor'));
+				}
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add supervisor to a station'));
+		}
+	}
+
+	public function updateStationSupervisor(Request $request, $stn_uuid, $sup_uuid){
+		if(Auth::user()->can('edit_stations')){
+			$validation = $this->ext->validateStationSupervisorData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+						->withInput()
+						->with('notification', $this->ext->validation);
+			}
+			
+			$account = $this->ext->getAccount($request['account_id']);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+
+			$supervisor = $this->ext->getSupervisor($sup_uuid);
+			if(!is_object($supervisor))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$supervisor));
+			
+			$notification = $this->mnt->editStationSupervisor($supervisor, $request->all(), $account);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.station'))
+					return redirect('station/'.$stn_uuid)->with(compact('notification'));
+				else
+					return back()->with('notification', $this->ext->missing_view);
+			}else{
+				return back()->with(compact('notification'))->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to edit supervisor to the station'));
+		}
+	}
+
+	public function showStationSupervisor($uuid){
+		if(Auth::user()->can('view_stations')){
+			$supervisor = $this->ext->getSupervisor($uuid); //return $supervisor;
+
+			
+			if(is_object($supervisor)){
+				return $this->ext->showStationSupervisor($supervisor);
+			}
+			
+		}else{
+			return $this->ext->invalidRequest();
+		}
+	}
+	
+	public function deleteStationSupervisor($stn_uuid, $acc_uuid){
+		if(session()->has('params')) session()->reflash();
+		
+		if(Auth::user()->can('delete_stations')){
+			
+			$station = $this->ext->getStation($stn_uuid);
+			
+			$account = $this->ext->getAccount($acc_uuid);
+			if(is_object($account) && is_object($station)){
+				return $this->ext->deleteStationStation($station, $account);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to remove a supervisor from a station'));
+		}
+	}
+	
+	public function destroyStationSupervisor($stn_uuid, $acc_uuid){
+		if(Auth::user()->can('delete_stations')){
+			
+			$station = $this->ext->getStation($stn_uuid);
+			if(!is_object($station))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$station));
+			
+			$account = $this->ext->getAccount($acc_uuid);
+			if(is_null($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
+			
+			$supervisor = $this->ext->getStationSupervisor($station, $account);
+			if(!is_object($supervisor))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$supervisor));
+			
+			$notification = $this->mnt->deleteStationSupervisor($supervisor);
+			if(in_array('success', $notification)){
+				if(View::exists('w3.show.station'))
+					return redirect('station/'.$stn_uuid)->with(compact('notification'));
+				else
+					return back()->with('notification', $this->ext->missing_view);
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to remove a supervisor from a station'));
+		}
+	}
 	
 }

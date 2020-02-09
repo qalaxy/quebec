@@ -133,6 +133,10 @@
 				<tr>
 					<td class="w3-padding">Remarks: </td>
 					<td class="w3-padding" style="text-align: justify;">{{$supervisor_reaction['remarks']}}</td>
+				</tr><!-- supervisor -->
+				<tr>
+					<td class="w3-padding">Supervisor: </td>
+					<td class="w3-padding" style="text-align: justify;">{{$supervisor_reaction['supervisor']}}</td>
 				</tr>
 			</table>
 			@endif

@@ -39,12 +39,302 @@ class ErrorExt extends Base{
 	}
 	
 	public function searchErrors(array $data){
+		$corrections = null; $errors = null;
 		try{
-			$errors = Error::where($this->prepareSearchParam($data, ['user_id', 'function_id', 'station_id', 'created_at']))
-								->orderBy('id', 'desc')
-								->paginate($this->error_data->rows);
+			$params = $this->prepareSearchParam($data, ['number', 'originator_id', 'function_id', 'station_id', 'error_from', 'error_to', 'correction_from', 'correction_to']);
+
+			foreach($data as $key=>$value){
+				foreach($params as $param){
+					if($key == $param[0]){
+						continue 2;
+					}
+				}
+				unset($data[$key]);
+			}
+
+			//return $data;
+
+			if(array_key_exists('originator_id', $data) 
+				&& array_key_exists('correction_from', $data) 
+				&& array_key_exists('correction_to', $data)){
+				$corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
+								->join('users', 'aio_errors.originator_id', '=', 'users.id')
+								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+								->join('status', 'error_correction_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->where('users.uuid', $data['originator_id'])
+								->whereBetween('error_corrections.created_at', [$data['correction_from'], $data['correction_to']])
+								->whereNull('error_corrections.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state',
+									);
+
+
+			}else if(array_key_exists('originator_id', $data) 
+				&& array_key_exists('correction_from', $data)){
+				$corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
+								->join('users', 'aio_errors.originator_id', '=', 'users.id')
+								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+								->join('status', 'error_correction_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->where('users.uuid', $data['originator_id'])
+								->where('error_corrections.created_at', '>=', $data['correction_from'])
+								->whereNull('error_corrections.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state',
+									);
+
+			}else if(array_key_exists('originator_id', $data) 
+				&& array_key_exists('correction_to', $data)){
+				$corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
+								->join('users', 'aio_errors.originator_id', '=', 'users.id')
+								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+								->join('status', 'error_correction_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->where('users.uuid', $data['originator_id'])
+								->where('error_corrections.created_at', '<=', $data['correction_to'])
+								->whereNull('error_corrections.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state',
+									);
+
+			}else if(array_key_exists('originator_id', $data)){
+				$corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
+								->join('users', 'aio_errors.originator_id', '=', 'users.id')
+								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+								->join('status', 'error_correction_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->where('users.uuid', $data['originator_id'])
+								->whereNull('error_corrections.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state',
+									);
+
+			}else if(array_key_exists('correction_from', $data) 
+				&& array_key_exists('correction_to', $data)){
+				$corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+								->join('status', 'error_correction_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->whereBetween('error_corrections.created_at', [$data['correction_from'], $data['correction_to']])
+								->whereNull('error_corrections.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state',
+									);
+
+			}else if(array_key_exists('correction_from', $data)){
+				$corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+								->join('status', 'error_correction_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->where('error_corrections.created_at', '>=', $data['correction_from'])
+								->whereNull('error_corrections.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state',
+									);
+
+			}else if(array_key_exists('correction_to', $data)){
+				$corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
+								->join('status', 'error_correction_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->where('error_corrections.created_at', '<=', $data['correction_to'])
+								->whereNull('error_corrections.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state',
+									);
+
+			}else{
+				$corrections = null;
+			}
+
+
+			$p = array();
+			$keys = [
+						['number', 'errors.number'], 
+						['function_id', 'functions.uuid'], 
+						['station_id', 'stations.uuid'], 
+					];
+
+			foreach($data as $i=>$value){
+				foreach($keys as $key){
+					if($i == $key[0]){
+						array_push($p, [$key[1], $value]);
+						continue 2;
+					}
+				}
+			}
+
+
+			if(array_key_exists('error_from', $data) && array_key_exists('error_to', $data)){
+				$errors = DB::table('errors')
+							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+							->join('functions', 'errors.function_id', '=', 'functions.id')
+							->join('error_status', 'errors.id', '=', 'error_status.error_id')
+							->join('status', 'error_status.status_id', '=', 'status.id')
+							->join('states', 'status.state_id', '=', 'states.id')
+							->where($p)
+							->whereBetween('errors.created_at', [$data['correction_from'], $data['correction_to']])
+							->whereNull('errors.deleted_at')
+							->select('errors.uuid',
+									'errors.number',
+									'stations.abbreviation as station_abbreviation',
+									'functions.abbreviation as function_abbreviation',
+									'stations.name as station',
+									'errors.description',
+									'errors.created_at',
+									'states.name as state',
+								);
+
+			}elseif(array_key_exists('error_from', $data)){
+				$errors = DB::table('errors')
+							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+							->join('functions', 'errors.function_id', '=', 'functions.id')
+							->join('error_status', 'errors.id', '=', 'error_status.error_id')
+							->join('status', 'error_status.status_id', '=', 'status.id')
+							->join('states', 'status.state_id', '=', 'states.id')
+							->where($p)
+							->where('errors.created_at', '>=', [$data['correction_from']])
+							->whereNull('errors.deleted_at')
+							->select('errors.uuid',
+									'errors.number',
+									'stations.abbreviation as station_abbreviation',
+									'functions.abbreviation as function_abbreviation',
+									'stations.name as station',
+									'errors.description',
+									'errors.created_at',
+									'states.name as state',
+								);
+
+			}elseif(array_key_exists('error_to', $data)){
+				$errors = DB::table('errors')
+							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+							->join('functions', 'errors.function_id', '=', 'functions.id')
+							->join('error_status', 'errors.id', '=', 'error_status.error_id')
+							->join('status', 'error_status.status_id', '=', 'status.id')
+							->join('states', 'status.state_id', '=', 'states.id')
+							->where($p)
+							->where('errors.created_at', '<=', [$data['correction_to']])
+							->whereNull('errors.deleted_at')
+							->select('errors.uuid',
+									'errors.number',
+									'stations.abbreviation as station_abbreviation',
+									'functions.abbreviation as function_abbreviation',
+									'stations.name as station',
+									'errors.description',
+									'errors.created_at',
+									'states.name as state',
+								);
+			}else{
+				$errors = DB::table('errors')
+							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+							->join('functions', 'errors.function_id', '=', 'functions.id')
+							->join('error_status', 'errors.id', '=', 'error_status.error_id')
+							->join('status', 'error_status.status_id', '=', 'status.id')
+							->join('states', 'status.state_id', '=', 'states.id')
+							->where($p)
+							->whereNull('errors.deleted_at')
+							->select('errors.uuid',
+									'errors.number',
+									'stations.abbreviation as station_abbreviation',
+									'functions.abbreviation as function_abbreviation',
+									'stations.name as station',
+									'errors.description',
+									'errors.created_at',
+									'states.name as state',
+								);
+			}
+
+			if($corrections){
+				$errors = $errors->union($corrections)->paginate($this->error_data->rows);
+			}else{
+				$errors = $errors->paginate($this->error_data->rows);
+			}
+
 			if(is_null($errors)){
 				throw new Exception('Errors could not be retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $errors;
+	}
+
+	public function getErrorsWithUuids(array $uuids){
+		try{
+			$errors = Error::withUuids($uuids)->get();
+			if(is_null($errors)){
+				throw new Exception('Errors have not been retrieved successfully');
 			}
 		}catch(Exception $e){
 			return $e->getMessage();
@@ -54,9 +344,28 @@ class ErrorExt extends Base{
 	
 	public function getPaginatedErrors(){
 		try{
-			$errors = Error::orderBy('id', 'desc')->paginate($this->error_data->rows);
+			$errors = DB::table('errors')
+						->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+						->join('functions', 'errors.function_id', '=', 'functions.id')
+						->join('error_status', 'errors.id', '=', 'error_status.error_id')
+						->join('status', 'error_status.status_id', '=', 'status.id')
+						->join('states', 'status.state_id', '=', 'states.id')
+						->join('account_station', 'stations.id', '=', 'account_station.station_id')
+						->join('accounts', 'account_station.account_id', '=', 'accounts.id')
+						->where('accounts.id', Auth::user()->account()->first()->id)
+						->whereNull('errors.deleted_at')
+						->select('errors.uuid',
+								'errors.number',
+								'stations.abbreviation as station_abbreviation',
+								'functions.abbreviation as function_abbreviation',
+								'stations.name as station',
+								'errors.description',
+								'errors.created_at',
+								'states.name as state',
+							)
+						->paginate($this->error_data->rows);
 			if(is_null($errors)){
-				throw new Exception('Erros could not be retrieved successfully');
+				throw new Exception('Errors could not be retrieved successfully');
 			}
 		}catch(Exception $e){
 			return $e->getMessage();
@@ -122,9 +431,11 @@ class ErrorExt extends Base{
 	
 	public function validateErrorData(array $data){
 		$rules = [
-				$this->error_data->reported_station_id_key => 'sometimes|'.$this->error_data->station_id_req,
+			$this->error_data->reported_station_id_key => (isset($data['error_id'])?'sometimes|':null)
+															.$this->error_data->station_id_req,
 				$this->error_data->reporting_station_id_key => $this->error_data->station_id_req,
-				$this->error_data->function_id_key => 'sometimes|'.$this->error_data->function_id_req,
+				$this->error_data->function_id_key => (isset($data['error_id'])?'sometimes|':null)
+													.$this->error_data->function_id_req,
 				//$this->error_data->date_time_created_key => $this->error_data->date_time_created_req,
 				$this->error_data->description_key => $this->error_data->description_req,
 				$this->error_data->impact_key => $this->error_data->impact_req, 
@@ -139,6 +450,40 @@ class ErrorExt extends Base{
 								$this->error_data->error_data_validation_msgs['date_time_created.before']);*/
 								
 		return Validator::make($data, $rules, $this->error_data->error_data_validation_msgs);
+	}
+
+	public function validateSerachErrorData(array $data){
+		//get top level
+		//if(is_null($this->verifyTopLevelKey($data, 'error_search_data')))
+		//	return ['data'=>'Missing data top level key'];
+
+		$rules = [
+			'number' => $this->error_data->error_search_number_req,
+			'station' => $this->error_data->error_search_station_req,
+			'func' => $this->error_data->error_search_function_req,
+			'originator' => $this->error_data->error_search_originator_req,
+			'error_from' => $this->error_data->error_search_error_from_req,
+			'error_to' => $this->error_data->error_search_error_to_req,
+			'correction_from' => $this->error_data->error_search_correction_from_req,
+			'correction_to' => $this->error_data->error_search_correction_to_req,
+		];
+
+		$errors = Validator::make($data['error_search_data'], 
+								$rules, 
+								$this->error_data->validate_error_search_data_msgs)
+							->errors();
+
+
+		return array('number' => $errors->first('number'),
+					'station' => $errors->first('station'),
+					'func' => $errors->first('func'),
+					'originator' => $errors->first('originator'),
+					'error_from' => $errors->first('error_from'),
+					'error_to' => $errors->first('error_to'),
+					'correction_from' => $errors->first('correction_from'),
+					'correction_to' => $errors->first('correction_to'),
+					'status' => boolval(count($errors)),
+			);
 	}
 	
 	public function getFunction($uuid){
@@ -726,11 +1071,10 @@ class ErrorExt extends Base{
 								? 'I agree with the corrective action'
 								: 'I disagree with the corrective action',
 					'remarks'=>$error->errorCorrection()->first()->supervisorReaction()->first()->remarks,
+					'supervisor'=>$error->errorCorrection()->first()->supervisorReaction()->first()->user()->first()->name,
 				];
 			}
 		}
-		
-		
 		
 		return [
 			'reported_error' => $reported_error,
@@ -744,7 +1088,7 @@ class ErrorExt extends Base{
 	public function errorsPdfData($errors){
 		$data = array();
 		foreach($errors as $error){
-			
+			//array_push($data, $this->errorPdfData($this->getError($error->uuid)));
 			array_push($data, $this->errorPdfData($error));
 		}
 		
@@ -812,6 +1156,7 @@ class ErrorExt extends Base{
 								->where('aio_errors.originator_id', Auth::id())
 								->where('states.code', '<>', 4)
 								->whereNull('errors.deleted_at')
+								->whereNull('aio_errors.deleted_at')
 								->whereNotIn('error_corrections.id', function($query){
 									$query->select(DB::raw('error_correction_id'))
 										->from('originator_reactions')
@@ -838,6 +1183,7 @@ class ErrorExt extends Base{
 									->where('supervisors.account_id', Auth::user()->account()->first()->id)
 									->where('states.code', 3)
 									->whereNull('errors.deleted_at')
+									->whereNull('supervisors.deleted_at')
 									->select('errors.number', 
 											'errors.uuid', 
 											'stations.name as station', 
@@ -960,6 +1306,35 @@ class ErrorExt extends Base{
 		}
 		return $states;
 	}
+
+	public function deleteErrorOriginatorReaction(object $error){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete originator reaction to error: '
+							.$error->reportedStation()->first()->abbreviation
+							.'/'.$error->func()->first()->abbreviation
+							.'/'.$error->number
+							.'/'.date_format(date_create($error->created_at), 'y')
+						.'</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-8 w3-large">Your are about to delete error originator reaction:</p>
+						<p><strong>Status:</strong> '.((boolval($error->errorCorrection()->first()->originatorReaction()->first()->status)) ? 'I agree with the corrective action': 'I Disagree with the corrective action')
+						.'<br /> <br /><strong>Remarks:</strong> '.$error->errorCorrection()->first()->originatorReaction()->first()->remarks
+						.'<br /><br /><strong>Originator: </strong>'.$error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->name
+						.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-error-originator-reaction').'/'.$error->uuid.'" title="Delete error originator reaction">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
 	
 	public function validateSupervisorReactionData(array $data){
 		$rules = [
@@ -1007,5 +1382,10 @@ class ErrorExt extends Base{
 			return $e->getMessage();
 		}
 	}
+
+	public function getSomethingHere(){
+		return null;
+	}
+
 }
 ?>

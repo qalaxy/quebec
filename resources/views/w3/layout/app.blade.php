@@ -98,7 +98,7 @@
   <p>
 	  <nav>
 		  <span target="_blank">AIM Kenya</span> |
-		  <span target="_top">&copy;2019</span>
+		  <span target="_top">&copy;2020</span>
 	  </nav>
   </p>
 </footer>

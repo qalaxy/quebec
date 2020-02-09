@@ -150,6 +150,26 @@ class Base{
 					</footer>
 				</div>';
 	}
+
+	public function invalidRequest(){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-theme"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Invalid deletion</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-8 w3-large">Sorry, your request is not valid</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<button class="w3-button w3-large w3-theme w3-hover-light-blue" title="Dismiss" onclick="document.getElementById(\'delete\').style.display=\'none\'">OK&nbsp;</button>
+							</div>
+						</div>
+					</footer>
+				</div>';
+	}
 }
 
 ?>
