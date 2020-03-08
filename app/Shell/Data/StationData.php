@@ -37,7 +37,7 @@ class StationData{
 
 		'from.required' => 'You have not entered the date the officer begins as a supervisor in the station',
 		'from.date' => 'Value entered should be date',
-		'from.before_or_equal' => 'Date entered should be equal to or later than today',
+		'from.before_or_equal' => 'Date entered should be equal to or ealier than today',
 
 		'to.date' => 'Value entered should be date',
 		'to.after_or_equal' => 'Date entered should be equal to or later than the date officer begun as a supervisor at the station',
