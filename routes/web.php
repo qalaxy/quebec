@@ -87,6 +87,9 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('update-account/{uuid}', 'Web\AccountController@updateAccount');
 	Route::get('delete-account/{uuid}', 'Web\AccountController@deleteAccount');
 	Route::get('destroy-account/{uuid}', 'Web\AccountController@destroyAccount');
+
+	Route::get('edit-account-credentials/{uuid}', 'Web\AccountController@editAccountCredentials');
+	Route::post('update-account-credentials/{uuid}', 'Web\AccountController@updateAccountCredentials');
 	
 	Route::get('emails/{uuid}', 'Web\AccountController@addEmail');
 	Route::get('add-email/{uuid}', 'Web\AccountController@addEmail');
@@ -130,6 +133,7 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	 *
 	 */	
 	Route::any('errors-pdf', 'Web\ErrorController@errorsPdf');
+	//Route::any('/', 'Web\ErrorController@errors'); /*Current home page*/
 	Route::any('errors', 'Web\ErrorController@errors');
 	Route::any('error-notifications', 'Web\ErrorController@errorNotifications');
 	Route::any('count-error-notifications', 'Web\ErrorController@countErrorNotifications');
@@ -168,6 +172,9 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	
 	Route::get('edit-error-supervisor-reaction/{uuid}', 'Web\ErrorController@editErrorSupervisorReaction');
 	Route::post('update-error-supervisor-reaction/{uuid}', 'Web\ErrorController@updateErrorSupervisorReaction');
+
+	Route::get('delete-error-supervisor-reaction/{uuid}', 'Web\ErrorController@deleteErrorSupervisorReaction');
+	Route::get('destroy-error-supervisor-reaction/{uuid}', 'Web\ErrorController@destroyErrorSupervisorReaction');
 
 	Route::get('get-affected-product/{uuid}', 'Web\ErrorController@getAffectedProduct');
 	Route::get('delete-affected-product/{uuid}', 'Web\ErrorController@deleteAffectedProduct');

@@ -35,6 +35,7 @@ class ErrorData{
 	public $supervisor_reaction_key = 'supervisor_reaction';
 	public $error_correction_id_key = 'error_correction_id';
 	public $aio_error_id_key = 'aio_error_id';
+	public $sts_key = 'sts';
 	
 	
 	public $function_id_req = 'required|uuid';

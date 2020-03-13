@@ -136,7 +136,7 @@ class StationController extends Controller
 				return $this->ext->invalidDeletion();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to remove a funtion from a station'));
+			return $this->ext->invalidDeletion('You are not allowed to remove a funtion from a station', 'w3-red');
 		}
 	}
 	
@@ -436,7 +436,7 @@ class StationController extends Controller
 				return $this->ext->invalidDeletion();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to remove a supervisor from a station'));
+			return $this->ext->invalidDeletion('You are not allowed to remove a supervisor from a station', 'w3-red');
 		}
 	}
 	

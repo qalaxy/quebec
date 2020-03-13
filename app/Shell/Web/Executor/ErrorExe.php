@@ -244,7 +244,8 @@ class ErrorExe extends Base{
 									$this->error_data->error_correction_id_key => $error_correction->id,
 									$this->error_data->aio_error_id_key => $error_correction->aioError()->first()->id,
 									$this->error_data->status_key => $this->data[$this->error_data->originator_reaction_key],
-									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],));
+									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
+									$this->error_data->sts_key => 1,));
 			if(is_null($originator_reaction)){
 				throw new Exception('Originator reaction has not been created successfully');
 			}else{
@@ -279,7 +280,9 @@ class ErrorExe extends Base{
 									$this->error_data->error_correction_id_key => $error_correction->id,
 									$this->error_data->user_id_key => Auth::id(),
 									$this->error_data->status_key => $this->data[$this->error_data->supervisor_reaction_key],
-									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key]));
+									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
+									$this->error_data->sts_key => 1
+								));
 			
 			if(is_null($supervisor_reaction)){
 				throw new Exception('Supervisor reaction has not been created successfully');
@@ -381,12 +384,40 @@ class ErrorExe extends Base{
 		}
 		return $reaction;
 	}
+
+	protected function annulOriginatorReaction($originator_reaction){
+		try{
+			$reaction = $originator_reaction->update(array($this->error_data->sts_key => 0));
+			if(is_null($reaction)){
+				throw new Exception('Originator reaction cannot be annulled');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $reaction;
+	}
+
+	protected function annulSupervisorReaction($supervisor_reaction){
+		try{
+			$reaction = $supervisor_reaction->update(array($this->error_data->sts_key => 0));
+			if(is_null($reaction)){
+				throw new Exception("Supervisor reaction cannot be annulled");
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $reaction;
+	}
 	
 	protected function updateSupervisorReaction($reaction){
 		try{
 			$sup_reaction = $reaction->update(array($this->error_data->user_id_key => Auth::id(),
-			$this->error_data->status_key => $this->data[$this->error_data->supervisor_reaction_key],
-						$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key]));
+						$this->error_data->status_key => $this->data[$this->error_data->supervisor_reaction_key],
+						$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
+						$this->error_data->sts_key => 1,
+					));
 			if(is_null($sup_reaction)){
 				throw new Exception('Supervisor reaction has not been updated successfully');
 			}else{
@@ -468,8 +499,8 @@ class ErrorExe extends Base{
 		try{
 			$func_error = $originator_reaction->update(array(
 									$this->error_data->status_key => $this->data[$this->error_data->originator_reaction_key],
-									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],)
-									);
+									$this->error_data->remarks_key => $this->data[$this->error_data->remarks_key],
+									$this->error_data->sts_key => 1,));
 			if(is_null($func_error)){
 				throw new  Exception("Error originator reaction has not been updated successfully");	
 			}else{
@@ -489,6 +520,21 @@ class ErrorExe extends Base{
 				throw new Exception('Error originator reaction has not been deleted successfully');
 			}else{
 				$this->success = array('indicator' => 'success', 'message'=>'Error originator reaction has been deleted successfully');
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $reaction;
+	}
+
+	protected function destroyErrorSupervisorReaction($supervisor_reaction){
+		try{
+			$reaction = $supervisor_reaction->delete();
+			if(is_null($reaction)){
+				throw new Exception('Error supervisor reaction has not been deleted successfully');
+			}else{
+				$this->success = array('indicator' => 'success', 'message'=>'Error supervisor reaction has been deleted successfully');
 			}
 		}catch(Exception $e){
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());

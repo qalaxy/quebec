@@ -102,7 +102,7 @@ class StationExt extends Base{
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
 						class="w3-button w3-display-topright">&times;</span>
-						<h2>Remove station\' function</h2>
+						<h2>Remove station\'s function</h2>
 					</header>
 					<div class="w3-container">
 						<p class="w3-padding-middle w3-large">Your are about to remove a function from a station:</p>

@@ -160,6 +160,7 @@ class CreateErrorTables extends Migration
 			$table->unsignedBigInteger('aio_error_id');
 			$table->boolean('status');
 			$table->string('remarks')->nullable();
+			$table->boolean('sts');
 			$table->timestamps();
 			$table->softDeletes();
 			$table->foreign('error_correction_id')->references('id')->on('error_corrections')->onUpdate('cascade')->onDelete('cascade');
@@ -185,6 +186,7 @@ class CreateErrorTables extends Migration
 			$table->unsignedBigInteger('error_correction_id');
 			$table->boolean('status');
 			$table->string('remarks')->nullable();
+			$table->boolean('sts');
 			$table->timestamps();
 			$table->softDeletes();
 			$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');

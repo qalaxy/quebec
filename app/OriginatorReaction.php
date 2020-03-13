@@ -13,7 +13,7 @@ class OriginatorReaction extends Model
 	
 	protected $table = 'originator_reactions';
 	
-	protected $fillable = ['uuid', 'error_correction_id', 'aio_error_id', 'status', 'remarks'];
+	protected $fillable = ['uuid', 'error_correction_id', 'aio_error_id', 'status', 'remarks', 'sts'];
 	
 	public function errorCorrection(){
 		$this->belongsTo('App\ErrorCorrection', 'error_correction_id');

@@ -131,15 +131,15 @@ class Base{
 		return $ids;
 	}
 	
-	public function invalidDeletion(){
+	public function invalidDeletion($msg=null, $indicator=null){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
-					<header class="w3-container w3-theme"> 
+					<header class="w3-container '.($indicator ?: "w3-theme").'"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
 						class="w3-button w3-display-topright">&times;</span>
 						<h2>Invalid deletion</h2>
 					</header>
 					<div class="w3-container">
-						<p class="w3-padding-8 w3-large">Sorry, your deletion request is not valid</p>
+						<p class="w3-padding-8 w3-large">'.($msg ?: "Sorry, your deletion request is not valid").'</p>
 					</div>
 					<footer class="w3-container ">
 						<div class="w3-row w3-padding-16">

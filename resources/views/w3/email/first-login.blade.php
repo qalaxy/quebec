@@ -14,8 +14,7 @@
 		<div class="w3-container">
 			<h2 class="w3-blue">Registration to AIM System</h2>
 			<p class="w3-leftbar">You have been registered anew by <strong>{{$user->account()->first()->owner()->first()->name}}</strong> in AIM System.</p>
-			<p class="w3-leftbar">Click on the button below to log in</p>
-			<a class="w3-button w3-blue" href="{{config('app.url').'/first-login/'.encrypt($user->uuid)}}">Login<a>
+			<p class="w3-leftbar">Click <a class="w3-button w3-blue" href="{{config('app.url').'/first-login/'.encrypt($user->uuid)}}">here<a> to log in</p>
 		</div>
 	</body>
 </html>

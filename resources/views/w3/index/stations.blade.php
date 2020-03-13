@@ -108,7 +108,7 @@
 @section('scripts')
 <script>
 
-document.getElementById('roles').className += " w3-text-blue";
+document.getElementById('stations').className += " w3-text-blue";
 document.getElementById('menu-administration').className += " w3-text-blue";
 menuAcc('administration');
 w3_show_nav('menuQMS');

@@ -84,8 +84,8 @@
 				</tr>
 				@foreach($permissions as $permission)
 				<tr>
-					<td><a href="{{url('permission/'.$permission->uuid)}}" style="text-decoration:none;">{{$permission->display_name}}</a></td>
-					<td><a href="{{url('permission/'.$permission->uuid)}}" style="text-decoration:none;">{{$permission->description}}</a></td>
+					<td>{{$permission->display_name}}</td>
+					<td>{{$permission->description}}</td>
 					<td><button class="w3-button" onclick="deleteRolePerm('{{$role->uuid}}', '{{$permission->uuid}}');" title="Delete {{$permission->display_name}}">
 						<i class="fa fa-trash fa-lg"></i>
 						</button>

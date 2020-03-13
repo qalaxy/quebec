@@ -9,6 +9,8 @@
 <link rel="icon" href="{{asset('public/images/logo/kcaa.png')}}">
 <body>
 
+@yield('style')
+
 <!-- Top -->
 <div class="w3-top">
   <div class="w3-row w3-white w3-padding">
@@ -22,12 +24,13 @@
 		onclick="w3_show_nav('menuQMS')"
 		id="qms-bar-item">QMS</a>
 	
-	<div class=" w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-light-blue w3-padding-16 w3-right w3-dropdown-hover">
+	<div class=" w3-bar-item w3-button w3-hover-light-blue w3-padding-16 w3-right w3-dropdown-hover">
 	  <span ><i class="fa fa-user fa-lg"></i>&nbsp;{{(Auth::user()) ? Auth::user()->name : null}}&nbsp;<i class="fa fa-caret-down"></i></span>
 	  <div id="user" class="w3-dropdown-content w3-bar-block w3-border" style="right:0">
-		<a href="javascript:void(0)" class="w3-bar-item w3-button">Account</a>
+		<a href="{{url('/account/'.Auth::user()->account()->first()->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue w3-small">Account</a>
+    <a href="javascript:void(0)" class="w3-bar-item w3-button w3-hover-light-blue w3-small">Settings</a>
 		<a href="{{ route('logout') }}" 
-			class="w3-bar-item w3-button" 
+			class="w3-bar-item w3-button w3-hover-light-blue w3-small" 
 			onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
 		<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf
@@ -48,10 +51,10 @@
   <div class="w3-container">
     <h3 style="color:#3498DB">Home</h3>
   </div>
-  <a class="w3-bar-item w3-button w3-hover-light-blue w3-light-gray" href="{{asset('/home')}}">Home</a>
-  <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/home-one')}}">About</a>
-  <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/home')}}">Projects</a>
-  <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/home')}}">Contact</a>
+  <a class="w3-bar-item w3-button w3-hover-light-blue w3-light-gray" href="{{url('/home#home')}}">Home</a>
+  <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{url('/home#home-about')}}">About</a>
+  <a class="w3-bar-item w3-button w3-hover-light-blue" href="#">Help</a>
+  <!--<a class="w3-bar-item w3-button w3-hover-light-blue" href="{{url('/#contacts')}}">Help/a>-->
   
   </div>
   <div id="menuQMS" class="myMenu" style="display:none">
@@ -63,10 +66,7 @@
 	Administration <i class="fa fa-caret-down"></i>
   </button>
   <div id="administration" class="w3-hide w3-white w3-card w3-margin-left w3-leftbar w3-border-gray w3-text-blue-gray">
-    <!--<a id="permissions" href="{{url('/permissions')}}" class="w3-bar-item w3-button w3-hover-light-blue">Permissions</a>-->
     <a id="roles" href="{{url('/roles')}}" class="w3-bar-item w3-button w3-hover-light-blue">Roles</a>
-    <!--<a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Error status</a>
-    <a href="{{asset('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Offices</a>-->
     <a id="stations" href="{{url('/stations')}}" class="w3-bar-item w3-button w3-hover-light-blue">Stations</a>
     <a href="{{url('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Products</a>
     <a href="{{url('/')}}" class="w3-bar-item w3-button w3-hover-light-blue">Functions</a>
@@ -99,6 +99,11 @@
 	  <nav>
 		  <span target="_blank">AIM Kenya</span> |
 		  <span target="_top">&copy;2020</span>
+
+      <!-- Developed by Elias Korir and John Njoroge
+        AIM Officers at Kenya Civil Aviation Authority
+      -->
+
 	  </nav>
   </p>
 </footer>
@@ -160,7 +165,7 @@ function countErrorNotifications(){
 			if(xhr.responseText >= 1){
 				let qms = document.getElementById('qms-bar-item');
 				//qms.style.color = 'yellow';
-				qms.innerHTML = 'QMS<sup><span class="w3-badge w3-large">'+xhr.responseText+'</span></sup>';
+				qms.innerHTML = 'QMS<span class="w3-badge w3-large w3-yellow">'+xhr.responseText+'</span>';
 			}
 		}
 	}

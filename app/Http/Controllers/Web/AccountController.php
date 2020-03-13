@@ -106,10 +106,10 @@ class AccountController extends Controller
 			$notification = $this->mnt->createAccount($request->all()); 
 			if(in_array('success', $notification)){
 				//Send email to user to log in for the first time
-				//$first_login = $this->ext->sendFirstLoginEmail($notification['uuid']);
-				//$first_login = null;
+				$first_login = $this->ext->sendFirstLoginEmail($notification['uuid']);
+				$first_login = null;
 				
-				//if(is_string($first_login)) $notification['message'] .= '. '.$first_login;
+				if(is_string($first_login)) $notification['message'] .= '. '.$first_login;
 				
 				if(View::exists('w3.show.account')){
 					return redirect('account/'.$notification['uuid'])
@@ -127,7 +127,7 @@ class AccountController extends Controller
 	}
 	
 	public function showAccount($uuid){
-		if(Auth::user()->can('view_users')){
+		if(Auth::user()->can('view_users') || Auth::user()->account()->first()->uuid == $uuid){
 			$account = $this->ext->getAccount($uuid);
 			if(is_object($account)){
 				if(View::exists('w3.show.account')){
@@ -202,7 +202,7 @@ class AccountController extends Controller
 				return $this->ext->invalidDeletion();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s account'));
+			return $this->ext->invalidDeletion('You are not allowed to delete a user\'s account', 'w3-red');
 		}
 	}
 	
@@ -225,6 +225,60 @@ class AccountController extends Controller
 			}
 		}else{
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s account'));
+		}
+	}
+
+	public function editAccountCredentials($uuid){
+		if(Auth::user()->can('edit_users') || Auth::user()->account()->first()->uuid == $uuid){
+			$account = $this->ext->getAccount($uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $account));
+
+			if(View::exists('w3.edit.account-credentials')){
+				return view('w3.edit.account-credentials')->with(compact('account'))
+						->with(array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+			}else{
+				return back()->with('notification', $this->ext->missing_view);
+			}
+
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to change user\'s account credentials'));
+		}
+	}
+
+	public function updateAccountCredentials(Request $request, $uuid){ //return $uuid .'  '.Auth::user()->account()->first()->uuid;
+		if(Auth::user()->can('edit_users') || Auth::user()->account()->first()->uuid == $uuid){
+			$account = $this->ext->getAccount($uuid);
+			if(!is_object($account))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $account));
+
+			$request['uuid'] = $account->user()->first()->uuid;
+			$validation = $this->ext->validateAccountCredentialsData($request->all());
+			if($validation->fails()){
+				return back()->withErrors($validation)
+							->withInput()
+							->with('notification', $this->ext->validation);
+			}
+
+			$compare_password = $this->ext->comparePassword($request->all(), $account->user()->first());
+			if($compare_password)
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $compare_password));
+
+			$notification = $this->mnt->editAccountCredentials($request->all(), $account);
+			if(in_array('success', $notification)){
+				//Consider sending email to user to verify the email address
+
+				if(View::exists('w3.show.account')){
+					return redirect('account/'.$notification['uuid'])
+								->with(compact('notification'));
+				}else
+					return back()->with(compact('notification'));
+			}else{
+				return back()->with(compact('notification'))
+							->withInput();
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to change user\'s account credentials'));
 		}
 	}
 	
@@ -253,8 +307,9 @@ class AccountController extends Controller
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view users'));
 		}
 	}
+
 	public function addEmail($uuid){
-		if(Auth::user()->can('create_users')){
+		if(Auth::user()->can('create_users') || Auth::user()->account()->first()->uuid == $uuid){
 			$account = $this->ext->getAccount($uuid);
 			if(!is_object($account))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
@@ -271,7 +326,7 @@ class AccountController extends Controller
 	}
 	
 	public function storeEmail(Request $request, $uuid){
-		if(Auth::user()->can('create_users')){
+		if(Auth::user()->can('create_users') || Auth::user()->account()->first()->uuid == $uuid){
 			$validation = $this->ext->validateEmailData($request->all());
 			if($validation->fails()){
 				return redirect('add-email/'.$uuid)
@@ -301,7 +356,7 @@ class AccountController extends Controller
 	}
 	
 	public function editEmail($account_uuid, $email_uuid){
-		if(Auth::user()->can('edit_users')){
+		if(Auth::user()->can('edit_users') || Auth::user()->account()->first()->uuid == $account_uuid){
 			$account = $this->ext->getAccount($account_uuid);
 			if(!is_object($account))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
@@ -322,7 +377,7 @@ class AccountController extends Controller
 	}
 	
 	public function updateEmail(Request $request, $account_uuid, $email_uuid){
-		if(Auth::user()->can('edit_users')){
+		if(Auth::user()->can('edit_users') || Auth::user()->account()->first()->uuid == $account_uuid){
 			$validation = $this->ext->validateEmailData($request->all());
 			if($validation->fails()){
 				return redirect('edit-email/'.$account_uuid.'/'.$email_uuid)
@@ -354,7 +409,7 @@ class AccountController extends Controller
 	public function deleteEmail($account_uuid, $email_uuid){
 		if(session()->has('params')) session()->reflash();
 		
-		if(Auth::user()->can('delete_users')){
+		if(Auth::user()->can('delete_users') || Auth::user()->account()->first()->uuid == $account_uuid){
 			
 			$account = $this->ext->getAccount($account_uuid);
 			$email = $this->ext->getEmail($email_uuid);
@@ -364,12 +419,12 @@ class AccountController extends Controller
 				return $this->ext->invalidDeletion();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s email'));
+			return $this->ext->invalidDeletion('You are not allowed to delete a user\'s email', 'w3-red');
 		}
 	}
 	
 	public function destroyEmail($account_uuid, $email_uuid){
-		if(Auth::user()->can('delete_users')){
+		if(Auth::user()->can('delete_users') || Auth::user()->account()->first()->uuid == $account_uuid){
 			$email = $this->ext->getEmail($email_uuid);
 			if(is_object($email)){
 				$notification = $this->mnt->deleteEmail($email);
@@ -415,7 +470,7 @@ class AccountController extends Controller
 	}
 	
 	public function accountStations(Request $request, $uuid){
-		if(Auth::user()->can('view_users')){
+		if(Auth::user()->can('view_users') || Auth::user()->account()->first()->uuid == $uuid){
 			$account = $this->ext->getAccount($uuid);
 			if(!is_object($account))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$account));
@@ -572,7 +627,7 @@ class AccountController extends Controller
 				return $this->ext->invalidDeletion();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s station'));
+			return $this->ext->invalidDeletion('You are not allowed to delete a user\'s station', 'w3-red');
 		}
 	}
 	
@@ -790,7 +845,7 @@ class AccountController extends Controller
 				return $this->ext->invalidDeletion();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s supervisory'));
+			return $this->ext->invalidDeletion('You are not allowed to delete a user\'s supervisory', 'w3-red');
 		}
 	}
 	
@@ -841,7 +896,7 @@ class AccountController extends Controller
 				return back()->with('notification', $this->ext->missing_view);
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add user\'s supervisory'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add user\'s roles'));
 		}
 	}
 	
@@ -873,7 +928,7 @@ class AccountController extends Controller
 			}
 			
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add user\'s supervisory'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to add user\'s role'));
 		}
 		
 	}
@@ -892,7 +947,7 @@ class AccountController extends Controller
 				return $this->ext->invalidDeletion();
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s role'));
+			return $this->ext->invalidDeletion('You are not allowed to delete a user\'s role', 'w3-red');
 		}
 	}
 	
@@ -918,13 +973,13 @@ class AccountController extends Controller
 				return back()->with('notification', array('indicator'=>'warning', 'message'=> $role));
 			}
 		}else{
-			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s supervisory'));
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete a user\'s role'));
 		}
 	}
 	
-	public function accountRole($uuid){
+	public function accountRole($uuid){ 
 		if(session()->has('params')) session()->reflash();
-		
+		abort(404);
 		if(Auth::user()->can('view_users')){
 			
 			$role = $this->ext->getRole($uuid);

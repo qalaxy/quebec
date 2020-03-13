@@ -49,7 +49,7 @@ class AccountExe extends Base{
 										.' '.ucfirst($this->data[$this->acc_data->last_name_key]),
 							$this->acc_data->email_key=>$this->data[$this->acc_data->email_key],
 							$this->acc_data->password_key=>Hash::make('12345678'),//Str::random(8)
-							$this->acc_data->status_key=>1,
+							$this->acc_data->status_key=>0,
 							$this->acc_data->level_id_key=>Level::where('order', Level::max('order'))->first()->id,
 						));
 						
@@ -191,6 +191,23 @@ class AccountExe extends Base{
 			return null;
 		}
 		return $acc;
+	}
+
+	protected function updateAccountCredentials($account){
+		try{
+			$user = $account->user()->first()->update(array($this->acc_data->email_key => $this->data[$this->acc_data->email_key],
+								$this->acc_data->password_key => Hash::make($this->data[$this->acc_data->password_key])));
+
+			if(is_null($user)){
+				throw new Exception('Authentication credentials have not been updated successfully');
+			}else{
+				$this->success = array('indicator'=>'success', 'message'=>'Authentication credentials have been updated successfully', 'uuid' => $account->uuid);
+			}
+		}catch(Exception $e){
+			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());
+			return null;
+		}
+		return $user;
 	}
 	
 	protected function saveEmail($account){

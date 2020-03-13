@@ -84,7 +84,7 @@ class AccountData{
 		'station_id.uuid'=>'Station value should be a UUID',
 		'from.required'=>'You have not enter the date officer became a supervisor at the station',
 		'from.date'=>'From field should have a date entry',
-		'from.before_or_equal'=>'The date officer became a supervisor should be today before today',
+		'from.before_or_equal'=>'The date officer became a supervisor should be a date before today',
 		'to.required'=>'You have not enter the date officer end being a supervisor',
 		'to.date'=>'To field should have a date entry',
 		'to.after_or_equal'=>'The date officer cease being a supervisor should be later than the date the officer became a supervisor',
@@ -97,5 +97,21 @@ class AccountData{
 		'role_id.uuid'=>'Role value should be uuid',
 	];
 	
+	public $account_credentials_validation_msgs = [
+		'email.required' => 'You have not entered email address',
+		'email.email' => 'Enter correct format of email address',
+		'email.string' => 'Email address should be a string of characters',
+		'email.min' => 'Email address should have more than 255 characters',
+		'email.unique' => 'Another user is currently using this email address you have entered',
+
+		'old_password.required' => 'You have not entered the old password',
+		'old_password.min' => 'Old password should be a string of 8 or more characters',
+		'old_password.string' => 'Old password should be a string of characters',
+
+		'password.required' => 'You have not entered a new password',
+		'password.min' => 'New password should be a string of 8 or more characters',
+		'password.string' => 'New password should be a string of characters',
+		'password.confirm' => 'The new password and its confirmation do not match',
+	];
 }
 ?>

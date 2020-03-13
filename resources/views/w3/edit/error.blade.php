@@ -47,7 +47,7 @@
 					</div>
 					<div class="w3-row w3-padding-small">
 						<div class="w3-col s12 m10 l10 w3-left">
-							<label class="w3-text-dark-gray">Function<span class="w3-text-red">*</span></label>
+							<label class="w3-text-dark-gray">Function</label>
 							<select class="w3-select w3-border {{($errors->has('function_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 									id="functions"
 									name="function_id">
@@ -125,7 +125,7 @@
 												@php $selection = 'selected'; @endphp
 												{{$selection}}
 											@elseif(is_null($selection) 
-													&& $account_station->station->first()->uuid == $error->reportingStation()->first()->uuid)
+													&& $account_station->station()->first()->uuid == $error->reportingStation()->first()->uuid)
 												@php $selection = 'selected'; @endphp
 												{{$selection}}
 											@endif

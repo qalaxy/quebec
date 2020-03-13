@@ -30,13 +30,25 @@ class ErrorController extends Controller
 			}
 
 			//return $errors;
+			$stations = $this->ext->getStations();
+			if(!is_object($stations))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));
+
+			$functions = $this->ext->getFunctions();
+			if(!is_object($functions))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$functions));
+
+			$accounts = $this->ext->getAccounts();
+			if(!is_object($accounts))
+				return back()->with('notification', array('indicator'=>'warning', 'message'=>$accounts));
+
 
 			if(is_object($errors)){
 				if(View::exists('w3.index.errors'))
 					if(count($errors))
-						return view('w3.index.errors')->with(compact('errors'));
+						return view('w3.index.errors')->with(compact('errors', 'stations', 'functions', 'accounts'));
 					else
-						return view('w3.index.errors')->with(compact('errors'))
+						return view('w3.index.errors')->with(compact('errors', 'stations', 'functions', 'accounts'))
 								->with('notification', array('indicator'=>'warning', 'message'=>'Error(s) not found'));
 				else{
 					return back()->with('notification', $this->ext->missing_view);
@@ -166,6 +178,7 @@ class ErrorController extends Controller
 			
 			//return $error->errorCorrection()->first()->aioError()->first()->id;
 			//return var_dump($error->errorCorrection()->first()->status()->first()->state()->first()->code);
+		//return $error->errorCorrection()->first()->originatorReaction()->first()->sts;
 			
 			if(View::exists('w3.show.error')){
 				return view('w3.show.error')->with(compact('error'));
@@ -457,6 +470,13 @@ class ErrorController extends Controller
 					if(is_string($originator_email))
 						$notification['message'] .= '. ' . $originator_email;
 				}
+
+				//Send email to supervisor of the station
+				if($error->reportedStation()->first()->supervisor()->first()){
+					$supervisor_email = $this->ext->sendSupervisorErrorCorrectionEmail($error);
+					if(is_string($supervisor_email))
+						$notification['message'] .= '. ' . $supervisor_email;
+				}
 				
 				if(View::exists('w3.show.error'))
 					return redirect('error/'.$uuid)->with(compact('notification'));
@@ -470,7 +490,7 @@ class ErrorController extends Controller
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide corrective action for the errors'));
 		}
 	}
-	
+
 	public function editCorrectiveAction($uuid){
 		if(Auth::user()->can('edit_errors')){
 			$error = $this->ext->getError($uuid);
@@ -512,6 +532,8 @@ class ErrorController extends Controller
 					return back()->with('notification', array('indicator'=>'warning', 'message'=>$account))->withInput();
 				$request['aio'] = $account->user()->first()->id;
 			}
+
+			$request['code'] = intval($error->errorCorrection()->first()->status()->first()->state()->first()->code);
 			
 			
 			$notification = $this->mnt->editCorrectiveAction($request->all(), $error);
@@ -522,6 +544,13 @@ class ErrorController extends Controller
 					$originator_email = $this->ext->sendOriginatorEmail($error);
 					if(is_string($originator_email))
 						$notification['message'] .= '. ' . $originator_email;
+				}
+				
+				//Send email to supervisor of the station
+				if($error->reportedStation()->first()->supervisor()->first()){
+					$supervisor_email = $this->ext->sendSupervisorErrorCorrectionEmail($error);
+					if(is_string($supervisor_email))
+						$notification['message'] .= '. ' . $supervisor_email.' Sup';
 				}
 				
 				if(View::exists('w3.show.error'))
@@ -929,6 +958,43 @@ class ErrorController extends Controller
 			}
 		}else{
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to provide supervisor reaction to the error'));
+		}
+	}
+
+	public function deleteErrorSupervisorReaction($uuid){
+		if(session()->has('params')) session()->reflash();
+
+		if(Auth::user()->can('delete_errors')){
+			$error = $this->ext->getError($uuid);
+			if(is_object($error)){
+				return $this->ext->deleteErrorSupervisorReaction($error);
+			}else{
+				return $this->ext->invalidDeletion();
+			}
+		}else{
+			
+		}
+	}
+
+	public function destroyErrorSupervisorReaction($uuid){
+		if(Auth::user()->can('delete_errors')){
+			$error = $this->ext->getError($uuid);
+			if(is_object($error)){
+				$notification = $this->mnt->deleteErrorSupervisorReaction($error);
+				if(in_array('success', $notification)){
+					if(View::exists('w3.show.error')){
+						return redirect('error/'.$uuid)
+									->with(compact('notification'));
+					}else
+						return back()->with(compact('notification'));
+				}else{
+					return back()->with(compact('notification'));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $error));
+			}
+		}else{
+			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to delete an error originator reaction'));
 		}
 	}
 	

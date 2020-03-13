@@ -17,18 +17,22 @@
 			<div class="w3-row">
 				<div class="w3-dropdown-hover w3-right w3-white">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
-					  <a href="{{url('/edit-account/'.$account->uuid)}}" class="w3-bar-item w3-button">Edit</a>
-					  <a href="javascript:void(0)" onclick="deleteAccount('{{$account->uuid}}');" class="w3-bar-item w3-button">Delete</a>
+					<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
 					  @if(is_null($account->user()->first()->role()->first()) && $account->accountStation()->first())
-					  <a href="{{url('/add-role/'.$account->uuid)}}" class="w3-bar-item w3-button">Roles</a>
+					  <a href="{{url('/add-role/'.$account->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Roles</a>
 						@endif
 					  @if(is_null($account->accountStation()->first()))
-						<a href="{{url('/add-station/'.$account->uuid)}}" class="w3-bar-item w3-button">Assign station</a>
+						<a href="{{url('/add-station/'.$account->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Assign station</a>
 					  @endif
 					  @if(is_null($account->supervisor()->first()) && $account->accountStation()->first())
-					  <a href="{{url('/add-account-supervisory/'.$account->uuid)}}" class="w3-bar-item w3-button">Supervisory</a>
+					  <a href="{{url('/add-account-supervisory/'.$account->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Supervisory</a>
 						@endif
+					  <a href="{{url('/edit-account/'.$account->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>
+					  <a href="javascript:void(0)" onclick="deleteAccount('{{$account->uuid}}');" class="w3-bar-item w3-button w3-hover-light-blue">Delete</a>
+					  @if(Auth::id() == $account->user()->first()->id || Auth::user()->can('create_users') || Auth::user()->can('edit_users'))
+					  	<a href="{{url('/edit-account-credentials/'.$account->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Change login credentials</a>
+					  @endif
+					  					
 					</div>
 				  </div>
 			</div>
@@ -73,13 +77,23 @@
 					</div>
 				</div>
 				@endif
+				@if($account->p_number)
+				<div class="w3-row w3-padding-small">
+					<div class="w3-col s12 m12 l2 w3-left">
+						<span class=""><strong>Login email: </strong></span>
+					</div>
+					<div class="w3-col s12 m12 l10 w3-left">
+						<span class="">{{$account->user()->first()->email}}</span>
+					</div>
+				</div>
+				@endif
 			</div>
 			<div class="w3-row ">
 				<div class="w3-dropdown-hover w3-right w3-white">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
+					<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
 					  <a href="{{url('/add-email/'.$account->uuid)}}" class="w3-bar-item w3-button">Add email</a>
-					  <a href="{{url('/')}}" class="w3-bar-item w3-button">Add phone number</a>
+					  <!--<a href="{{url('/')}}" class="w3-bar-item w3-button">Add phone number</a>-->
 					</div>
 				  </div>
 			</div>
@@ -116,40 +130,9 @@
 				</div>
 				@endif
 			</div>
-			@if($account->user()->first()->role()->first())
-			<div class="w3-row ">
-				<div class="w3-dropdown-hover w3-right w3-white">
-					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
-					  <a href="{{($account)?url('/add-role/'.$account->uuid):null}}" class="w3-bar-item w3-button">Add a role</a>
-					  <a href="{{($account)?url('/account-role/'.$account->uuid):null}}" class="w3-bar-item w3-button">All user's roles</a>
-					</div>
-				  </div>
-			</div>
-			<div class="w3-light-gray w3-topbar w3-border-gray">
-				@if($account)
-				<div class="w3-row w3-padding-small">
-					<div class="w3-col s12 m12 l2 w3-left">
-						<span class=""><strong>User role(s): </strong></span>
-					</div>
-					<div class="w3-col s12 m12 l10 w3-left">
-						@foreach($account->user()->first()->role()->distinct()->get() as $role)
-							<span class="w3-hover-text-blue" onmouseover="document.getElementById('{{$role->uuid}}').style.display='inline';  this.style.cursor='pointer';" 
-												onmouseout="document.getElementById('{{$role->uuid}}').style.display='none'">
-												<span onmousedown="loadAccountRole(event, '{{$role->uuid}}')" title="Press ALT + left click on station to view role">{{$role->display_name}}</span>
-								<span id="{{$role->uuid}}" style="display:none;">
-									<a class="w3-hover-blue" onclick="deleteRole('{{$account->uuid}}', '{{$role->uuid}}');"><i class="fa fa-close fa-lg"></i></a>
-								</span>,
-							</span>
-						@endforeach
-					</div>
-				</div>
-				@endif
-			</div>
-			@endif
 			@if($account->accountStation()->first())
 			<div class="w3-row ">
-				<div class="w3-dropdown-hover w3-right w3-white">
+				<div class="w3-dropdown-hover w3-right w3-white w3-small">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
 					  <a href="{{($account)?url('/add-station/'.$account->uuid):null}}" class="w3-bar-item w3-button">Add a station</a>
@@ -180,10 +163,41 @@
 				</div>
 				@endif
 			</div>
-			@endif()
-			@if($account->supervisor()->first())
+			@endif
+			@if($account->user()->first()->role()->first())
 			<div class="w3-row ">
 				<div class="w3-dropdown-hover w3-right w3-white">
+					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
+					<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
+					  <a href="{{($account)?url('/add-role/'.$account->uuid):null}}" class="w3-bar-item w3-button">Add a role</a>
+					  <a href="{{($account)?url('/account-role/'.$account->uuid):null}}" class="w3-bar-item w3-button">All user's roles</a>
+					</div>
+				  </div>
+			</div>
+			<div class="w3-light-gray w3-topbar w3-border-gray">
+				@if($account)
+				<div class="w3-row w3-padding-small">
+					<div class="w3-col s12 m12 l2 w3-left">
+						<span class=""><strong>User role(s): </strong></span>
+					</div>
+					<div class="w3-col s12 m12 l10 w3-left">
+						@foreach($account->user()->first()->role()->distinct()->get() as $role)
+							<span class="w3-hover-text-blue" onmouseover="document.getElementById('{{$role->uuid}}').style.display='inline';  this.style.cursor='pointer';" 
+												onmouseout="document.getElementById('{{$role->uuid}}').style.display='none'">
+												<span onmousedown="loadAccountRole(event, '{{$role->uuid}}')" title="Press ALT + left click on station to view role">{{$role->display_name}}</span>
+								<span id="{{$role->uuid}}" style="display:none;">
+									<a class="w3-hover-blue" onclick="deleteRole('{{$account->uuid}}', '{{$role->uuid}}');"><i class="fa fa-close fa-lg"></i></a>
+								</span>,
+							</span>
+						@endforeach
+					</div>
+				</div>
+				@endif
+			</div>
+			@endif
+			@if($account->supervisor()->first())
+			<div class="w3-row ">
+				<div class="w3-dropdown-hover w3-right w3-white w3-small">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
 					  <a href="{{($account)?url('/add-account-supervisory/'.$account->uuid):null}}" class="w3-bar-item w3-button">Add a station to supervise</a>

@@ -16,6 +16,7 @@ use App\Mail\ErrorNotificationEmail;
 use App\Mail\ErrorOriginatorNotification;
 use App\Mail\SupervisorReactionEmail;
 use App\Mail\ErrorSupervisorNotification;
+use App\Mail\ErrorCorrectionSupervisorNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -330,6 +331,18 @@ class ErrorExt extends Base{
 		return $errors;
 	}
 
+	public function getAccounts(){
+		try{
+			$accounts = Account::all();
+			if(is_null($accounts)){
+				throw new Exception("Accounts have not been retrieved successfully");				
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $accounts;
+	}
+
 	public function getErrorsWithUuids(array $uuids){
 		try{
 			$errors = Error::withUuids($uuids)->get();
@@ -544,7 +557,7 @@ class ErrorExt extends Base{
 		$error = $this->getError($uuid);
 		if(!is_object($error)) return $error;
 		
-		$addresses = $this->prepareRecipientEmails($recipients, $error);
+		$addresses = $this->prepareRecipientEmails($recipients);
 		
 		if($error->reportedStation()->first()->email()->first()){
 			array_push($addresses, $error->reportedStation()->first()->email()->first()->address);
@@ -561,11 +574,10 @@ class ErrorExt extends Base{
 					return $e->getMessage();
 				}	
 			}
-		}else return 'Addressees for email notification could not be found';
-		
+		}else return 'Addressees to be e-mailed error notification could not be found';
 	}
 	
-	private function prepareRecipientEmails($recipients, $error){
+	private function prepareRecipientEmails($recipients){
 		$addresses = array();
 		foreach($recipients as $recipient){
 			if($recipient->station()->first()->accountStation()->where('account_id', $recipient->user()->first()->account()->first()->id)->first()->status == 1){
@@ -573,8 +585,7 @@ class ErrorExt extends Base{
 					array_push($addresses, $email->address);
 				}
 			}
-		}
-		
+		}		
 		return $addresses;
 	}
 	
@@ -717,6 +728,23 @@ class ErrorExt extends Base{
 								
 		return Validator::make($data, $rules, $this->error_data->corrective_action_validation_msgs);
 	}
+
+	public function sendSupervisorErrorCorrectionEmail(object $error){
+		try{
+			$supervisors = $error->reportedStation()->first()->supervisor()->get();
+			foreach($supervisors as $supervisor){
+				foreach($supervisor->account()->first()->email()->get() as $email){
+					$email = Mail::to($email->address)
+								->send(new ErrorCorrectionSupervisorNotification($error));
+					if($email){
+						throw new Exception('Email to '.$email->address.' has not been sent successfully');
+					}
+				}
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+	}
 	
 	public function getAccount($uuid){
 		try{
@@ -732,11 +760,14 @@ class ErrorExt extends Base{
 	
 	public function sendOriginatorEmail($error){
 		try{
-			$email = Mail::to($error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->email)
+			foreach($error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->account()->first()->email()->first() as $email){
+				$email = Mail::to($email->address)
 							->send(new ErrorOriginatorNotification($error));
-			if($email){
-				throw new Exception('Email to '.$error->errorCorrection()->first()->aioError()->first()->errorOriginator()->first()->name.' has not been sent successfully');
+				if($email){
+					throw new Exception('Email to '.$email->address.' has not been sent successfully');
+				}
 			}
+			
 		}catch(Exception $e){
 			return $e->getMessage();
 		}	
@@ -1031,6 +1062,7 @@ class ErrorExt extends Base{
 				'description' => $error->description,
 				'impact' => $error->impact,
 				'station' => $error->reportedStation()->first()->name,
+				'reporting_station' => $error->reportingStation()->first()->name,
 				'date_reported' => date_format(date_create($error->updated_at), 'd/m/Y H:i:s'),
 				//'responsibility' => ($error->responsibility)?$error->user()->first()->name:null,
 				'user' => $error->user()->first()->name,
@@ -1062,6 +1094,7 @@ class ErrorExt extends Base{
 								? 'I agree with the corrective action'
 								: 'I disagree with the corrective action',
 					'remarks'=>$error->errorCorrection()->first()->originatorReaction()->first()->remarks,
+					'sts'=>boolval($error->errorCorrection()->first()->originatorReaction()->first()->sts),
 				];
 			}
 			
@@ -1072,6 +1105,7 @@ class ErrorExt extends Base{
 								: 'I disagree with the corrective action',
 					'remarks'=>$error->errorCorrection()->first()->supervisorReaction()->first()->remarks,
 					'supervisor'=>$error->errorCorrection()->first()->supervisorReaction()->first()->user()->first()->name,
+					'sts'=>boolval($error->errorCorrection()->first()->supervisorReaction()->first()->sts),
 				];
 			}
 		}
@@ -1203,8 +1237,9 @@ class ErrorExt extends Base{
 										->join('error_notifications', 'errors.id', '=', 'error_notifications.error_id')
 										->join('functions', 'errors.function_id', '=', 'functions.id')
 										->whereNull('errors.deleted_at')
-										->whereRaw($this->prepareNotificationErrorQuery($account_stations))
+										->whereNull('functions.deleted_at')
 										->where('states.code', 2)
+										->whereRaw($this->prepareNotificationErrorQuery($account_stations))
 										->select('errors.number', 
 												'errors.uuid', 
 												'stations.name as station', 
@@ -1385,6 +1420,35 @@ class ErrorExt extends Base{
 
 	public function getSomethingHere(){
 		return null;
+	}
+
+	public function deleteErrorSupervisorReaction(object $error){
+		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
+					<header class="w3-container w3-red"> 
+						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
+						class="w3-button w3-display-topright">&times;</span>
+						<h2>Delete supervisor reaction to error: '
+							.$error->reportedStation()->first()->abbreviation
+							.'/'.$error->func()->first()->abbreviation
+							.'/'.$error->number
+							.'/'.date_format(date_create($error->created_at), 'y')
+						.'</h2>
+					</header>
+					<div class="w3-container">
+						<p class="w3-padding-8 w3-large">Your are about to delete error supervisor reaction to a corrective action:</p>
+						<p><strong>Status:</strong> '.((boolval($error->errorCorrection()->first()->supervisorReaction()->first()->status)) ? 'I agree with the corrective action': 'I Disagree with the corrective action')
+						.'<br /> <br /><strong>Remarks:</strong> '.$error->errorCorrection()->first()->supervisorReaction()->first()->remarks
+						.'<br /><br /><strong>Supervisor: </strong>'.$error->errorCorrection()->first()->supervisorReaction()->first()->user()->first()->name
+						.'</p>
+					</div>
+					<footer class="w3-container ">
+						<div class="w3-row w3-padding-16">
+							<div class="w3-col">
+								<a class="w3-button w3-large w3-theme w3-hover-deep-orange" href="'.url('destroy-error-supervisor-reaction').'/'.$error->uuid.'" title="Delete error supervisor reaction">Delete&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+							</div>
+						</div>
+					</footer>
+				</div>';
 	}
 
 }

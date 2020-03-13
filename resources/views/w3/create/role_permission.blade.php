@@ -18,7 +18,7 @@
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Permission<span class="w3-text-red">*</span></label>
 							<select class="w3-select w3-border {{($errors->has('permission')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" name="permission">
-								<option value="" disabled selected>Select a permission</option>
+								<option value="" disabled selected>Select a permission to assign the role {{$role->display_name}}</option>
 								@if($permissions)
 									@foreach($permissions as $permission)
 										

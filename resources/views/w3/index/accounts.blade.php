@@ -89,8 +89,8 @@
 							{{$account->first_name}} {{$account->middle_name}} {{$account->last_name}}
 						</a>
 					</td>
-					<td><a href="{{url('user/'.$account->uuid)}}" style="text-decoration:none;">{{$account->p_number}}</a></td>
-					<td><a href="{{url('user/'.$account->uuid)}}" style="text-decoration:none;">{{($account->user()->first()->status)?'Activated':'Inactive'}}</a></td>
+					<td><a href="{{url('account/'.$account->uuid)}}" style="text-decoration:none;">{{$account->p_number}}</a></td>
+					<td><a href="{{url('account/'.$account->uuid)}}" style="text-decoration:none;">{{($account->user()->first()->status)?'Activated':'Inactive'}}</a></td>
 					<td><a class="w3-button" href="{{url('edit-account/'.$account->uuid)}}" title="Edit {{$account->first_name}}"><i class="fa fa-edit fa-lg"></i></a></td>
 					<td><button class="w3-button" onclick="deleteAccount('{{$account->uuid}}');" title="Delete {{$account->first_name}}">
 						<i class="fa fa-trash fa-lg"></i>

@@ -4,76 +4,71 @@
 <title>QMS-Error logs</title>
 @endsection
 
+@section('style')
+<style>
+	#home{
+		padding:100px 100px 100px 100px; 
+		background: url({{url('public/images/kcaa.jpg')}}); 
+		background-repeat: no-repeat; 
+		background-size: 100% 100%; 
+		min-height:1000px;
+	}
+
+	.home{
+	  		padding-top:300px;
+	  	}
+
+	.home-btn:hover{
+		background: #00CED1;
+		border-color: #0000FF;
+		color:white;
+		text-shadow: 5px 5px 5px #000000;
+	}
+
+	.home-btn{
+		color:#ffffff; 
+		/*text-shadow: 10px 10px 10px #000000;*/
+		background: #00BFFF;
+	}
+	@media only screen and (max-width: 600px) {
+	  	.home-btn {
+	    	background-color: #00BFFF;
+	  	}
+
+	  	#home{
+	  		padding: 50px 50px 50px 50px;
+	  		/*background: url({{url('public/images/kcaa.jpg')}}); */
+			background-repeat: no-repeat; 
+			background-size: 100% 100%; 
+			min-height:100px;
+	  	}
+
+	  	.home{
+	  		padding-top:50px;
+	  	}
+	}
+</style>
+@endsection
 
 @section('content')	
-<div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Error logs</h1>
-	<div class="w3-row w3-panel" style="max-width:100%;">
-		<div class="w3-row">
-			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{asset('/create-error')}}">CREATE</a>
-			<button class="w3-button w3-blue w3-hover w3-hover-light-blue w3-right" onclick="document.getElementById('id01').style.display='block'">SEARCH</button>
-		</div>
-		<div id="id01" class="w3-modal">
-			<div class="w3-modal-content w3-animate-zoom w3-card-4">
-				<header class="w3-container w3-theme"> 
-					<span onclick="document.getElementById('id01').style.display='none'" 
-					class="w3-button w3-display-topright">&times;</span>
-					<h2>Search error logs</h2>
-				</header>
-				<div class="w3-container">
-					<p>Some text..</p>
-					<p>Some form here to insert query paramenters...</p>
-				</div>
-			</div>
-		</div>
-		@include('w3.components.notification')
-		<div class="w3-responsive w3-white w3-padding-16 w3-text-dark-gray">
-			<table class="w3-table-all w3-hoverable">
-				<tr class="w3-theme w3-text-white">
-					<th>Serial No</th>
-					<th>Description</th>
-					<th>Station</th>
-					<th>Status</th>
-					<th colspan="2"></th>
-				</tr>
-				<tr>
-					<td>1</td>
-					<td>Wrong route for flight JMA8641</td>
-					<td>HKMO</td>
-					<td>Pending</td>
-					<td><a>Edit</a></td>
-					<td><a>Delete</a></td>
-				</tr>
-				<tr>
-					<td>2</td>
-					<td>Missing Aircraft registration for flight SLR631 to HKLU</td>
-					<td>HKML</td>
-					<td>Closed</td>
-					<td><a>Edit</a></td>
-					<td><a>Delete</a></td>
-				</tr>
-				<tr>
-					<td>3</td>
-					<td>Wrong coordinate in NTM proposal about works on bay 2</td>
-					<td>HQ</td>
-					<td>Rejected</td>
-					<td><a>Edit</a></td>
-					<td><a>Delete</a></td>
-				</tr>
-			</table>
-		</div>
-		<div class="w3-row w3-padding-16 w3-right">
-			<div class="w3-bar w3-border">
-			  <a href="#" class="w3-bar-item w3-button">&laquo;</a>
-			  <a href="#" class="w3-bar-item w3-button">1</a>
-			  <a href="#" class="w3-bar-item w3-button">2</a>
-			  <a href="#" class="w3-bar-item w3-button">3</a>
-			  <a href="#" class="w3-bar-item w3-button">...</a>
-			  <a href="#" class="w3-bar-item w3-button">10</a>
-			  <a href="#" class="w3-bar-item w3-button">&raquo;</a>
-			</div>
-		</div>
-	</div>
+<div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:1000px;">
+	@include('w3.components.notification')
+  	<div id="home" class="w3-container">
+  		<div class="w3-cell-row w3-section home" style="">
+  			<div class="w3-container w3-cell w3-cell-middle w3-mobile w3-center">
+    			<a href="{{url('/errors')}}" class="w3-btn w3-border w3-border-white w3-round-xlarge w3-xlarge home-btn">ERRORS LIST&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+  			</div>
+  			<div class="w3-container w3-cell w3-cell-middle w3-mobile">
+    			<a id="home-create-error" href="{{url('create-error')}}" class="w3-btn w3-border w3-border-white w3-round-xlarge w3-xlarge home-btn">REPORT ERROR&nbsp;<i class="fa fa-angle-right fa-lg"></i></a>
+ 			</div>
+  		</div>
+  	</div>
+
+  	<div class="w3-container w3-center w3-padding-64">
+  		<h2 id="home-about" class="w3-text-blue">About</h2>
+  		<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.<br />Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  	</div>
+	
 </div>
 
 <div class="row" style="max-width:75%;">

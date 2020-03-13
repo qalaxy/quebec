@@ -12,7 +12,7 @@
 	</head>
 	<body>
 		<div class="w3-container">
-			<h2 class="w3-blue">Error tracking</h2>
+			<h2 class="w3-blue">Error originator notification</h2>
 			<p class="w3-leftbar">You have been mentioned as error originator.</p>
 			<p class="w3-leftbar">Click on the link below to respond to the error correction.</p>
 			<a class="w3-button w3-blue" href="{{config('app.url').'/error/'.encrypt($error->uuid)}}">

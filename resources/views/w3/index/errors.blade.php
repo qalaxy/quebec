@@ -16,7 +16,7 @@
 					<a class="w3-bar-item w3-button  w3-hover-light-blue" href="{{url('/create-error')}}">Create</a>
 					<button href="javascript:void(0)" class="w3-bar-item w3-button  w3-hover-light-blue" 
 									onclick="document.getElementById('search').style.display='block'">Search</button>
-					<a href="{{url('/errors-pdf')}}"  target="_blank" class="w3-bar-item w3-button  w3-hover-light-blue">PDF format</a>
+					<!--<a href="{{url('/errors-pdf')}}"  target="_blank" class="w3-bar-item w3-button  w3-hover-light-blue">PDF format</a>-->
 
 					<button onclick="event.preventDefault(); document.getElementById('errors-pdf').submit();"  
 							onmouseover="getErrors(document.getElementById('errors-pdf'), document.getElementsByTagName('table')[0]);"
@@ -71,7 +71,7 @@
 										<div class="w3-row w3-padding-small">
 											<div class="w3-col s12 m12 l10 w3-left">
 												<label class="w3-text-dark-gray">Station</label>
-												<input class="w3-input w3-border {{($errors->has('station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+												<!--<input class="w3-input w3-border {{($errors->has('station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 														name="station_id"
 														id="error_search_station"
 														type="text"
@@ -83,18 +83,37 @@
 													<span class="w3-small w3-text-red">{{$errors->first('station_id')}}</span>
 												@else
 													<span>&nbsp;</span>
-												@endif
+												@endif-->
+
+												<select class="w3-select w3-border {{($errors->has('station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+													name="station_id" 
+													id="error_search_station"
+													oninput="validateErrorSerachForm('{{url('/validate-errors-search-form')}}')">
+													<option value="" disabled selected>Search by station</option>
+													@isset($stations)
+														@foreach($stations as $station)
+															
+															<option value="{{$station->uuid}}" {{(old('station_id') == $station->uuid)? 'selected':null}}>{{$station->name}}</option>
+																
+														@endforeach
+													@endif
+													@if($errors->has('station_id'))
+														<span class="w3-small w3-text-red">{{$errors->first('station_id')}}</span>
+													@else
+														<span>&nbsp;</span>
+													@endif
+												</select>
+
 											</div>
 										</div>
 									</div>
 								</div>
 								<div class="w3-row">
-
 									<div class="w3-col s12 m12 l6">
 										<div class="w3-row w3-padding-small">
 											<div class="w3-col s12 m12 l10 w3-left">
 												<label class="w3-text-dark-gray">Function</label>
-												<input class="w3-input w3-border {{($errors->has('function_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+												<!--<input class="w3-input w3-border {{($errors->has('function_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 														name="function_id"
 														id="error_search_function"
 														type="text"
@@ -106,6 +125,25 @@
 													<span class="w3-small w3-text-red">{{$errors->first('function_id')}}</span>
 												@else
 													<span>&nbsp;</span>
+												@endif-->
+
+												<select class="w3-select w3-border {{($errors->has('function_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+													name="function_id" 
+													id="error_search_function"
+													oninput="validateErrorSerachForm('{{url('/validate-errors-search-form')}}')">
+													<option value="" disabled selected>Search by function</option>
+													@isset($functions)
+														@foreach($functions as $function)
+															
+															<option value="{{$function->uuid}}" {{(old('function_id') == $function->uuid)? 'selected':null}}>{{$function->name}}</option>
+																
+														@endforeach
+													@endif
+												</select>
+												@if($errors->has('function_id'))
+													<span class="w3-small w3-text-red">{{$errors->first('function_id')}}</span>
+												@else
+													<span>&nbsp;</span>
 												@endif
 											</div>
 										</div>
@@ -113,8 +151,8 @@
 									<div class="w3-col s12 m12 l6">
 										<div class="w3-row w3-padding-small">
 											<div class="w3-col s12 m12 l10 w3-left">
-												<label class="w3-text-dark-gray">Officer causing</label>
-												<input class="w3-input w3-border {{($errors->has('originator_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+												<label class="w3-text-dark-gray">Error originating officer</label>
+												<!--<input class="w3-input w3-border {{($errors->has('originator_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 														name="originator_id"
 														id="error_search_originator"
 														type="text"
@@ -126,7 +164,27 @@
 													<span class="w3-small w3-text-red">{{$errors->first('originator_id')}}</span>
 												@else
 													<span>&nbsp;</span>
+												@endif-->
+
+												<select class="w3-select w3-border {{($errors->has('originator_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
+													name="originator_id" 
+													id="error_search_originator"
+													oninput="validateErrorSerachForm('{{url('/validate-errors-search-form')}}')">
+													<option value="" disabled selected>Search by error originator</option>
+													@isset($accounts)
+														@foreach($accounts as $account)
+															
+															<option value="{{$account->user()->first()->uuid}}" {{(old('originator_id') == $account->user()->first()->uuid)? 'selected':null}}>{{$account->first_name}}</option>
+																
+														@endforeach
+													@endif
+												</select>
+												@if($errors->has('originator_id'))
+													<span class="w3-small w3-text-red">{{$errors->first('originator_id')}}</span>
+												@else
+													<span>&nbsp;</span>
 												@endif
+
 											</div>
 										</div>
 									</div>

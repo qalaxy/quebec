@@ -9,7 +9,7 @@
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
   <h1 class="w3-xlarge">Error notifications</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
-		<div class="w3-row">
+		<!--<div class="w3-row">
 			<div class="w3-dropdown-hover w3-right w3-white">
 				<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 				<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
@@ -19,7 +19,7 @@
 						
 				</div>
 			</div>
-		</div>
+		</div>-->
 		<div id="search" class="w3-modal">
 			<div class="w3-modal-content w3-animate-zoom w3-card-4">
 				<header class="w3-container w3-theme"> 

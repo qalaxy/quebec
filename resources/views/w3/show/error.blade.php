@@ -70,19 +70,22 @@
 				<div class="w3-row">
 					<div class="w3-dropdown-hover w3-right w3-white">
 						<button class="w3-button w3-xlarge">
-							@php $stn = false; @endphp
-							@if(is_null($error->errorCorrection()->first()))
-								@if(Auth::user()->account()->first()->accountStation()->where('station_id', $error->reportedStation()->first()->id)->first())
+							@php $stn = false; $stn_ = false; @endphp
+
+							@if((is_null($error->errorCorrection()->first()) 
+									&& Auth::user()->account()->first()->accountStation()->where('station_id', $error->reportedStation()->first()->id)->first())
+								|| (is_null($error->affectedProduct()->first()) 
+									&& Auth::user()->account()->first()->accountStation()->where('station_id', $error->reportingStation()->first()->id)->first()))
+
 									<i class="fa fa-bell w3-text-blue"></i>
-									@php $stn = true; @endphp
-								@else
-									<i class="fa fa-bars"></i></button>
-								@endif
 							@else
-								<i class="fa fa-bars"></i></button>
+									<i class="fa fa-bars"></i>
 							@endif
+
+						</button>
 						<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
-							@if($stn)
+							@if(is_null($error->errorCorrection()->first()) 
+									&& Auth::user()->account()->first()->accountStation()->where('station_id', $error->reportedStation()->first()->id)->first())
 								<a href="{{url('/error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">
 									Corrective action
 									<sup class="w3-text-blue"><i class="fa fa-bell"></i></sup>
@@ -242,13 +245,17 @@
 												<span onclick="loadAffectedProduct('{{$affected_product->uuid}}', '{{url('/get-affected-product/'.$affected_product->uuid)}}');">
 															{{$affected_product->product()->first()->name}}</span>
 								<span id="{{$affected_product->uuid}}" style="display:none;">
-									@if($error->errorCorrection()->first()
-											&& $error->errorCorrection()->first()->status()->first()->state()->first()->code != 4)
-										<a class="w3-hover-blue" 
-											onclick="deleteAffectedProduct('{{$affected_product->uuid}}', '{{url('/delete-affected-product/'.$affected_product->uuid)}}');"
-											title="Remove {{$affected_product->product()->first()->name}}">
-											<i class="fa fa-close fa-lg"></i>
-										</a>
+									@if($account_station->station()->first()->id == $error->reportingStation()->first()->id)
+										@if($error->errorCorrection()->first()
+												&& $error->errorCorrection()->first()->status()->first()->state()->first()->code == 4)
+											<span></span>
+										@else
+											<a class="w3-hover-blue" 
+												onclick="deleteAffectedProduct('{{$affected_product->uuid}}', '{{url('/delete-affected-product/'.$affected_product->uuid)}}');"
+												title="Remove {{$affected_product->product()->first()->name}}">
+												<i class="fa fa-close fa-lg"></i>
+											</a>
+										@endif
 									@endif
 									
 								</span>,
@@ -318,8 +325,10 @@
 							@elseif($supervisor)
 									@if($error->errorCorrection()->first()->externalError()->first() 
 										|| ($error->errorCorrection()->first()->originatorReaction()->first()
+											&& boolval($error->errorCorrection()->first()->originatorReaction()->first()->sts)
 											&& $error->errorCorrection()->first()->supervisorReaction()->first())
 										|| ($error->errorCorrection()->first()->originatorReaction()->first()
+											&& boolval($error->errorCorrection()->first()->originatorReaction()->first()->sts)
 											&& is_null($error->errorCorrection()->first()->supervisorReaction()->first())))
 										<a href="{{($error->errorCorrection()->first()->supervisorReaction()->first())
 											? url('/edit-error-supervisor-reaction/'.$error->uuid)
@@ -327,7 +336,8 @@
 											class="w3-bar-item w3-button w3-hover-light-blue">
 											Supervisor comments<sup class="w3-text-blue"><i class="fa fa-bell"></i></sup>
 										</a>
-									@else
+									@elseif(is_null($error->errorCorrection()->first()->originatorReaction()->first()) 
+											|| !boolval($error->errorCorrection()->first()->originatorReaction()->first()->sts))
 										<button class="w3-bar-item w3-button w3-hover-light-blue" 
 												onclick="confirmSupervisorReaction('{{($error->errorCorrection()->first()->supervisorReaction()->first())
 																						? url('/edit-error-supervisor-reaction/'.$error->uuid)
@@ -335,12 +345,25 @@
 											Supervisor comments<sup class="w3-text-blue"><i class="fa fa-bell"></i></sup>
 										</button>
 									@endif
+									<!--@if($error->errorCorrection()->first()->originatorReaction()->first())
+										<a href="{{($error->errorCorrection()->first()->supervisorReaction()->first())
+											? url('/edit-error-supervisor-reaction/'.$error->uuid)
+											: url('/create-error-supervisor-reaction/'.$error->uuid)}}" 
+											class="w3-bar-item w3-button w3-hover-light-blue">
+											Originator remarks<sup class="w3-text-blue"><i class="fa fa-bell"></i></sup>
+										</a>
+									@endif-->
 							@endif
 							@if($stn)
+								@if($rejected)
+									<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">
+										Correct corrective action<sup class="w3-text-blue"><i class="fa fa-bell"></i></sup>
+									</a>
+								@else
 								<a href="{{url('/edit-error-corrective-action/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">
 									Edit
-									@if($rejected) <sup class="w3-text-blue"><i class="fa fa-bell"></i></sup>@endif
-								</a>						
+								</a>
+								@endif				
 								<span class="w3-bar-item w3-button w3-hover-light-blue" 
 									onclick="deleteErrorCorrection('{{$error->uuid}}', '{{url('/delete-corrective-action/'.$error->uuid)}}');"
 									>Delete</span>
@@ -454,6 +477,7 @@
 					@else
 						<br />
 					@endif
+				@php $sts = boolval($error->errorCorrection()->first()->originatorReaction()->first()->sts); @endphp
 				<div class="w3-light-gray w3-topbar w3-border-gray">
 					
 					@if($error->errorCorrection()->first()->originatorReaction()->first())
@@ -462,7 +486,7 @@
 							<span class=""><strong>Source's opinion: </strong></span>
 						</div>
 						<div class="w3-col s12 m12 l10 w3-left">
-							<span class="">
+							<span class="" style="text-decoration: {{($sts)? 'none': 'line-through'}};">
 								{{(boolval($error->errorCorrection()->first()->originatorReaction()->first()->status))
 								?'I agree with the corrective action'
 								:'I disagree with the corrective action'}}
@@ -471,12 +495,15 @@
 					</div>
 					@endif
 					@if($error->errorCorrection()->first()->originatorReaction()->first())
+					
 					<div class="w3-row w3-padding">
 						<div class="w3-col s12 m12 l2 w3-left">
 							<span class=""><strong>Remarks: </strong></span>
 						</div>
 						<div class="w3-col s12 m12 l10 w3-left">
-							<span class="">{{$error->errorCorrection()->first()->originatorReaction()->first()->remarks}}</span>
+							<span class="" style="text-decoration: {{($sts)? 'none': 'line-through'}};">
+								{{$error->errorCorrection()->first()->originatorReaction()->first()->remarks}}
+							</span>
 						</div>
 					</div>
 					@endif
@@ -490,8 +517,20 @@
 								<div class="w3-dropdown-hover w3-right w3-white">
 									<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
 									<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
-										<a href="{{url('/edit-error-supervisor-reaction/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>
-										<a href="{{url('/delete-error-originator-reaction/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Delete</a>						
+										
+
+										@if($error->errorCorrection()->first() 
+											&& !boolval($error->errorCorrection()->first()->originatorReaction()->first()->sts))
+										<button class="w3-bar-item w3-button w3-hover-light-blue"
+											onclick="confirmSupervisorReaction('{{($error->errorCorrection()->first()->supervisorReaction()->first())
+																						? url('/edit-error-supervisor-reaction/'.$error->uuid)
+																						: url('/create-error-supervisor-reaction/'.$error->uuid)}}')">
+											Edit</button>
+										@else
+											<a href="{{url('/edit-error-supervisor-reaction/'.$error->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue">Edit</a>
+										@endif
+										<a onclick="deleteSupervisorReaction('{{url('delete-error-supervisor-reaction').'/'.$error->uuid}}');"
+											class="w3-bar-item w3-button w3-hover-light-blue">Delete</a>						
 									</div>
 								  </div>
 							</div>
@@ -518,12 +557,14 @@
 					</div>
 					@endif
 					@if($error->errorCorrection()->first()->supervisorReaction()->first())
+
+					@php $sts = boolval($error->errorCorrection()->first()->supervisorReaction()->first()->sts); @endphp
 					<div class="w3-row w3-padding">
 						<div class="w3-col s12 m12 l2 w3-left">
 							<span class=""><strong>Opinion: </strong></span>
 						</div>
 						<div class="w3-col s12 m12 l10 w3-left">
-							<span class="">
+							<span class="" style="text-decoration: {{($sts)? 'none': 'line-through'}};">
 								{{(boolval($error->errorCorrection()->first()->supervisorReaction()->first()->status))
 								?'I agree with the corrective action'
 								:'I disagree with the corrective action'}}
@@ -537,7 +578,9 @@
 							<span class=""><strong>Remarks: </strong></span>
 						</div>
 						<div class="w3-col s12 m12 l10 w3-left">
-							<span class="">{{$error->errorCorrection()->first()->supervisorReaction()->first()->remarks}}</span>
+							<span class="" style="text-decoration: {{($sts)? 'none': 'line-through'}};">
+								{{$error->errorCorrection()->first()->supervisorReaction()->first()->remarks}}
+						</span>
 						</div>
 					</div>
 					@endif
@@ -581,7 +624,7 @@ function deleteError(uuid){
 
 function confirmSupervisorReaction(url){
 	let confirmation = document.getElementById('confirmation');
-	confirmation.children[0].children[1].children[0].innerHTML = 'Do you want to proceed with this action without error originator\'s reaction?';
+	confirmation.children[0].children[1].children[0].innerHTML = 'Do you want to proceed with this action without error originator\'s reaction to corrective action?';
 	confirmation.children[0].children[2].children[0].children[0].children[0].setAttribute("href", url) ;
 	confirmation.style.display='block';
 }

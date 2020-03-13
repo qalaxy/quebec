@@ -122,7 +122,7 @@
 			<div class="w3-row ">
 				<div class="w3-dropdown-hover w3-right w3-white">
 					<button class="w3-button w3-xlarge"><i class="fa fa-bars"></i></button>
-					<div class="w3-dropdown-content w3-bar-block w3-border" style="right:0; width:200px;">
+					<div class="w3-dropdown-content w3-bar-block w3-border w3-small" style="right:0; width:200px;">
 					  <a href="{{($station)?url('/add-station-recipient/'.$station->uuid):null}}" class="w3-bar-item w3-button">Add a notification recipient</a>
 					</div>
 				  </div>

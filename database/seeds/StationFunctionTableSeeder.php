@@ -13,7 +13,7 @@ class StationFunctionTableSeeder extends Seeder
      */
     public function run()
     {
-        $station_func = array(array('station'=>'Headquarters', 'function'=>'AIS Products Management'),
+        $station_func = array(array('station'=>'Headquarters', 'function'=>'AIM Products Management'),
 						array('station'=>'Jomo Kenyatta International Airport', 'function'=>'AIS Products Management'),
 						array('station'=>'Jomo Kenyatta International Airport NOF', 'function'=>'AIS Products Management'),
 						array('station'=>'Nairobi Wilson Airport', 'function'=>'AIS Products Management'),

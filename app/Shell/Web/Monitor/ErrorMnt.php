@@ -66,7 +66,7 @@ class ErrorMnt extends ErrorExe{
 			DB::rollback();
 			return $this->error;
 		}
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 	
@@ -110,13 +110,13 @@ class ErrorMnt extends ErrorExe{
 
 	public function deleteCorrectiveAction(object $error){
 		DB::beginTransaction();
-		$correction = $this->destroyCorrectiveAction($error);
+		$correction = $this->destroyCorrectiveAction($error->errorCorrection()->first());
 		if(is_null($correction)){
 			DB::rollback();
 			return $this->error;
 		}
 		
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 	
@@ -174,14 +174,9 @@ class ErrorMnt extends ErrorExe{
 			return $this->error;
 		}
 		
-		$correction_status = $this->updateErrorStatus($error->errorCorrection()->first()->status()->first(), 3);
-		if(is_null($correction_status)){
-			DB::rollback();
-			return $this->error;
-		}
-		
 		$aio_error = $error->errorCorrection()->first()->aioError()->first();
 		$external_error = $error->errorCorrection()->first()->externalError()->first();
+		$supervisor_reaction = $error->errorCorrection()->first()->supervisorReaction()->first();
 		
 		if(isset($data[$this->error_data->originator_id_key])){
 			
@@ -190,6 +185,12 @@ class ErrorMnt extends ErrorExe{
 				&& $aio_error->originatorReaction()->first()){
 				$delete_originator_reaction = $this->destroyOriginatorReaction($error->errorCorrection()->first()->originatorReaction()->first());
 				if(is_null($delete_originator_reaction)){
+					DB::rollback();
+					return $this->error;
+				}
+			}else if($aio_error && $aio_error->originatorReaction()->first() && $data['code'] == 2){
+				$originator_reaction = $this->annulOriginatorReaction($error->errorCorrection()->first()->originatorReaction()->first());
+				if(is_null($originator_reaction)){
 					DB::rollback();
 					return $this->error;
 				}
@@ -222,7 +223,21 @@ class ErrorMnt extends ErrorExe{
 				}
 			}
 		}
+
+		if($supervisor_reaction && $data['code'] == 2){
+			$supervisor_reaction = $this->annulSupervisorReaction($supervisor_reaction);
+			if(is_null($supervisor_reaction)){
+				DB::rollback();
+				return $this->error;
+			}
+		}
 		
+		$correction_status = $this->updateErrorStatus($error->errorCorrection()->first()->status()->first(), 3);
+		if(is_null($correction_status)){
+			DB::rollback();
+			return $this->error;
+		}
+
 		DB::commit();
 		return $this->success;
 		
@@ -308,7 +323,19 @@ class ErrorMnt extends ErrorExe{
 			return $this->error;
 		}
 		
-		DB::rollback();
+		DB::commit();
+		return $this->success;
+	}
+
+	public function deleteErrorSupervisorReaction(object $error){
+		DB::beginTransaction();
+		$supervisor_reaction = $this->destroyErrorSupervisorReaction($error->errorCorrection()->first()->supervisorReaction()->first());
+		if(is_null($supervisor_reaction)){
+			DB::rollback();
+			return $this->error;
+		}
+
+		DB::commit();
 		return $this->success;
 	}
 }

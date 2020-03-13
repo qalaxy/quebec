@@ -18,7 +18,7 @@
 						<div class="w3-col s12 m10 l10 w3-left">
 							<label class="w3-text-dark-gray">Role<span class="w3-text-red">*</span></label>
 							<select class="w3-select w3-border {{($errors->has('role_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" name="role_id">
-								<option value="" disabled selected>Select a role</option>
+								<option value="" disabled selected>Select a role to assign {{$account->first_name}}</option>
 								@if($roles)
 									@foreach($roles as $role)
 										

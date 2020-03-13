@@ -49,6 +49,19 @@ class AccountMnt extends AccountExe{
 		DB::commit();
 		return $this->success;
 	}
+
+	public function editAccountCredentials(array $data, object $account){
+		$this->data = $data;
+		DB::beginTransaction();
+		$user = $this->updateAccountCredentials($account);
+		if(is_null($user)){
+			DB::rollback();
+			return $this->error;
+		}
+
+		DB::commit();
+		return $this->success;
+	}
 	
 	public function editAccount(array $data, object $account){
 		$this->data = $data;
@@ -123,7 +136,7 @@ class AccountMnt extends AccountExe{
 			return $this->error;
 		}
 		
-		DB::rollback();
+		DB::commit();
 		return $this->success;
 	}
 	

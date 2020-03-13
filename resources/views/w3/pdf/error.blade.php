@@ -51,6 +51,10 @@
 					<td class="w3-padding" style="text-align: justify;">{{$reported_error['user']}}</td>
 				</tr>
 				<tr>
+					<td class="w3-padding">Station reporting: </td>
+					<td class="w3-padding" style="text-align: justify;">{{$reported_error['reporting_station']}}</td>
+				</tr>
+				<tr>
 					<td class="w3-padding">Remarks: </td>
 					<td class="w3-padding" style="text-align: justify;">{{$reported_error['remarks']}}</td>
 				</tr>
@@ -113,11 +117,11 @@
 			<table class="w3-table w3-border" border="0" width="100%" style="width:100%">
 				<tr>
 					<th class="w3-padding" style="width:25%; font-weight: normal;">Opinion: </td>
-					<th class="w3-padding" style="text-align: justify; font-weight: normal;">{{$originator_reaction['status']}}</td>
+					<th class="w3-padding" style="text-align: justify; font-weight: normal; text-decoration: {{($originator_reaction['sts'])? 'none': 'line-through'}};">{{$originator_reaction['status']}}</td>
 				</tr>
 				<tr>
 					<td class="w3-padding">Remarks: </td>
-					<td class="w3-padding" style="text-align: justify;">{{$originator_reaction['remarks']}}</td>
+					<td class="w3-padding" style="text-align: justify; text-decoration: {{($originator_reaction['sts'])? 'none': 'line-through'}};">{{$originator_reaction['remarks']}}</td>
 				</tr>
 			</table>
 			@endif
@@ -127,12 +131,12 @@
 			
 			<table class="w3-table w3-border" border="0" width="100%" style="width:100%">
 				<tr>
-					<th class="w3-padding" style="width:25%; font-weight: normal;">Opinion: </td>
+					<th class="w3-padding" style="width:25%; font-weight: normal; text-decoration: {{($supervisor_reaction['sts'])? 'none': 'line-through'}};">Opinion: </td>
 					<th class="w3-padding" style="text-align: justify; font-weight: normal;">{{$supervisor_reaction['status']}}</td>
 				</tr>
 				<tr>
 					<td class="w3-padding">Remarks: </td>
-					<td class="w3-padding" style="text-align: justify;">{{$supervisor_reaction['remarks']}}</td>
+					<td class="w3-padding" style="text-align: justify; text-decoration: {{($supervisor_reaction['sts'])? 'none': 'line-through'}};">{{$supervisor_reaction['remarks']}}</td>
 				</tr><!-- supervisor -->
 				<tr>
 					<td class="w3-padding">Supervisor: </td>

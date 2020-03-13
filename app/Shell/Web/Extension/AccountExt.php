@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 use App\Shell\Web\Base;
 use App\Shell\Data\AccountData;
@@ -56,7 +57,12 @@ class AccountExt extends Base{
 	public function validateFirstLoginData(array $data){
 		
 		return Validator::make($data, [
-            'email' => ['required', 'string', 'email', 'max:255',Rule::unique('users')->ignore(User::withUuid($data['uuid'])->first())],
+            'email' => ['required', 'string', 'email', 'max:255', 
+        					Rule::unique('users')
+        						->where(function ($query) use($data) { 
+        							$query->where('uuid', '<>',$data['uuid'])->whereNull('deleted_at');
+        						})],
+
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 	}
@@ -154,6 +160,29 @@ class AccountExt extends Base{
 						</div>
 					</footer>
 				</div>';
+	}
+
+	public function validateAccountCredentialsData(array $data){
+		return Validator::make($data, [
+            'email' => ['required', 'string', 'email', 'max:255',
+            				Rule::unique('users')
+        						->where(function ($query) use($data) { 
+        							$query->where('uuid', '<>',$data['uuid'])->whereNull('deleted_at');
+        						})
+        				],
+            'old_password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], $this->acc_data->account_credentials_validation_msgs);
+
+		return Validator::make($data, $rules, $this->acc_data->account_credentials_validation_msgs);
+	}
+
+	public function comparePassword(array $data, object $user){
+		if($data['old_password'] == $data['password'])
+			return 'The old and new passwords are the same. Enter a new password different from the old one.';
+
+		if(!Hash::check($data['old_password'], $user->password))
+			return 'You have entered wrong old password';
 	}
 	
 	public function searchEmails(){
