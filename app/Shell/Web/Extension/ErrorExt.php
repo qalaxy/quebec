@@ -141,6 +141,7 @@ class ErrorExt extends Base{
 								->join('states', 'status.state_id', '=', 'states.id')
 								->where('users.uuid', $data['originator_id'])
 								->whereNull('error_corrections.deleted_at')
+								->whereNull('users.deleted_at')
 								->select('errors.uuid',
 										'errors.number',
 										'stations.abbreviation as station_abbreviation',
@@ -245,7 +246,7 @@ class ErrorExt extends Base{
 							->join('status', 'error_status.status_id', '=', 'status.id')
 							->join('states', 'status.state_id', '=', 'states.id')
 							->where($p)
-							->whereBetween('errors.created_at', [$data['correction_from'], $data['correction_to']])
+							->whereBetween('errors.created_at', [$data['error_from'], $data['error_to']])
 							->whereNull('errors.deleted_at')
 							->select('errors.uuid',
 									'errors.number',
@@ -265,7 +266,7 @@ class ErrorExt extends Base{
 							->join('status', 'error_status.status_id', '=', 'status.id')
 							->join('states', 'status.state_id', '=', 'states.id')
 							->where($p)
-							->where('errors.created_at', '>=', [$data['correction_from']])
+							->where('errors.created_at', '>=', [$data['error_from']])
 							->whereNull('errors.deleted_at')
 							->select('errors.uuid',
 									'errors.number',
@@ -285,7 +286,7 @@ class ErrorExt extends Base{
 							->join('status', 'error_status.status_id', '=', 'status.id')
 							->join('states', 'status.state_id', '=', 'states.id')
 							->where($p)
-							->where('errors.created_at', '<=', [$data['correction_to']])
+							->where('errors.created_at', '<=', [$data['error_to']])
 							->whereNull('errors.deleted_at')
 							->select('errors.uuid',
 									'errors.number',

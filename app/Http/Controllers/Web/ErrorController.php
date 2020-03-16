@@ -21,7 +21,7 @@ class ErrorController extends Controller
 		$this->mnt = new ErrorMnt();
 	}
 	
-	public function errors(Request $request){
+	public function errors(Request $request){ //return $request->all();
 		if(Auth::user()->can('view_errors')){
 			if(count($request->all())){
 				$errors = $this->ext->searchErrors($request->all());
@@ -30,6 +30,7 @@ class ErrorController extends Controller
 			}
 
 			//return $errors;
+
 			$stations = $this->ext->getStations();
 			if(!is_object($stations))
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$stations));

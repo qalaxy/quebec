@@ -20,7 +20,7 @@
 
 					<button onclick="event.preventDefault(); document.getElementById('errors-pdf').submit();"  
 							onmouseover="getErrors(document.getElementById('errors-pdf'), document.getElementsByTagName('table')[0]);"
-							class="w3-bar-item w3-button  w3-hover-light-blue">Post PDF format
+							class="w3-bar-item w3-button  w3-hover-light-blue">PDF
 					</button>
 					<form id="errors-pdf" action="{{url('/errors-pdf')}}" method="POST" style="display: none;" target="_blank">
 			            @csrf

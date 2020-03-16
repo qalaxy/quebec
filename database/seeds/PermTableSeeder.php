@@ -35,6 +35,15 @@ class PermTableSeeder extends Seeder
 					array('name'=>'create_stations', 'display_name'=>'Create stations', 'description'=>'', 'level'=>'admin'),
 					array('name'=>'edit_stations', 'display_name'=>'Edit stations', 'description'=>'', 'level'=>'admin'),
 					array('name'=>'delete_stations', 'display_name'=>'Delete stations', 'description'=>'', 'level'=>'admin'),
+
+					array('name'=>'view_products', 'display_name'=>'View Products', 'description'=>'', 'level'=>'system_admin'),
+					array('name'=>'create_products', 'display_name'=>'Create Products', 'description'=>'', 'level'=>'system_admin'),
+					array('name'=>'edit_products', 'display_name'=>'Edit Products', 'description'=>'', 'level'=>'system_admin'),
+					array('name'=>'delete_products', 'display_name'=>'Delete Products', 'description'=>'', 'level'=>'system_admin'),
+					array('name'=>'view_functions', 'display_name'=>'View functions  ', 'description'=>'', 'level'=>'system_admin'),
+					array('name'=>'create_functions', 'display_name'=>'Create functions  ', 'description'=>'', 'level'=>'system_admin'),
+					array('name'=>'edit_functions', 'display_name'=>'Edit functions  ', 'description'=>'', 'level'=>'system_admin'),
+					array('name'=>'delete_functions', 'display_name'=>'Delete functions  ', 'description'=>'', 'level'=>'system_admin'),
 		);
 		$levels = Level::all();
 		for($i = 0; $i < count($perms); $i++){

@@ -205,6 +205,9 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('update-station-supervisor/{uuid}/{sup_uuid}', 'Web\StationController@updateStationSupervisor');
 	Route::get('show-station-supervisor/{uuid}', 'Web\StationController@showStationSupervisor');
 
+	Route::get('products', 'Web\ProductController@products');
+	Route::get('functions', 'Web\FunctionController@functions');
+
 });
 
 
