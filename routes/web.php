@@ -139,6 +139,7 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::any('count-error-notifications', 'Web\ErrorController@countErrorNotifications');
 	Route::get('create-error', 'Web\ErrorController@createError');
 	Route::get('get-station-functions/{uuid}', 'Web\ErrorController@getStationFunctions');
+	Route::get('get-functions-station/{uuid}', 'Web\ErrorController@getFunctionsStation');
 	Route::post('store-error', 'Web\ErrorController@storeError');
 	Route::get('error/{uuid}', 'Web\ErrorController@showError');
 	Route::get('pdf-error/{uuid}', 'Web\ErrorController@pdfError');
@@ -181,7 +182,7 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::get('destroy-affected-product/{uuid}', 'Web\ErrorController@destroyAffectedProduct');
 
 	Route::get('validate-errors-search-form/{str}', 'Web\ErrorController@validateErrorsSearchForm');
-	
+	Route::get('get-station-users/{uuid}', 'Web\ErrorController@getStationUsers');
 	/*
 	 * ========================================================================================================================
 	 * Station routes
@@ -205,8 +206,29 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	Route::post('update-station-supervisor/{uuid}/{sup_uuid}', 'Web\StationController@updateStationSupervisor');
 	Route::get('show-station-supervisor/{uuid}', 'Web\StationController@showStationSupervisor');
 
+	/*
+	 * ========================================================================================================================
+	 * Product routes
+	 *
+	 */
 	Route::get('products', 'Web\ProductController@products');
+
+	/*
+	 * ========================================================================================================================
+	 * Functions routes
+	 *
+	 */
 	Route::get('functions', 'Web\FunctionController@functions');
+	Route::get('function-products/{uuid}', 'Web\FunctionController@functionProducts');
+	Route::get('function/{uuid}', 'Web\FunctionController@func');
+
+	/*
+	 * =======================================================================================================================
+	 * SystemError routes
+	 * 
+	 */
+
+	Route::any('system-errors', 'Web\SystemErrorController@systemErrors');
 
 });
 

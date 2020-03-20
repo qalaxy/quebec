@@ -43,5 +43,29 @@ class FunctionExt extends Base{
 		return $functions;
 	}
 
+	public function getFunction(string $uuid){
+		try{
+			$func = Func::withUuid($uuid)->first();
+			if(is_null($func)){
+				throw new Exception('Function has not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $func;
+	}
+
+	public function getFunctionProducts(object $func){
+		try{
+			$products = $func->product()->paginate($this->f_data->rows);
+			if(is_null($products)){
+				throw new Exception('Products for the function have not been retrieved successfully');
+			}
+		}catch(Exception $e){
+			return $e->getMessage();
+		}
+		return $products;
+	}
+
 }
 ?>

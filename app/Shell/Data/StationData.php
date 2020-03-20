@@ -2,7 +2,7 @@
 namespace App\Shell\Data;
 
 class StationData{
-	public $rows = 5;
+	public $rows = 15;
 	
 	public $function_id_key = 'function_id';
 	public $user_id_key = 'user_id';

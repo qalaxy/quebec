@@ -36,7 +36,7 @@ class StationExe extends Base{
 			if(is_null($stn_func)){
 				throw new Exception('AIS function has not been removed from the station successfully');
 			}else{
-				$this->success = array('indicator'=>'success', 'message'=>'AIS function has been removed the station successfully');
+				$this->success = array('indicator'=>'success', 'message'=>'AIS function has been removed from the station successfully');
 			}
 		}catch(Exception $e){
 			$this->error = array('indicator'=>'warning', 'message'=>$e->getMessage());

@@ -158,12 +158,6 @@ class StationController extends Controller
 				else
 					return back()->with('notification', $this->ext->missing_view);
 			}
-			
-			if(is_object($station) && is_object($function)){
-				return $this->ext->deleteStationFunction($station, $function);
-			}else{
-				return $this->ext->invalidDeletion();
-			}
 		}else{
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to remove a funtion from a station'));
 		}

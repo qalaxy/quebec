@@ -154,7 +154,7 @@ function displayErrorMessage(elememt, value){
 
 function removeErrorMessage(element){
 	element.children[1].setAttribute("class", "w3-input w3-border w3-border-dark-gray");
-	element.children[2].innerHTML = '&nbsp;';
+	//element.children[2].innerHTML = '&nbsp;';
 }
 
 function deleteOriginatorReaction(url){

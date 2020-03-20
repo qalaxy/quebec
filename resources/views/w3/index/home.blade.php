@@ -1,7 +1,7 @@
 @extends('w3.layout.app')
 
 @section('title')
-<title>QMS-Error logs</title>
+<title>AIM</title>
 @endsection
 
 @section('style')

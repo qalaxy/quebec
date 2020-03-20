@@ -88,6 +88,7 @@
 												<select class="w3-select w3-border {{($errors->has('station_id')) ? 'w3-border-red' : 'w3-border-dark-gray'}}" 
 													name="station_id" 
 													id="error_search_station"
+													onchange="loadfunctions(this.value); loadOriginators(this.value);"
 													oninput="validateErrorSerachForm('{{url('/validate-errors-search-form')}}')">
 													<option value="" disabled selected>Search by station</option>
 													@isset($stations)
@@ -301,7 +302,7 @@
 					<th>Number</th>
 					<th>Station</th>
 					<th>Description</th>
-					<th>Status</th>
+					<!--<th>Status</th>-->
 					<th>Date reported</th>
 					<!--<th colspan="2"></th>-->
 				</tr>
@@ -313,7 +314,7 @@
 					</td>
 					<td>{{$error->station}}</td>
 					<td>{{$error->description}}</td>
-					<td>{{$error->state}}</td>
+					<!--<td>{{$error->state}}</td>-->
 					<td>{{date_format(date_create($error->created_at), 'd/m/Y H:i:s')}}</td>
 					<!--<td><a class="w3-button" href="{{url('edit-error/'.$error->uuid)}}"><i class="fa fa-edit fa-lg"></i></a></td>
 					<td><button class="w3-button" onclick="deleteError('{{$error->uuid}}');">
@@ -354,6 +355,45 @@ function getErrors(form, table){
 	console.log(form);
 
 }
+
+function loadOriginators(station){ //alert('Hey');
+	let option = '<option value="" disabled selected>Search by error originator</option>';
+
+	let xhr = new XMLHttpRequest();
+	xhr.open("GET", "{{url('/get-account-station')}}/"+station);
+	xhr.send();
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			let originators = JSON.parse(xhr.responseText);
+			for(i in originators){
+				option += '<option value="'+originators[i].id+'">'+originators[i].name+'</option>';
+			}
+
+			document.getElementById('error_search_originator').innerHTML = option;
+			console.log(document.getElementById('error_search_originator'));
+		}
+	}
+}
+
+function loadfunctions(station){ //alert('Hey');
+	let option = '<option value="" disabled selected>Search by function</option>';
+
+	let xhr = new XMLHttpRequest();
+	xhr.open("GET", "{{url('/get-functions-station')}}/"+station);
+	xhr.send();
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			let functions = JSON.parse(xhr.responseText);
+			for(i in functions){
+				option += '<option value="'+functions[i].id+'">'+functions[i].name+'</option>';
+			}
+
+			document.getElementById('error_search_function').innerHTML = option;
+			console.log(document.getElementById('error_search_function'));
+		}
+	}
+}
+
 </script>
 <script src="{{url('public/js/error.js')}}"></script>
 

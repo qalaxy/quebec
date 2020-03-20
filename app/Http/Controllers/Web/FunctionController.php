@@ -45,4 +45,46 @@ class FunctionController extends Controller
     		return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view functions'));
     	}
     }
+
+    public function func($uuid){
+    	if(Auth::user()->can('view_functions')){
+    		$func = $this->ext->getFunction($uuid);
+
+    		if(is_object($func)){
+				if(View::exists('w3.show.function')){
+					return view('w3.show.function')->with(compact('func'));
+				}else{
+					return back()->with('notification', array('indicator'=>'danger', 'message'=>$this->ext->missing_view));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $func));
+			}
+
+    	}else{
+    		return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view functions'));
+    	}
+    }
+
+    public function functionProducts($uuid){
+    	if(Auth::user()->can('view_functions')){
+    		$func = $this->ext->getFunction($uuid); 
+    		if(!is_object($func))
+    			return back()->with('notification', array('indicator'=>'warning', 'message'=> $func));
+
+    		$products = $this->ext->getFunctionProducts($func);
+
+    		if(is_object($products)){
+				if(View::exists('w3.index.function-products')){
+					return view('w3.index.function-products')->with(compact('func', 'products'));
+				}else{
+					return back()->with('notification', array('indicator'=>'danger', 'message'=>$this->ext->missing_view));
+				}
+			}else{
+				return back()->with('notification', array('indicator'=>'warning', 'message'=> $products));
+			}
+
+    	}else{
+    		return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view functions'));
+    	}
+    }
 }

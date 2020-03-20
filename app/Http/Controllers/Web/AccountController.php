@@ -367,7 +367,7 @@ class AccountController extends Controller
 			
 			if(View::exists('w3.edit.email')){
 				return view('w3.edit.email')->with(compact('account', 'email'))
-						->with(array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
+						->with('notification', array('indicator'=>'information', 'message'=>'All fields with * should not be left blank'));
 			}else{
 				return back()->with('notification', $this->ext->missing_view);
 			}

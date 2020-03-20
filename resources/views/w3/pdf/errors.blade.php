@@ -31,49 +31,54 @@
 							<th class="w3-small" style="text-align: justify; border: 1px solid #708090;">Reported by</th>
 							<th class="w3-small" style="text-align: justify; border: 1px solid #708090;">Cause</th>
 							<th class="w3-small" style="text-align: justify; border: 1px solid #708090;">Corrective action</th>
+							<th class="w3-small" style="text-align: justify; border: 1px solid #708090;">Caused by</th>
 							<th class="w3-small" style="text-align: justify; border: 1px solid #708090;">Correction date</th>
 							<th class="w3-small" style="text-align: justify; border: 1px solid #708090;">Corrected by</th>
-							<th class="w3-small" style="text-align: justify; border: 1px solid #708090;">Remarks</th>
+							<th class="w3-small" style="text-align: justify; border: 1px solid #708090;">Correction remarks</th>
 						</tr>
 					</thead>
 					<tbody>
 					@foreach($errors as $error)
 						<tr>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
-								{{$error['reported_error']['number']}}
+							<td class="" style="text-align: justify; border: 0.5px solid #708090;">
+								<a href="{{url('/error/'.$error['reported_error']['uuid'])}}" style="text-decoration: none; font-size: 10px;">
+									{{$error['reported_error']['number']}}</a>
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{$error['reported_error']['date_reported']}}
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{$error['reported_error']['description']}}
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{$error['reported_error']['impact']}}
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								@if(count($error['products']))
 									@foreach($error['products'] as $product)
 										{{$product['product']}},
 									@endforeach
 								@endif
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{$error['reported_error']['user']}}
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{(count($error['correction']))?$error['correction']['cause']:null}}
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{(count($error['correction']))?$error['correction']['corrective_action']:null}}
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
+								{{(count($error['correction']))?$error['correction']['source']:null}}
+							</td>
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{(count($error['correction']))?$error['correction']['date_responded']:null}}
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{(count($error['correction']))?$error['correction']['corrector']:null}}
 							</td>
-							<td class="w3-small" style="text-align: justify; border: 0.5px solid #708090;">
+							<td class="" style="text-align: justify; border: 0.5px solid #708090; font-size: 10px;">
 								{{(count($error['correction']))?$error['correction']['remarks']:null}}
 							</td>
 						</tr>

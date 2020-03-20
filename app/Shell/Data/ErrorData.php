@@ -2,7 +2,7 @@
 namespace App\Shell\Data;
 
 class ErrorData{
-	public $rows = 5;
+	public $rows = 15;
 	
 	public $function_id_key = 'function_id';
 	public $station_id_key = 'station_id';

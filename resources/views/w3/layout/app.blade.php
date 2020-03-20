@@ -81,7 +81,7 @@
 		<span class="w3-badge w3-theme w3-small w3-right"></span>
 	</a>
   </div>  
-  <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/home')}}">System errors</a>
+  <a id="system-errors" class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/system-errors')}}">System errors</a>
   <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/home')}}">Help</a>
   </div>
 </div>

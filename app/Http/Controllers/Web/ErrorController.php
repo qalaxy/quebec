@@ -113,6 +113,21 @@ class ErrorController extends Controller
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to create functional errors'));
 		}
 	}
+
+	public function getFunctionsStation($uuid){
+		if(Auth::user()->can('create_errors') || Auth::user()->can('view_errors')){
+			
+			$station = $this->ext->getStation($uuid);
+			if(!is_object($station))
+				return response()->json(array(['id'=>null, 'name'=>'Error occurred. Sorry']));
+			
+			return response()->json($this->ext->getJsonStationFunctions($station));
+			
+			
+		}else{
+			return response()->json(array(['id'=>null, 'name'=>'You do not have permission']));
+		}
+	}
 	
 	public function storeError(Request $request){
 		if(Auth::user()->can('create_errors')){
@@ -424,7 +439,7 @@ class ErrorController extends Controller
 	}
 	
 	public function getAccountStation($uuid){
-		if(Auth::user()->can('create_errors')){
+		if(Auth::user()->can('create_errors') || Auth::user()->can('view_errors')){
 			
 			$station = $this->ext->getStation($uuid);
 			if(!is_object($station))
@@ -620,14 +635,14 @@ class ErrorController extends Controller
 	
 	public function errorPdf($uuid){
 		if(Auth::user()->can('view_errors')){
-			$error = $this->ext->getError($uuid); //return var_dump($error);
+			$error = $this->ext->getError($uuid);
 			if(!is_object($error)) 
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$error))->withInput();
 			
-			$data = $this->ext->errorPdfData($error); //return var_dump($data);
+			$data = $this->ext->errorPdfData($error);
 			
 			$pdf = PDF::loadView('w3.pdf.error', $data);
-			return $pdf->stream();
+			return $pdf->stream('AIM_non_conformity_report_S_'.date('Y_d_m_H:i:s'));
 		}else{
 			return back()->with('notification', array('indicator'=>'danger', 'message'=>'You are not allowed to view errors'));
 		}
@@ -639,14 +654,13 @@ class ErrorController extends Controller
 				$errors = $this->ext->getErrorsWithUuids(json_decode($request['errors']));
 			}else{ 
 				abort(403);
-				//$errors = $this->ext->getPaginatedErrors();
 			}
 			
 			if(is_object($errors)){
 				$data = $this->ext->errorsPdfData($errors);
 				
 				$pdf = PDF::loadView('w3.pdf.errors', $data)->setPaper('a4', 'landscape');
-				return $pdf->stream();
+				return $pdf->stream('AIM_non_conformity_report_M_'.date('Y_d_m_H:i:s'));
 			}else{
 				return back()->with('notification', array('indicator'=>'warning', 'message'=>$errors));
 			}

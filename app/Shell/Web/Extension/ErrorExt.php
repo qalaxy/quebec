@@ -41,287 +41,206 @@ class ErrorExt extends Base{
 	
 	public function searchErrors(array $data){
 		$corrections = null; $errors = null;
-		try{
-			$params = $this->prepareSearchParam($data, ['number', 'originator_id', 'function_id', 'station_id', 'error_from', 'error_to', 'correction_from', 'correction_to']);
-
-			foreach($data as $key=>$value){
-				foreach($params as $param){
-					if($key == $param[0]){
-						continue 2;
-					}
-				}
-				unset($data[$key]);
-			}
-
-			//return $data;
-
-			if(array_key_exists('originator_id', $data) 
-				&& array_key_exists('correction_from', $data) 
-				&& array_key_exists('correction_to', $data)){
-				$corrections = DB::table('errors')
-								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-								->join('functions', 'errors.function_id', '=', 'functions.id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
-								->join('users', 'aio_errors.originator_id', '=', 'users.id')
-								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
-								->join('status', 'error_correction_status.status_id', '=', 'status.id')
-								->join('states', 'status.state_id', '=', 'states.id')
-								->where('users.uuid', $data['originator_id'])
-								->whereBetween('error_corrections.created_at', [$data['correction_from'], $data['correction_to']])
-								->whereNull('error_corrections.deleted_at')
-								->select('errors.uuid',
-										'errors.number',
-										'stations.abbreviation as station_abbreviation',
-										'functions.abbreviation as function_abbreviation',
-										'stations.name as station',
-										'errors.description',
-										'errors.created_at',
-										'states.name as state',
-									);
-
-
-			}else if(array_key_exists('originator_id', $data) 
-				&& array_key_exists('correction_from', $data)){
-				$corrections = DB::table('errors')
-								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-								->join('functions', 'errors.function_id', '=', 'functions.id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
-								->join('users', 'aio_errors.originator_id', '=', 'users.id')
-								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
-								->join('status', 'error_correction_status.status_id', '=', 'status.id')
-								->join('states', 'status.state_id', '=', 'states.id')
-								->where('users.uuid', $data['originator_id'])
-								->where('error_corrections.created_at', '>=', $data['correction_from'])
-								->whereNull('error_corrections.deleted_at')
-								->select('errors.uuid',
-										'errors.number',
-										'stations.abbreviation as station_abbreviation',
-										'functions.abbreviation as function_abbreviation',
-										'stations.name as station',
-										'errors.description',
-										'errors.created_at',
-										'states.name as state',
-									);
-
-			}else if(array_key_exists('originator_id', $data) 
-				&& array_key_exists('correction_to', $data)){
-				$corrections = DB::table('errors')
-								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-								->join('functions', 'errors.function_id', '=', 'functions.id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
-								->join('users', 'aio_errors.originator_id', '=', 'users.id')
-								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
-								->join('status', 'error_correction_status.status_id', '=', 'status.id')
-								->join('states', 'status.state_id', '=', 'states.id')
-								->where('users.uuid', $data['originator_id'])
-								->where('error_corrections.created_at', '<=', $data['correction_to'])
-								->whereNull('error_corrections.deleted_at')
-								->select('errors.uuid',
-										'errors.number',
-										'stations.abbreviation as station_abbreviation',
-										'functions.abbreviation as function_abbreviation',
-										'stations.name as station',
-										'errors.description',
-										'errors.created_at',
-										'states.name as state',
-									);
-
-			}else if(array_key_exists('originator_id', $data)){
-				$corrections = DB::table('errors')
-								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-								->join('functions', 'errors.function_id', '=', 'functions.id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
-								->join('users', 'aio_errors.originator_id', '=', 'users.id')
-								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
-								->join('status', 'error_correction_status.status_id', '=', 'status.id')
-								->join('states', 'status.state_id', '=', 'states.id')
-								->where('users.uuid', $data['originator_id'])
-								->whereNull('error_corrections.deleted_at')
-								->whereNull('users.deleted_at')
-								->select('errors.uuid',
-										'errors.number',
-										'stations.abbreviation as station_abbreviation',
-										'functions.abbreviation as function_abbreviation',
-										'stations.name as station',
-										'errors.description',
-										'errors.created_at',
-										'states.name as state',
-									);
-
-			}else if(array_key_exists('correction_from', $data) 
-				&& array_key_exists('correction_to', $data)){
-				$corrections = DB::table('errors')
-								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-								->join('functions', 'errors.function_id', '=', 'functions.id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
-								->join('status', 'error_correction_status.status_id', '=', 'status.id')
-								->join('states', 'status.state_id', '=', 'states.id')
-								->whereBetween('error_corrections.created_at', [$data['correction_from'], $data['correction_to']])
-								->whereNull('error_corrections.deleted_at')
-								->select('errors.uuid',
-										'errors.number',
-										'stations.abbreviation as station_abbreviation',
-										'functions.abbreviation as function_abbreviation',
-										'stations.name as station',
-										'errors.description',
-										'errors.created_at',
-										'states.name as state',
-									);
-
-			}else if(array_key_exists('correction_from', $data)){
-				$corrections = DB::table('errors')
-								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-								->join('functions', 'errors.function_id', '=', 'functions.id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
-								->join('status', 'error_correction_status.status_id', '=', 'status.id')
-								->join('states', 'status.state_id', '=', 'states.id')
-								->where('error_corrections.created_at', '>=', $data['correction_from'])
-								->whereNull('error_corrections.deleted_at')
-								->select('errors.uuid',
-										'errors.number',
-										'stations.abbreviation as station_abbreviation',
-										'functions.abbreviation as function_abbreviation',
-										'stations.name as station',
-										'errors.description',
-										'errors.created_at',
-										'states.name as state',
-									);
-
-			}else if(array_key_exists('correction_to', $data)){
-				$corrections = DB::table('errors')
-								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-								->join('functions', 'errors.function_id', '=', 'functions.id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
-								->join('error_correction_status', 'error_corrections.id', '=', 'error_correction_status.error_correction_id')
-								->join('status', 'error_correction_status.status_id', '=', 'status.id')
-								->join('states', 'status.state_id', '=', 'states.id')
-								->where('error_corrections.created_at', '<=', $data['correction_to'])
-								->whereNull('error_corrections.deleted_at')
-								->select('errors.uuid',
-										'errors.number',
-										'stations.abbreviation as station_abbreviation',
-										'functions.abbreviation as function_abbreviation',
-										'stations.name as station',
-										'errors.description',
-										'errors.created_at',
-										'states.name as state',
-									);
-
-			}else{
-				$corrections = null;
-			}
-
-
-			$p = array();
-			$keys = [
-						['number', 'errors.number'], 
-						['function_id', 'functions.uuid'], 
-						['station_id', 'stations.uuid'], 
+		$search_param = ['number' => null,
+							'originator_id' => null,
+							'function_id' => null,
+							'station_id' => null,
+							'error_from' => null,
+							'error_to' => null,
+							'correction_from' => null,
+							'correction_to' => null
 					];
 
-			foreach($data as $i=>$value){
-				foreach($keys as $key){
-					if($i == $key[0]){
-						array_push($p, [$key[1], $value]);
+		try{
+			$params = $this->prepareSearchParam($data, array_keys($search_param));
+
+			foreach($params as $param){
+				foreach ($search_param as $key => $value) {
+					if($param[0] == $key){
+						$search_param[$key] = $param[1];
 						continue 2;
 					}
-				}
+				}				
 			}
 
+			//return $search_param;
 
-			if(array_key_exists('error_from', $data) && array_key_exists('error_to', $data)){
-				$errors = DB::table('errors')
-							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-							->join('functions', 'errors.function_id', '=', 'functions.id')
-							->join('error_status', 'errors.id', '=', 'error_status.error_id')
-							->join('status', 'error_status.status_id', '=', 'status.id')
-							->join('states', 'status.state_id', '=', 'states.id')
-							->where($p)
-							->whereBetween('errors.created_at', [$data['error_from'], $data['error_to']])
-							->whereNull('errors.deleted_at')
-							->select('errors.uuid',
-									'errors.number',
-									'stations.abbreviation as station_abbreviation',
-									'functions.abbreviation as function_abbreviation',
-									'stations.name as station',
-									'errors.description',
-									'errors.created_at',
-									'states.name as state',
-								);
+			/*if(is_null($search_param['error_from']) && is_null($search_param['error_to']))
+				$error_date = 'errors.created_at is null';
 
-			}elseif(array_key_exists('error_from', $data)){
-				$errors = DB::table('errors')
-							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-							->join('functions', 'errors.function_id', '=', 'functions.id')
-							->join('error_status', 'errors.id', '=', 'error_status.error_id')
-							->join('status', 'error_status.status_id', '=', 'status.id')
-							->join('states', 'status.state_id', '=', 'states.id')
-							->where($p)
-							->where('errors.created_at', '>=', [$data['error_from']])
-							->whereNull('errors.deleted_at')
-							->select('errors.uuid',
-									'errors.number',
-									'stations.abbreviation as station_abbreviation',
-									'functions.abbreviation as function_abbreviation',
-									'stations.name as station',
-									'errors.description',
-									'errors.created_at',
-									'states.name as state',
-								);
+			if(isset($search_param['error_from']) && is_null($search_param['error_to']))
+				$error_date = 'errors.created_at>="'.date_format(date_create($search_param['error_from']), 'Y-m-d H:i:s').'"';
 
-			}elseif(array_key_exists('error_to', $data)){
+			if(isset($search_param['error_to']) && is_null($search_param['error_from']))
+				$error_date = 'errors.created_at<="'.date_format(date_create($search_param['error_to']), 'Y-m-d H:i:s').'"';
+
+			if(isset($search_param['error_from']) && isset($search_param['error_to']))
+				$error_date = 'errors.created_at between '
+							.'"'.date_format(date_create($search_param['error_from']), 'Y-m-d H:i:s').'"'
+							.' and '.'"'.date_format(date_create($search_param['error_to']), 'Y-m-d H:i:s').'"';
+
+
+			if(is_null($search_param['correction_from']) && is_null($search_param['correction_to']))
+				$error_correction_date = 'error_corrections.created_at is null';
+
+			if(isset($search_param['correction_from']) && is_null($search_param['correction_to']))
+				$error_correction_date = 'error_corrections.created_at>="'.date_format(date_create($search_param['correction_from']), 'Y-m-d H:i:s').'"';
+
+
+			if(isset($search_param['correction_to']) && is_null($search_param['correction_from']))
+				$error_correction_date = 'error_corrections.created_at<="'.date_format(date_create($search_param['correction_to']), 'Y-m-d H:i:s').'"';
+
+			if(isset($search_param['correction_from']) && isset($search_param['correction_to']))
+				$error_correction_date = 'error_corrections.created_at between '
+						.'"'.date_format(date_create($search_param['correction_from']), 'Y-m-d H:i:s').'"'
+						.' and '.'"'.date_format(date_create($search_param['correction_to']), 'Y-m-d H:i:s').'"';
+
+			$error_corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
+								->join('users', 'aio_errors.originator_id', '=', 'users.id')
+								->join('error_status', 'errors.id', '=', 'error_status.error_id')
+								->join('status', 'error_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+								->whereRaw('(errors.number="'.$search_param['number'].'"'
+											.' or functions.uuid="'.$search_param['function_id'].'"'
+											.' or stations.uuid="'.$search_param['station_id'].'"'
+											.' or users.uuid="'.$search_param['originator_id'].'"'
+											.' or '.$error_date
+											.' or '.$error_correction_date.') and errors.deleted_at is null'
+											.' and error_corrections.deleted_at is null')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state')
+								->distinct();
+
+			$errors = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_status', 'errors.id', '=', 'error_status.error_id')
+								->join('status', 'error_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id')
+
+								->whereRaw('(errors.number="'.$search_param['number'].'"'
+											.' or functions.uuid="'.$search_param['function_id'].'"'
+											.' or stations.uuid="'.$search_param['station_id'].'"'
+											.' or '.$error_date.') and errors.deleted_at is null')
+
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state',)
+								->distinct();*/
+
+
+
+			$error_corrections = DB::table('errors')
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_corrections', 'errors.id', '=', 'error_corrections.error_id')
+								->join('aio_errors', 'error_corrections.id', '=', 'aio_errors.error_correction_id')
+								->join('users', 'aio_errors.originator_id', '=', 'users.id')
+								->join('error_status', 'errors.id', '=', 'error_status.error_id')
+								->join('status', 'error_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id');
+								if(isset($search_param['number']))
+									$error_corrections = $error_corrections->where('errors.number', $search_param['number']);
+
+								if(isset($search_param['function_id']))
+									$error_corrections = $error_corrections->where('functions.uuid', $search_param['function_id']);
+
+								if(isset($search_param['station_id']))
+									$error_corrections = $error_corrections->where('stations.uuid', $search_param['station_id']);
+
+								if(isset($search_param['originator_id']))
+									$error_corrections = $error_corrections->where('users.uuid', $search_param['originator_id']);
+
+								if(isset($search_param['error_from']) && is_null($search_param['error_to']))
+									$error_corrections = $error_corrections->where('errors.created_at', '>=', $search_param['error_from']);
+
+								if(isset($search_param['error_to']) && is_null($search_param['error_from']))
+									$error_corrections = $error_corrections->where('errors.created_at', '<=', $search_param['error_to']);
+
+								if(isset($search_param['error_from']) && isset($search_param['error_to']))
+									$error_corrections = $error_corrections->whereBetween('errors.created_at', [$search_param['error_from'], $search_param['error_to']]);
+
+								if(isset($search_param['correction_from']) && is_null($search_param['correction_to']))
+								$error_corrections = $error_corrections->where('error_corrections.created_at', '>=', $search_param['correction_from']);
+
+								if(isset($search_param['correction_to']) && is_null($search_param['correction_from']))
+									$error_corrections = $error_corrections->where('error_corrections.created_at', '<=', $search_param['correction_to']);
+
+								if(isset($search_param['correction_from']) && isset($search_param['correction_to']))
+									$error_corrections = $error_corrections->whereBetween('error_corrections.created_at', [$search_param['correction_from'], $search_param['correction_to']]);
+								$error_corrections = $error_corrections->whereNull('errors.deleted_at')
+								->whereNull('error_corrections.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state')
+								->distinct();
+
+			if(!$search_param['originator_id'] && !$search_param['correction_from'] && !$search_param['correction_to']){
 				$errors = DB::table('errors')
-							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-							->join('functions', 'errors.function_id', '=', 'functions.id')
-							->join('error_status', 'errors.id', '=', 'error_status.error_id')
-							->join('status', 'error_status.status_id', '=', 'status.id')
-							->join('states', 'status.state_id', '=', 'states.id')
-							->where($p)
-							->where('errors.created_at', '<=', [$data['error_to']])
-							->whereNull('errors.deleted_at')
-							->select('errors.uuid',
-									'errors.number',
-									'stations.abbreviation as station_abbreviation',
-									'functions.abbreviation as function_abbreviation',
-									'stations.name as station',
-									'errors.description',
-									'errors.created_at',
-									'states.name as state',
-								);
-			}else{
-				$errors = DB::table('errors')
-							->join('stations', 'errors.reported_station_id', '=', 'stations.id')
-							->join('functions', 'errors.function_id', '=', 'functions.id')
-							->join('error_status', 'errors.id', '=', 'error_status.error_id')
-							->join('status', 'error_status.status_id', '=', 'status.id')
-							->join('states', 'status.state_id', '=', 'states.id')
-							->where($p)
-							->whereNull('errors.deleted_at')
-							->select('errors.uuid',
-									'errors.number',
-									'stations.abbreviation as station_abbreviation',
-									'functions.abbreviation as function_abbreviation',
-									'stations.name as station',
-									'errors.description',
-									'errors.created_at',
-									'states.name as state',
-								);
+								->join('stations', 'errors.reported_station_id', '=', 'stations.id')
+								->join('functions', 'errors.function_id', '=', 'functions.id')
+								->join('error_status', 'errors.id', '=', 'error_status.error_id')
+								->join('status', 'error_status.status_id', '=', 'status.id')
+								->join('states', 'status.state_id', '=', 'states.id');
+								if(isset($search_param['number']))
+									$errors = $errors->where('errors.number', $search_param['number']);
+
+								if(isset($search_param['function_id']))
+									$errors = $errors->where('functions.uuid', $search_param['function_id']);
+
+								if(isset($search_param['station_id']))
+									$errors = $errors->where('stations.uuid', $search_param['station_id']);
+
+								if(isset($search_param['error_from']) && is_null($search_param['error_to']))
+									$errors = $errors->where('errors.created_at', '>=', $search_param['error_from']);
+
+								if(isset($search_param['error_to']) && is_null($search_param['error_from']))
+									$errors = $errors->where('errors.created_at', '<=', $search_param['error_to']);
+
+								if(isset($search_param['error_from']) && isset($search_param['error_to']))
+									$errors = $errors->whereBetween('errors.created_at', [$search_param['error_from'], $search_param['error_to']]);
+								
+								$errors = $errors->whereNull('errors.deleted_at')
+								->select('errors.uuid',
+										'errors.number',
+										'stations.abbreviation as station_abbreviation',
+										'functions.abbreviation as function_abbreviation',
+										'stations.name as station',
+										'errors.description',
+										'errors.created_at',
+										'states.name as state')
+								->distinct();
 			}
 
-			if($corrections){
-				$errors = $errors->union($corrections)->paginate($this->error_data->rows);
-			}else{
+			if($errors && $error_corrections){
+				$errors = $error_corrections->union($errors)->paginate($this->error_data->rows);
+			}else if(!$errors && $error_corrections){
+				$errors = $error_corrections->paginate($this->error_data->rows);
+			}else if($errors && !$error_corrections){
 				$errors = $errors->paginate($this->error_data->rows);
 			}
+
+			//$errors = $error_corrections->distinct()->paginate($this->error_data->rows);
 
 			if(is_null($errors)){
 				throw new Exception('Errors could not be retrieved successfully');
@@ -710,6 +629,14 @@ class ErrorExt extends Base{
 		}
 		return $accounts;
 	}
+
+	public function getJsonStationFunctions(object $station){
+		$functions = array();
+		foreach($station->func()->get() as $func){
+			array_push($functions, ['id'=>$func->uuid, 'name'=>$func->name]);
+		}
+		return $functions;
+	}
 	
 	public function validateCorrectiveActionData(array $data){
 		$rules = [
@@ -1054,6 +981,7 @@ class ErrorExt extends Base{
 		$products = array(); $correction = array(); $reported_error = array(); $originator_reaction = array(); $supervisor_reaction = array();
 		
 		$reported_error = [
+				'uuid'=>$error->uuid,
 				'number' => $error->reportedStation()->first()->abbreviation.'/'
 					.$error->func()->first()->abbreviation.'/'
 					.$error->number.'/'

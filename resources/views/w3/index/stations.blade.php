@@ -79,7 +79,7 @@
 			<table class="w3-table-all w3-hoverable">
 				<tr class="w3-theme w3-text-white">
 					<th>Name</th>
-					<th>Code</th>
+					<th>Abbreviation</th>
 					<th colspan="2"></th>
 				</tr>
 				@foreach($stations as $station)
