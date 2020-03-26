@@ -229,6 +229,9 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	 */
 
 	Route::any('system-errors', 'Web\SystemErrorController@systemErrors');
+	Route::get('create-system-error', 'Web\SystemErrorController@createSystemError');
+	Route::post('store-system-error', 'Web\SystemErrorController@storeSystemError');
+	Route::get('system-error/{uuid}', 'Web\SystemErrorController@systemError');
 
 });
 

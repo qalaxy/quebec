@@ -27,7 +27,9 @@
 	<div class=" w3-bar-item w3-button w3-hover-light-blue w3-padding-16 w3-right w3-dropdown-hover">
 	  <span ><i class="fa fa-user fa-lg"></i>&nbsp;{{(Auth::user()) ? Auth::user()->name : null}}&nbsp;<i class="fa fa-caret-down"></i></span>
 	  <div id="user" class="w3-dropdown-content w3-bar-block w3-border" style="right:0">
-		<a href="{{url('/account/'.Auth::user()->account()->first()->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue w3-small">Account</a>
+    @if(Auth::user()->account()->first())
+		  <a href="{{url('/account/'.Auth::user()->account()->first()->uuid)}}" class="w3-bar-item w3-button w3-hover-light-blue w3-small">Account</a>
+    @endif
     <a href="javascript:void(0)" class="w3-bar-item w3-button w3-hover-light-blue w3-small">Settings</a>
 		<a href="{{ route('logout') }}" 
 			class="w3-bar-item w3-button w3-hover-light-blue w3-small" 

@@ -13,7 +13,7 @@ class SystemError extends Model
 	
 	protected $table = 'system_errors';
 	
-	protected $fillable = ['uuid', 'system_id', 'user_id', 'station_id', 'description', 'solution', 'from', 'to', 'date_created', 'time_created', 'state_id', 'remarks'];
+	protected $fillable = ['uuid', 'number', 'system_id', 'user_id', 'station_id', 'description', 'solution', 'from', 'to', 'state_id', 'remarks'];
 	
 	public function app(){
 		return $this->belongsTo('App\System', 'system_id');

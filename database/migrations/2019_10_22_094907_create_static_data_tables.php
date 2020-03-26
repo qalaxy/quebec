@@ -30,6 +30,7 @@ class CreateStaticDataTables extends Migration
             $table->bigIncrements('id');
 			$table->uuid('uuid');
 			$table->string('name');
+			$table->string('abbreviation');
 			$table->string('description')->nullable();
             $table->timestamps();
 			$table->softDeletes();

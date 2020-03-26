@@ -22,6 +22,7 @@ class CreateSystemErrorTables extends Migration
 			$table->unsignedBigInteger('system_id');
 			$table->unsignedBigInteger('user_id');
 			$table->unsignedBigInteger('station_id');
+			$table->integer('number');
 			$table->string('description');
 			$table->string('solution')->nullable();
 			$table->dateTime('from');

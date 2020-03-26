@@ -13,7 +13,7 @@ class System extends Model
 	
 	protected $table = 'systems';
 	
-	protected $fillable = ['uuid', 'name', 'description'];
+	protected $fillable = ['uuid', 'name', 'abbreviation', 'description'];
 	
 	public function systemError(){
 		return $this->hasMany('App\SystemError', 'system_id');
