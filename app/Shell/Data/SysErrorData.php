@@ -20,7 +20,7 @@ class SysErrorData{
 	public $solution_req = 'required|string|max:255';
 	public $from_req = 'required|date';
 	public $to_req = 'required|date';
-	public $remarks_req = 'required|max:255';
+	public $remarks_req = 'nullable|string|max:255';
 
 	public $sys_data_validation_msgs = [
 		'station_id.required' => 'You have not selected station',
@@ -43,7 +43,7 @@ class SysErrorData{
 		'to.required' => 'You have not entered the date the error was solved',
 		'to.date' => 'Value should be a date',
 
-		'remarks.required' => 'You have not entered remarks on system error',
+		'remarks.string' => 'Remarks should be a string value',
 		'remarks.max' => 'The characters in system error remarks should not be more than 255',
 	];
 }

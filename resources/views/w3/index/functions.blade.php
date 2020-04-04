@@ -7,7 +7,7 @@
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">Functions</h1>
+  <h1 class="w3-xlarge">AIM functions</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		<div class="w3-row">
 			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{url('/create-function')}}">CREATE</a>
@@ -89,7 +89,7 @@
 						<td>{{$function->abbreviation}}</td>
 						<td>{{$function->description}}</td>
 						<td><a class="w3-button" href="{{url('edit-function/'.$function->uuid)}}" title="Edit {{$function->name}}"><i class="fa fa-edit fa-lg"></i></a></td>
-						<td><button class="w3-button" onclick="deleteProduct('{{$function->uuid}}');" title="Delete {{$function->name}}">
+						<td><button class="w3-button" onclick="deleteFunction('{{$function->uuid}}');" title="Delete {{$function->name}}">
 								<i class="fa fa-trash fa-lg"></i>
 							</button>
 						</td>
@@ -115,10 +115,10 @@ document.getElementById('menu-administration').className += " w3-text-blue";
 menuAcc('administration');
 w3_show_nav('menuQMS');
 
-function deleteProduct(uuid){
+function deleteFunction(uuid){
 	let xhr = new XMLHttpRequest();
 	
-	xhr.open("GET", "{{url('delete-product')}}/"+uuid);
+	xhr.open("GET", "{{url('delete-function')}}/"+uuid);
 	xhr.send();
 	
 	xhr.onreadystatechange = function(){

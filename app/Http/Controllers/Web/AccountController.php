@@ -197,7 +197,10 @@ class AccountController extends Controller
 			
 			$account = $this->ext->getAccount($uuid);
 			if(is_object($account)){
-				return $this->ext->deleteAccount($account);
+				if($account->user()->first()->id == Auth::id())
+					return $this->ext->invalidDeletion('You cannot delete your own account', 'w3-red');
+				else
+					return $this->ext->deleteAccount($account);
 			}else{
 				return $this->ext->invalidDeletion();
 			}

@@ -10,7 +10,7 @@
   <h1 class="w3-xlarge">Products for: {{($func)?$func->name:null}}</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		<div class="w3-row">
-			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{($func)?url('/add-function-products/'.$func->uuid):null}}" title="Add more products">ADD</a>
+			<a class="w3-button w3-blue w3-hover w3-hover-light-blue" href="{{($func)?url('/create-function-product/'.$func->uuid):null}}" title="Add more products">ADD</a>
 			<!--<button class="w3-button w3-blue w3-hover w3-hover-light-blue w3-right" onclick="document.getElementById('search').style.display='block'">SEARCH</button>-->
 		</div>
 		<div id="search" class="w3-modal">
@@ -86,7 +86,7 @@
 				<tr>
 					<td>{{$product->name}}</td>
 					<td>{{$product->description}}</td>
-					<td><button class="w3-button" onclick="deleteFunctionProduct('{{$func->uuid}}', '{{$product->uuid}}');" title="Delete {{$product->name}}">
+					<td><button class="w3-button" onclick="deleteFunctionProduct('{{$func->uuid}}', '{{$product->uuid}}');" title="Remove {{$product->name}}">
 						<i class="fa fa-trash fa-lg"></i>
 						</button>
 					</td>
@@ -107,16 +107,15 @@
 @section('scripts')
 <script>
 
-document.getElementById('roles').className += " w3-text-blue";
+document.getElementById('functions').className += " w3-text-blue";
 document.getElementById('menu-administration').className += " w3-text-blue";
 menuAcc('administration');
 w3_show_nav('menuQMS');
 
-function deleteRolePerm(role_uuid, perm_uuid){
-	//alert(perm_uuid);
+function deleteFunctionProduct(func, prod){
 	let xhr = new XMLHttpRequest();
 	
-	xhr.open("GET", "{{url('delete-role-permission')}}/"+role_uuid+"/"+perm_uuid);
+	xhr.open("GET", "{{url('delete-function-product')}}/"+func+"/"+prod);
 	xhr.send();
 	
 	xhr.onreadystatechange = function(){

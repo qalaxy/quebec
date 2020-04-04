@@ -1,13 +1,13 @@
 @extends('w3.layout.app')
 
 @section('title')
-<title>Function</title>
+<title>Product</title>
 @endsection
 
 
 @section('content')	
 <div class="w3-panel w3-padding-small w3-card-4 w3-white w3-leftbar w3-border-light-blue" style="min-height:700px;">
-  <h1 class="w3-xlarge">AIM function</h1>
+  <h1 class="w3-xlarge">Product</h1>
 	<div class="w3-row w3-panel" style="max-width:100%;">
 		<div id="delete" class="w3-modal">
 			
@@ -16,48 +16,34 @@
 		<div class="w3-container w3-text-dark-gray">
 			
 			
-			@if($func->name)
+			@if($product->name)
 			<div class="w3-row w3-padding-small">
-				<div class="w3-col s12 m12 l2 w3-left">
+				<div class="w3-col s12 m12 l1 w3-left">
 					<span class=""><strong>Name: </strong></span>
 				</div>
 				<div class="w3-col s12 m12 l10 w3-left">
-					<span class="">{{$func->name}}</span>
-				</div>
-			</div>
-			@endif
-
-			@if($func->abbreviation)
-			<div class="w3-row w3-padding-small">
-				<div class="w3-col s12 m12 l2 w3-left">
-					<span class=""><strong>Abbreviation: </strong></span>
-				</div>
-				<div class="w3-col s12 m12 l10 w3-left">
-					<span class="">{{$func->abbreviation}}</span>
+					<span class="">{{$product->name}}</span>
 				</div>
 			</div>
 			@endif
 			
-			@if($func->description)
+			@if($product->description)
 			<div class="w3-row w3-padding-small">
 				<div class="w3-col s12 m12 l2 w3-left">
 					<span class=""><strong>Description: </strong></span>
 				</div>
 				<div class="w3-col s12 m12 l10 w3-left">
-					<span class="">{{$func->description}}</span>
+					<span class="">{{$product->description}}</span>
 				</div>
 			</div>
 			@endif
 
 			<div class="w3-row w3-padding-small">
 				<div class="w3-col s12 m12 l1 w3-left">
-					<a class="w3-button w3-theme" href="{{($func->uuid)? url('edit-function').'/'.$func->uuid:null}}">Edit</a>
+					<a class="w3-button w3-theme" href="{{($product->uuid)? url('edit-product').'/'.$product->uuid:null}}">Edit</a>
 				</div>
 				<div class="w3-col s12 m12 l2 w3-left">
-					<a class="w3-button w3-theme" onclick="deleteFunction('{{($func->uuid)?$func->uuid : null}}');">Delete</a>
-				</div>
-				<div class="w3-col s12 m12 l2 w3-left">
-					<a class="w3-button w3-theme" href="{{($func->uuid)? url('function-products').'/'.$func->uuid:null}}">Function's products</a>
+					<a class="w3-button w3-theme" onclick="deleteProduct('{{($product->uuid)?$product->uuid : null}}');">Delete</a>
 				</div>
 			</div>
 		</div>
@@ -72,15 +58,15 @@
 @section('scripts')
 <script>
 
-document.getElementById('functions').className += " w3-text-blue";
+document.getElementById('roles').className += " w3-text-blue";
 document.getElementById('menu-administration').className += " w3-text-blue";
 menuAcc('administration');
 w3_show_nav('menuQMS');
 
-function deleteFunction(uuid){
+function deleteProduct(uuid){
 	let xhr = new XMLHttpRequest();
 	
-	xhr.open("GET", "{{url('delete-function')}}/"+uuid);
+	xhr.open("GET", "{{url('delete-product')}}/"+uuid);
 	xhr.send();
 	
 	xhr.onreadystatechange = function(){

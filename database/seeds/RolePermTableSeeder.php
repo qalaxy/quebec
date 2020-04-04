@@ -43,6 +43,17 @@ class RolePermTableSeeder extends Seeder
 						array('role'=>'super_admin', 'perm'=>'create_stations'),
 						array('role'=>'super_admin', 'perm'=>'edit_stations'),
 						array('role'=>'super_admin', 'perm'=>'delete_stations'),
+						
+						array('role'=>'super_admin', 'perm'=>'view_products'),
+						array('role'=>'super_admin', 'perm'=>'create_products'),
+						array('role'=>'super_admin', 'perm'=>'edit_products'),
+						array('role'=>'super_admin', 'perm'=>'delete_products'),
+
+						
+						array('role'=>'super_admin', 'perm'=>'view_functions'),
+						array('role'=>'super_admin', 'perm'=>'create_functions'),
+						array('role'=>'super_admin', 'perm'=>'edit_functions'),
+						array('role'=>'super_admin', 'perm'=>'delete_functions'),
 	   ); 
 	   $roles = Role::all();
 	   $perms = Permission::all();

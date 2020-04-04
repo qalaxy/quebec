@@ -211,16 +211,37 @@ Route::group(['middleware'=>['auth', 'web']], function(){
 	 * Product routes
 	 *
 	 */
-	Route::get('products', 'Web\ProductController@products');
+	Route::any('products', 'Web\ProductController@products');
+	Route::get('create-product', 'Web\ProductController@createProduct');
+	Route::post('store-product', 'Web\ProductController@storeProduct');
+	Route::get('product/{uuid}', 'Web\ProductController@product');
+	Route::get('edit-product/{uuid}', 'Web\ProductController@editProduct');
+	Route::post('update-product/{uuid}', 'Web\ProductController@updateProduct');
+	Route::get('delete-product/{uuid}', 'Web\ProductController@deleteProduct');
+	Route::get('destroy-product/{uuid}', 'Web\ProductController@destroyProduct');
 
 	/*
 	 * ========================================================================================================================
 	 * Functions routes
 	 *
 	 */
-	Route::get('functions', 'Web\FunctionController@functions');
-	Route::get('function-products/{uuid}', 'Web\FunctionController@functionProducts');
+	Route::any('functions', 'Web\FunctionController@functions');
+	Route::get('create-function', 'Web\FunctionController@createFunction');
+	Route::post('store-function', 'Web\FunctionController@storeFunction');
 	Route::get('function/{uuid}', 'Web\FunctionController@func');
+	Route::get('edit-function/{uuid}', 'Web\FunctionController@editFunction');
+	Route::post('update-function/{uuid}', 'Web\FunctionController@updateFunction');
+	Route::get('delete-function/{uuid}', 'Web\FunctionController@deleteFunction');
+	Route::get('destroy-function/{uuid}', 'Web\FunctionController@destroyFunction');
+
+	Route::get('function-products/{uuid}', 'Web\FunctionController@functionProducts');
+	Route::get('create-function-product/{uuid}', 'Web\FunctionController@createFunctionProduct');
+	Route::post('store-function-product/{uuid}', 'Web\FunctionController@storeFunctionProduct');
+	Route::get('delete-function-product/{function}/{product}', 'Web\FunctionController@deleteFunctionProduct');
+	Route::get('destroy-function-product/{function}/{product}', 'Web\FunctionController@destroyFunctionProduct');
+
+	//destroy-function-product
+	
 
 	/*
 	 * =======================================================================================================================

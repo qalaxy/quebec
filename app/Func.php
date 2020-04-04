@@ -13,7 +13,7 @@ class Func extends Model
 	
 	protected $table = 'functions';
 	
-	protected $fillble = ['uuid','name', 'abbreviation', 'description'];
+	protected $fillable = ['uuid', 'name', 'abbreviation', 'description'];
 	
 	public function product(){
 		return $this->belongsToMany('App\Product', 'function_product', 'function_id', 'product_id');
@@ -30,7 +30,7 @@ class Func extends Model
 	public static function boot(){
 		parent::boot();
 		Func::deleted(function($func){
-			$func->func()->delete();
+			//$func->func()->delete();
 		});
 	}
 }

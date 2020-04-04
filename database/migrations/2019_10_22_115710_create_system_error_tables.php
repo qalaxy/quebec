@@ -27,8 +27,6 @@ class CreateSystemErrorTables extends Migration
 			$table->string('solution')->nullable();
 			$table->dateTime('from');
 			$table->dateTime('to');
-			$table->date('date_created');
-			$table->time('time_created');
 			$table->unsignedBigInteger('state_id');
 			$table->string('remarks')->nullable();
             $table->timestamps();
