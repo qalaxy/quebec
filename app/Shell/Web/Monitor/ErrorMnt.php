@@ -45,7 +45,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 	
-	public function createErrorProduct(array $data, object $error, object $product){
+	public function createErrorProduct(array $data, $error, $product){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -70,7 +70,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 	
-	public function createCorrectiveAction(array $data, object $error){
+	public function createCorrectiveAction(array $data, $error){
 		$this->data = $data;
 		DB::beginTransaction();
 		$correction = $this->storeErrorCorrection($error);
@@ -108,7 +108,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 
-	public function deleteCorrectiveAction(object $error){
+	public function deleteCorrectiveAction($error){
 		DB::beginTransaction();
 		$correction = $this->destroyCorrectiveAction($error->errorCorrection()->first());
 		if(is_null($correction)){
@@ -120,7 +120,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 	
-	public function createErrorOriginatorReaction(array $data, object $error_correction){
+	public function createErrorOriginatorReaction(array $data, $error_correction){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -133,7 +133,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 	
-	public function createErrorSupervisorReaction(array $data, object $error){
+	public function createErrorSupervisorReaction(array $data, $error){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -164,7 +164,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 	
-	public function editCorrectiveAction(array $data, object $error){
+	public function editCorrectiveAction(array $data, $error){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -243,7 +243,7 @@ class ErrorMnt extends ErrorExe{
 		
 	}
 	
-	public function editErrorSupervisorReaction(array $data, object $error){
+	public function editErrorSupervisorReaction(array $data, $error){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -291,7 +291,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 
-	public function deleteError(object $error){
+	public function deleteError($error){
 		DB::beginTransaction();
 		$func_error = $this->destroyError($error);
 		if(is_null($func_error)){
@@ -303,7 +303,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 
-	public function editErrorOriginatorReaction(array $data, object $error){
+	public function editErrorOriginatorReaction(array $data, $error){
 		$this->data = $data;
 		DB::beginTransaction();
 		$func_error = $this->updateErrorOriginatorReaction($error->errorCorrection()->first()->originatorReaction()->first());
@@ -315,7 +315,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 
-	public function deleteErrorOriginatorReaction(object $error){
+	public function deleteErrorOriginatorReaction($error){
 		DB::beginTransaction();
 		$originator_reaction = $this->destroyErrorOriginatorReaction($error->errorCorrection()->first()->originatorReaction()->first());
 		if(is_null($originator_reaction)){
@@ -327,7 +327,7 @@ class ErrorMnt extends ErrorExe{
 		return $this->success;
 	}
 
-	public function deleteErrorSupervisorReaction(object $error){
+	public function deleteErrorSupervisorReaction($error){
 		DB::beginTransaction();
 		$supervisor_reaction = $this->destroyErrorSupervisorReaction($error->errorCorrection()->first()->supervisorReaction()->first());
 		if(is_null($supervisor_reaction)){

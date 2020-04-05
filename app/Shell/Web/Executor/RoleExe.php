@@ -44,7 +44,7 @@ class RoleExe extends Base{
 		return $role;
 	}
 	
-	protected function storeRoleStation($role, $station){
+	protected function storeRoleStation(Role $role, Station $station){
 		try{
 			$role_station = $role->station()->attach($station->id);
 			if($role_station){
@@ -120,7 +120,7 @@ class RoleExe extends Base{
 		return $role;
 	}
 	
-	protected function destroyRole($role){
+	protected function destroyRole(Role $role){
 		try{
 			$role = $role->delete();
 			if(is_null($role)){
@@ -135,7 +135,7 @@ class RoleExe extends Base{
 		return $role;
 	}
 	
-	protected function storeRolePerm($role, $permission){
+	protected function storeRolePerm(Role $role, Permission $permission){
 		try{
 			if($role->permission()->attach($permission)){
 				throw new Exception('Permission has not been added to the role successfully');
@@ -149,7 +149,7 @@ class RoleExe extends Base{
 		return $role;
 	}
 	
-	protected function destroyRolePerm($role, $perm){
+	protected function destroyRolePerm(Role $role, Permission $perm){
 		try{
 			$role_perm = $role->permission()->detach($perm);
 			if(is_null($role_perm)){

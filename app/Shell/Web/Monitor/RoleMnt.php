@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\DB;
 use App\Shell\Web\Executor\RoleExe;
 
 class RoleMnt extends RoleExe{
-	public function createRole(array $data, object $stations){
+	public function createRole(array $data, $stations){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -66,7 +66,7 @@ class RoleMnt extends RoleExe{
 		return $this->success;
 	}
 	
-	public function deleteRole(object $role){
+	public function deleteRole($role){
 		DB::beginTransaction();
 		$role = $this->destroyRole($role);
 		if(is_null($role)){

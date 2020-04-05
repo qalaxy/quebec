@@ -127,7 +127,7 @@ class ErrorExe extends Base{
 		return $notification_recipient;
 	}
 	
-	protected function storeErrorProduct($error, $product){
+	protected function storeErrorProduct(Error $error, Product $product){
 		try{
 			$error_product = AffectedProduct::firstOrCreate(array($this->error_data->error_id_key => $error->id,
 							$this->error_data->product_id_key => $product->id, ), 
@@ -147,7 +147,7 @@ class ErrorExe extends Base{
 		return $error_product;
 	}
 	
-	protected function storeErrorCorrection($error){
+	protected function storeErrorCorrection(Error $error){
 		try{
 			$correction = ErrorCorrection::firstOrCreate(array($this->error_data->error_id_key => $error->id), 
 					array('uuid' => Uuid::generate(),
@@ -237,7 +237,7 @@ class ErrorExe extends Base{
 		return $error_status;
 	}
 	
-	protected function storeErrorOriginatorReaction($error_correction){
+	protected function storeErrorOriginatorReaction(ErrorCorrection $error_correction){
 		try{
 			$originator_reaction = OriginatorReaction::firstOrCreate(array($this->error_data->error_correction_id_key => $error_correction->id), 
 								array('uuid' => Uuid::generate(),
@@ -296,7 +296,7 @@ class ErrorExe extends Base{
 		return $supervisor_reaction;
 	}
 	
-	protected function updateErrorCorrection($correction){
+	protected function updateErrorCorrection(ErrorCorrection $correction){
 		try{
 			$corrective_action = $correction->update(array(
 									$this->error_data->user_id_key => Auth::id(),
@@ -450,7 +450,7 @@ class ErrorExe extends Base{
 		return $func_error;
 	}
 
-	protected function destroyError($error){
+	protected function destroyError(Error $error){
 		try{
 			$func_error = $error->delete();
 			if(is_null($func_error)){
@@ -480,7 +480,7 @@ class ErrorExe extends Base{
 		return $product;
 	}
 
-	protected function destroyCorrectiveAction($correction){
+	protected function destroyCorrectiveAction(ErrorCorrection $correction){
 		try{
 			$correction = $correction->delete();
 			if(is_null($correction)){
@@ -495,7 +495,7 @@ class ErrorExe extends Base{
 		return $correction;
 	}
 
-	protected function updateErrorOriginatorReaction($originator_reaction){
+	protected function updateErrorOriginatorReaction(ErrorCorrection $originator_reaction){
 		try{
 			$func_error = $originator_reaction->update(array(
 									$this->error_data->status_key => $this->data[$this->error_data->originator_reaction_key],
@@ -513,7 +513,7 @@ class ErrorExe extends Base{
 		return $func_error;
 	}
 
-	protected function destroyErrorOriginatorReaction($originator_reaction){
+	protected function destroyErrorOriginatorReaction(OriginatorReaction $originator_reaction){
 		try{
 			$reaction = $originator_reaction->delete();
 			if(is_null($reaction)){
@@ -528,7 +528,7 @@ class ErrorExe extends Base{
 		return $reaction;
 	}
 
-	protected function destroyErrorSupervisorReaction($supervisor_reaction){
+	protected function destroyErrorSupervisorReaction(SupervisorReaction $supervisor_reaction){
 		try{
 			$reaction = $supervisor_reaction->delete();
 			if(is_null($reaction)){

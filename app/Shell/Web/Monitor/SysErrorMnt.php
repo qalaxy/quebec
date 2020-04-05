@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Shell\Web\Executor\SysErrorExe;
 class SysErrorMnt extends SysErrorExe{
 
-	public function createSystemError(array $data, object $system, object $station, int $number){
+	public function createSystemError(array $data, $system, $station, int $number){
 		$this->data = $data;
 
 		DB::beginTransaction();

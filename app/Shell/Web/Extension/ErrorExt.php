@@ -294,7 +294,7 @@ class ErrorExt extends Base{
 								'stations.name as station',
 								'errors.description',
 								'errors.created_at',
-								'states.name as state',
+								'states.name as state'
 							)
 						->paginate($this->error_data->rows);
 			if(is_null($errors)){
@@ -354,7 +354,7 @@ class ErrorExt extends Base{
 		return $status;
 	}
 	
-	public function getStationFunctions(object $station){
+	public function getStationFunctions(Station $station){
 		$data = array();
 		foreach($station->func()->get() as $func){
 			array_push($data, ['id'=>$func->uuid, 'name'=>$func->name]);
@@ -443,7 +443,7 @@ class ErrorExt extends Base{
 		return $station;
 	}
 	
-	public function getNotificationRecipients(object $station){
+	public function getNotificationRecipients(Station $station){
 		try{
 			$recipients = $station->recipient()->get();
 			if(is_null($recipients)){
@@ -618,7 +618,7 @@ class ErrorExt extends Base{
 				</div>';
 	}
 	
-	public function getJsonStationAccounts(object $station){
+	public function getJsonStationAccounts(Station $station){
 		$accounts = array();
 		foreach($station->accountStation()->where('status', 1)->get() as $account_station){
 			array_push($accounts, 
@@ -630,7 +630,7 @@ class ErrorExt extends Base{
 		return $accounts;
 	}
 
-	public function getJsonStationFunctions(object $station){
+	public function getJsonStationFunctions(Station $station){
 		$functions = array();
 		foreach($station->func()->get() as $func){
 			array_push($functions, ['id'=>$func->uuid, 'name'=>$func->name]);
@@ -657,7 +657,7 @@ class ErrorExt extends Base{
 		return Validator::make($data, $rules, $this->error_data->corrective_action_validation_msgs);
 	}
 
-	public function sendSupervisorErrorCorrectionEmail(object $error){
+	public function sendSupervisorErrorCorrectionEmail(Error $error){
 		try{
 			$supervisors = $error->reportedStation()->first()->supervisor()->get();
 			foreach($supervisors as $supervisor){
@@ -729,7 +729,7 @@ class ErrorExt extends Base{
 	}
 	
 	
-	public function pdfError(object $error){
+	public function pdfError(Error $error){
 		
 		$this->pdf->AddPage();
 		$this->pdf->SetMargins(20, 10, 10);
@@ -873,7 +873,7 @@ class ErrorExt extends Base{
 		
 	}
 	
-	private function getPdfErrorProducts(array $header, object $error)
+	private function getPdfErrorProducts(array $header, Error $error)
 	{
 		
 		$this->pdf->Ln();
@@ -919,7 +919,7 @@ class ErrorExt extends Base{
 		
 	}
 	
-	private function getPdfErrorCorrection(object $error){
+	private function getPdfErrorCorrection(Error $error){
 		$this->pdf->Ln();
 		$this->pdf->SetFont('Arial','B',17);
 		$this->pdf->Cell(100, 10, 'Error correction', 0, 0, 'L');
@@ -1271,7 +1271,7 @@ class ErrorExt extends Base{
 		return $states;
 	}
 
-	public function deleteErrorOriginatorReaction(object $error){
+	public function deleteErrorOriginatorReaction(Error $error){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
@@ -1309,7 +1309,7 @@ class ErrorExt extends Base{
 		return Validator::make($data, $rules, $this->error_data->validate_error_supervisor_reaction_msgs);
 	}
 	
-	public function sendSupervisorEmail(object $error){
+	public function sendSupervisorEmail(Error $error){
 		try{
 			$supervisors = $error->reportedStation()->first()->supervisor()->where('status', 1)->get();
 			if(count($supervisors)){
@@ -1328,7 +1328,7 @@ class ErrorExt extends Base{
 		}	
 	}
 	
-	public function sendSupReactionEmail(object $error){
+	public function sendSupReactionEmail(Error $error){
 		try{
 			$recipients = $error->errorNotification()->first()->notificationRecipient()->get();
 			if(count($recipients)){
@@ -1351,7 +1351,7 @@ class ErrorExt extends Base{
 		return null;
 	}
 
-	public function deleteErrorSupervisorReaction(object $error){
+	public function deleteErrorSupervisorReaction(Error $error){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 

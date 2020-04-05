@@ -4,7 +4,7 @@
 		<title>Reset password</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-		<link rel="icon" href="{{asset('public/images/logo/kcaa.png')}}">
+		<link rel="icon" href="{{asset('images/logo/kcaa.png')}}">
 		<style>
 			.center{
 				display: block;
@@ -24,7 +24,7 @@
 	<div class="w3-container" style="padding:50px;">
 		<div class="w3-card-4 w3-white center" style="max-width:600px">
 			<div class="w3-center"><br>
-				<img src="{{asset('public/images/logo/kcaa.png')}}" alt="AIM" style="width:30%" class="w3-margin-top">
+				<img src="{{asset('images/logo/kcaa.png')}}" alt="AIM" style="width:30%" class="w3-margin-top">
 			</div>
 			@if (session('status'))
 				<div class="w3-panel w3-display-container w3-leftbar w3-text-brown w3-pale-green w3-border-green">

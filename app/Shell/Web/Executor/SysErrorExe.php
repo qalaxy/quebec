@@ -11,7 +11,7 @@ class SysErrorExe extends Base{
 		$this->sys_data = new SysErrorData();
 	}
 
-	protected function storeSystemError($system, $station, $number){
+	protected function storeSystemError(System $system, Station $station, $number){
 		try{
 			$system_error = SystemError::create(array($this->sys_data->number_key => $number,
 						$this->sys_data->system_id_key => $system->id,

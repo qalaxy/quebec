@@ -62,7 +62,7 @@ class AdminExt extends Base{
 		return Validator::make($data, $rules, $this->perm_data->validationMsgs);
 	}
 	
-	public function archivePerm(object $old){
+	public function archivePerm(Permission $old){
 		$keys = [$this->perm_data->name_key,
 				$this->perm_data->display_name_key,
 				$this->perm_data->description_key,

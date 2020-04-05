@@ -20,7 +20,7 @@ class ProductMnt extends ProductExe{
 		return $this->success;
 	}
 
-	public function editProduct(array $data, object $product){
+	public function editProduct(array $data, $product){
 		$this->data = $data;
 		DB::beginTransaction();
 		$product = $this->updateProduct($product);
@@ -33,7 +33,7 @@ class ProductMnt extends ProductExe{
 		return$this->success;
 	}
 
-	public function deleteProduct(object $product){
+	public function deleteProduct($product){
 		DB::beginTransaction();
 
 		$product = $this->destroyProduct($product);

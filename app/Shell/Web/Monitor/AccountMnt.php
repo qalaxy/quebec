@@ -50,7 +50,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 
-	public function editAccountCredentials(array $data, object $account){
+	public function editAccountCredentials(array $data, $account){
 		$this->data = $data;
 		DB::beginTransaction();
 		$user = $this->updateAccountCredentials($account);
@@ -63,7 +63,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function editAccount(array $data, object $account){
+	public function editAccount(array $data, $account){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -83,7 +83,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function deleteAccount(object $account){
+	public function deleteAccount($account){
 		DB::beginTransaction();
 		$user = $this->destroyUser($account);
 		if(is_null($user)){
@@ -101,7 +101,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;		
 	}
 	
-	public function addEmail(array $data, object $account){
+	public function addEmail(array $data, $account){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -114,7 +114,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function editEmail(array $data, object $email){
+	public function editEmail(array $data, $email){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -127,7 +127,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function deleteEmail(object $email){
+	public function deleteEmail($email){
 		DB::beginTransaction();
 		
 		$email = $this->destroyEmail($email);
@@ -140,7 +140,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function addStation(array $data, object $account, object $station){
+	public function addStation(array $data, $account, $station){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -153,7 +153,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function editAccountStation(array $data, object $stn, $station){
+	public function editAccountStation(array $data, $stn, $station){
 		$this->data = $data;
 		DB::beginTransaction();
 		$stn = $this->updateAccountStation($stn, $station);
@@ -165,7 +165,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function deleteAccountStation(object $stn){
+	public function deleteAccountStation($stn){
 		DB::beginTransaction();
 		$stn = $this->destroyAccountStation($stn);
 		
@@ -177,7 +177,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function addAccountSupervisory(array $data, object $account, object $station){
+	public function addAccountSupervisory(array $data, $account, $station){
 		$this->data = $data;
 		
 		DB::beginTransaction();
@@ -190,7 +190,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function editAccountSupervisory(array $data, object $supervisory, object $station){
+	public function editAccountSupervisory(array $data, $supervisory, $station){
 		$this->data = $data;
 		DB::beginTransaction();
 		$supervisory = $this->updateAccountSupervisory($supervisory, $station);
@@ -202,7 +202,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function deleteAccountSupervisory(object $supervisory){
+	public function deleteAccountSupervisory($supervisory){
 		DB::beginTransaction();
 		$supervisory = $this->destroyAccountSupervisory($supervisory);
 		if(is_null($supervisory)){
@@ -213,7 +213,7 @@ class AccountMnt extends AccountExe{
 		return $this->success;
 	}
 	
-	public function createAccountRole(object $user, object $role){
+	public function createAccountRole($user, $role){
 		DB::beginTransaction();
 		$role = $this->storeAccountRole($user, $role);
 		if(is_null($role)){

@@ -69,7 +69,7 @@ class ProductExt extends Base{
 		return $product;
 	}
 
-	public function deleteProduct(object $product){
+	public function deleteProduct(Product $product){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 

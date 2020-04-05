@@ -16,7 +16,7 @@ class StationExe extends Base{
 		$this->stn_data = new StationData();
 	}
 	
-	protected function storeStationFunction($station, $function){
+	protected function storeStationFunction(Station $station, Func $function){
 		try{
 			if($station->func()->attach($function)){
 				throw new Exception('AIS function has not been added to the station successfully');
@@ -30,7 +30,7 @@ class StationExe extends Base{
 		return $station;
 	}
 	
-	protected function destroyStationFunction($station, $function){
+	protected function destroyStationFunction(Station $station, Func $function){
 		try{
 			$stn_func = $station->func()->detach($function);
 			if(is_null($stn_func)){
@@ -45,7 +45,7 @@ class StationExe extends Base{
 		return $stn_func;
 	}
 	
-	protected function storeStationRecipient($station, $user){
+	protected function storeStationRecipient(Station $station, User $user){
 		try{
 			$recipient = Recipient::firstOrCreate(array($this->stn_data->station_id_key => $station->id,
 											$this->stn_data->user_id_key => $user->id), 
@@ -65,7 +65,7 @@ class StationExe extends Base{
 		return $recipient;
 	}
 	
-	protected function destroyStationRecipient($recipient){
+	protected function destroyStationRecipient(Recipient $recipient){
 		try{
 			$stn_recipient = $recipient->delete();
 			if(is_null($stn_recipient)){
@@ -80,7 +80,7 @@ class StationExe extends Base{
 		return $stn_recipient;
 	}
 
-	protected function storeStationSupervisor($station, $account){
+	protected function storeStationSupervisor(Station $station, Account $account){
 		try{
 			$supervisor = Supervisor::firstOrCreate(array($this->stn_data->station_id_key => $station->id, 
 								$this->stn_data->account_id_key => $account->id), 
@@ -103,7 +103,7 @@ class StationExe extends Base{
 		return $supervisor;
 	}
 
-	protected function updateStationSupervisor($supervisor, $account){
+	protected function updateStationSupervisor(Supervisor $supervisor, Account $account){
 		try{
 			$supervisor = $supervisor->update(array('uuid' => Uuid::generate(), 
 								$this->stn_data->account_id_key => $account->id,
@@ -123,7 +123,7 @@ class StationExe extends Base{
 		return $supervisor;
 	}
 
-	protected function destroyStationSupervisor($supervisor){
+	protected function destroyStationSupervisor(Supervisor $supervisor){
 		try{
 			$supervisor = $supervisor->delete();
 			if(is_null($supervisor)){

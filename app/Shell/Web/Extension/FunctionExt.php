@@ -70,7 +70,7 @@ class FunctionExt extends Base{
 		return Validator::make($data, $rules, $this->f_data->function_data_validation_msgs);
 	}
 
-	public function deleteFunction(object $function){
+	public function deleteFunction(Func $function){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
@@ -92,7 +92,7 @@ class FunctionExt extends Base{
 	}
 
 
-	public function getFunctionProducts(object $func){
+	public function getFunctionProducts(Func $func){
 		try{
 			$products = $func->product()->paginate($this->f_data->rows);
 			if(is_null($products)){
@@ -104,7 +104,7 @@ class FunctionExt extends Base{
 		return $products;
 	}
 
-	public function getUnaddedProducts(object $func){
+	public function getUnaddedProducts(Func $func){
 		try{
 			$products = DB::table('products')
 								->whereNotIn('products.id', function($query) use($func){
@@ -144,7 +144,7 @@ class FunctionExt extends Base{
 		return $product;
 	}
 
-	public function deleteFunctionProduct(object $function, object $product){
+	public function deleteFunctionProduct(Func $function, Product $product){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 

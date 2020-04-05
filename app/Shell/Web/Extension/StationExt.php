@@ -59,7 +59,7 @@ class StationExt extends Base{
 		return $station;
 	}
 	
-	public function getUnaddedFunctions(object $station){
+	public function getUnaddedFunctions(Station $station){
 		try{
 			$functions = DB::table('functions')
 								->whereNotIn('id', function($query)use($station){
@@ -97,7 +97,7 @@ class StationExt extends Base{
 		return $function;
 	}
 	
-	public function deleteStationFunction(object $station, object $function){
+	public function deleteStationFunction(Station $station, Func $function){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
@@ -121,7 +121,7 @@ class StationExt extends Base{
 				</div>';
 	}
 	
-	public function getUnaddedRecipients(object $station){
+	public function getUnaddedRecipients(Station $station){
 		try{
 			$users = DB::table('users')
 								->join('account_user', 'users.id', '=', 'account_user.user_id')
@@ -190,7 +190,7 @@ class StationExt extends Base{
 				</div>';
 	}
 	
-	public function getStationRecipient(object $station, object $user){
+	public function getStationRecipient(Station $station, User $user){
 		try{
 			$recipient = $station->recipient()->first()->where('user_id', $user->id)->first();
 			if(is_null($recipient)){
@@ -202,7 +202,7 @@ class StationExt extends Base{
 		return $recipient;
 	}
 
-	public function getUnaddedSupervisors(object $station, $account=null){
+	public function getUnaddedSupervisors(Station $station, $account=null){
 		try{
 			if($account){
 				$accounts = DB::table('accounts')
@@ -267,7 +267,7 @@ class StationExt extends Base{
 		return $account;
 	}
 
-	public function deleteStationStation(object $station, object $account){
+	public function deleteStationStation(Station $station, Account $account){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
@@ -297,7 +297,7 @@ class StationExt extends Base{
 				</div>';
 	}
 
-	public function getStationSupervisor(object $station, object $account){
+	public function getStationSupervisor(Station $station, Account $account){
 		try{
 			$supervisor = $station->supervisor()->where('account_id', $account->id)->first();
 			if(is_null($supervisor)){
@@ -322,7 +322,7 @@ class StationExt extends Base{
 		return $supervisor;
 	}
 
-	public function showStationSupervisor(object $supervisor){
+	public function showStationSupervisor(Supervisor $supervisor){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-theme"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 

@@ -199,7 +199,7 @@ function getStationFunctions(station){
 }
 </script>
 
-<script src="{{asset('public/js/error.js')}}"></script>
+<script src="{{asset('js/error.js')}}"></script>
 
 
 @endsection

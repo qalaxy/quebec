@@ -33,7 +33,7 @@ class FunctionExe extends Base{
 		return $func;
 	}
 
-	protected function updateFunction($func){
+	protected function updateFunction(Func $func){
 		try{
 			$func = $func->update(array($this->f_data->name_key => ucwords($this->data[$this->f_data->name_key]),
 				$this->f_data->abbreviation_key => strtoupper($this->data[$this->f_data->abbreviation_key]),
@@ -50,7 +50,7 @@ class FunctionExe extends Base{
 		return $func;
 	}
 
-	protected function destroyFunction($function){
+	protected function destroyFunction(Func $function){
 		try{
 			$function = $function->delete();
 
@@ -67,7 +67,7 @@ class FunctionExe extends Base{
 		return $function;
 	}
 
-	protected function storeFunctionProduct($function, $product){
+	protected function storeFunctionProduct(Func $function, Product $product){
 		try{
 			$func_prod = $function->product()->attach($product);
 			if($func_prod){
@@ -82,7 +82,7 @@ class FunctionExe extends Base{
 		return $product;
 	}
 
-	protected function destroyFunctionProduct($func, $product){
+	protected function destroyFunctionProduct(Func $func, Product $product){
 		try{
 			$func_prod = $func->product()->detach($product);
 			if(is_null($func_prod)){

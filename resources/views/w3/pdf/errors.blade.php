@@ -3,14 +3,14 @@
 	<head>
 		<title>Error report</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="stylesheet" href="{{asset('public/css/w3.css')}}">
-		<link rel="icon" href="{{asset('public/images/logo/kcaa.png')}}">
+		<link rel="stylesheet" href="{{asset('css/w3.css')}}">
+		<link rel="icon" href="{{asset('images/logo/kcaa.png')}}">
 	</head>
 	<body>
 		<div class="w3-container">
 			<table class="w3-table" border="0" width="100%" style="width:100%">
 				<tr>
-					<td style="width:25%;"><img src="{{asset('/public/images/logo/kcaa.png')}}" class="" alt="KCAA" style="width:150px;height:100px;"></td>
+					<td style="width:25%;"><img src="{{asset('images/logo/kcaa.png')}}" class="" alt="KCAA" style="width:150px;height:100px;"></td>
 					<td class="w3-padding w3-small">Kenya Civil Aviation Authority<br /> 
 									Aeronautical Information Management<br />
 									P. O. Box 30163<br />

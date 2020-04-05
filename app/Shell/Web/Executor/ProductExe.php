@@ -35,7 +35,7 @@ class ProductExe extends Base{
 		return $product;
 	}
 
-	protected function updateProduct($product){
+	protected function updateProduct(Product $product){
 		try{
 			$product = $product->update(array(
 						$this->p_data->name_key => ucwords($this->data[$this->p_data->name_key]),
@@ -54,7 +54,7 @@ class ProductExe extends Base{
 		return $product;
 	}
 
-	protected function destroyProduct($product){
+	protected function destroyProduct(Product $product){
 		try{
 			$product = $product->delete();
 			if(is_null($product)){

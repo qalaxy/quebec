@@ -632,7 +632,7 @@ function confirmSupervisorReaction(url){
 
 </script>
 
-<script src="{{url('public/js/error.js')}}"></script>
+<script src="{{url('js/error.js')}}"></script>
 
 
 @endsection

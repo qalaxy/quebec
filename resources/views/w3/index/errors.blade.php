@@ -395,6 +395,6 @@ function loadfunctions(station){ //alert('Hey');
 }
 
 </script>
-<script src="{{url('public/js/error.js')}}"></script>
+<script src="{{url('js/error.js')}}"></script>
 
 @endsection

@@ -7,6 +7,8 @@ use App\AccountStation;
 use App\Station;
 use App\System;
 use App\SystemError;
+use App\User;
+
 use App\Shell\Web\Base;
 use App\Shell\Data\SysErrorData;
 
@@ -58,7 +60,7 @@ class SysErrorExt extends Base{
 	}
 
 
-	public function getUserAccountStations(object $user){
+	public function getUserAccountStations(User $user){
 		try{
 			$account_stations = AccountStation::where('account_id', $user->account()->first()->id)->get();
 			if(is_null($account_stations)){
@@ -108,7 +110,7 @@ class SysErrorExt extends Base{
 		return $system;
 	}
 
-	public function getNextSystemErrorNumber(object $station, object $system){
+	public function getNextSystemErrorNumber(Station $station, System $system){
 		try{
 			$number = Error::withTrashed()->where($this->error_data->station_id_key, $station->id)
 								->where($this->error_data->system_id_key, $system->id)

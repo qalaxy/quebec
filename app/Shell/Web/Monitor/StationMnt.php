@@ -6,7 +6,7 @@ use App\Shell\Web\Executor\StationExe;
 
 class StationMnt extends StationExe{
 	
-	public function createStationFunction(object $station, object $function){
+	public function createStationFunction($station, $function){
 		DB::beginTransaction();
 		$stn_func = $this->storeStationFunction($station, $function);
 		if(is_null($stn_func)){
@@ -18,7 +18,7 @@ class StationMnt extends StationExe{
 		return $this->success;
 	}
 	
-	public function deleteStationFunction(object $station, object $function){
+	public function deleteStationFunction($station, $function){
 		DB::beginTransaction();
 		$stn_func = $this->destroyStationFunction($station, $function);
 		if(is_null($stn_func)){
@@ -30,7 +30,7 @@ class StationMnt extends StationExe{
 		return $this->success;
 	}
 	
-	public function createStationRecipient(object $station, object $user){
+	public function createStationRecipient($station, $user){
 		DB::beginTransaction();
 		$recipient = $this->storeStationRecipient($station, $user);
 		if(is_null($recipient)){
@@ -42,7 +42,7 @@ class StationMnt extends StationExe{
 		return $this->success;
 	}
 	
-	public function deleteStationRecipient(object $recipient){
+	public function deleteStationRecipient($recipient){
 		DB::beginTransaction();
 		$stn_recipient = $this->destroyStationRecipient($recipient);
 		if(is_null($stn_recipient)){
@@ -54,7 +54,7 @@ class StationMnt extends StationExe{
 		return $this->success;
 	}
 
-	public function createStationSupervisor(array $data, object $station, object $account){
+	public function createStationSupervisor(array $data, $station, $account){
 		$this->data = $data;
 		DB::beginTransaction();
 
@@ -68,7 +68,7 @@ class StationMnt extends StationExe{
 		return $this->success;
 	}
 
-	public function editStationSupervisor(object $supervisor, array $data, object $account){
+	public function editStationSupervisor($supervisor, array $data, $account){
 		$this->data = $data;
 		DB::beginTransaction();
 		$supervisor = $this->updateStationSupervisor($supervisor, $account);
@@ -81,7 +81,7 @@ class StationMnt extends StationExe{
 		return $this->success;
 	}
 
-	public function deleteStationSupervisor(object $supervisor){
+	public function deleteStationSupervisor($supervisor){
 		DB::beginTransaction();
 		$supervisor = $this->destroyStationSupervisor($supervisor);
 		if(is_null($supervisor)){

@@ -7,6 +7,7 @@ use App\AccountStation;
 use App\Email;
 use App\Level;
 use App\PhoneNumber;
+use App\Role;
 use App\Supervisor;
 use App\User;
 use Uuid;
@@ -127,7 +128,7 @@ class AccountExe extends Base{
 		return $email;
 	}
 	
-	protected function updateUser($account){
+	protected function updateUser(Account $account){
 		try{
 			$user = $account->user()->first()->
 				update(array(
@@ -165,7 +166,7 @@ class AccountExe extends Base{
 		return $acc;
 	}
 	
-	protected function destroyUser($account){
+	protected function destroyUser(Account $account){
 		try{
 			$user = $account->user()->first()->delete();
 			if(is_null($user)){
@@ -193,7 +194,7 @@ class AccountExe extends Base{
 		return $acc;
 	}
 
-	protected function updateAccountCredentials($account){
+	protected function updateAccountCredentials(Account $account){
 		try{
 			$user = $account->user()->first()->update(array($this->acc_data->email_key => $this->data[$this->acc_data->email_key],
 								$this->acc_data->password_key => Hash::make($this->data[$this->acc_data->password_key])));
@@ -210,7 +211,7 @@ class AccountExe extends Base{
 		return $user;
 	}
 	
-	protected function saveEmail($account){
+	protected function saveEmail(Account $account){
 		try{
 			$email = Email::firstOrCreate(array($this->acc_data->address_key => $this->data[$this->acc_data->email_key], 'deleted_at' => null), 
 						array($this->acc_data->address_key => $this->data[$this->acc_data->email_key])
@@ -229,7 +230,7 @@ class AccountExe extends Base{
 	}
 	
 	
-	protected function updateEmail($email){
+	protected function updateEmail(Email $email){
 		try{
 			$u_email = $email->update(array($this->acc_data->address_key => $this->data[$this->acc_data->email_key]));
 			if(is_null($u_email)){
@@ -246,7 +247,7 @@ class AccountExe extends Base{
 		return $u_email;
 	}
 	
-	protected function destroyEmail($email){
+	protected function destroyEmail(Email $email){
 		try{
 			$email = $email->delete();
 			if(is_null($email)){
@@ -261,7 +262,7 @@ class AccountExe extends Base{
 		return $email;
 	}
 	
-	protected function storeStation($account, $station){
+	protected function storeStation(Account $account, Station $station){
 		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < date_format(today(), 'Y-m-d')))
 			$this->data[$this->acc_data->status_key] = false;
 		
@@ -288,7 +289,7 @@ class AccountExe extends Base{
 		return $station;
 	}
 	
-	protected function updateAccountStation($stn, $station){
+	protected function updateAccountStation(AccountStation $stn, Station $station){
 		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < date_format(today(), 'Y-m-d')))
 			$this->data[$this->acc_data->status_key] = false;
 		try{
@@ -325,7 +326,7 @@ class AccountExe extends Base{
 		return $stn;
 	}
 	
-	protected function storeAccountSupervisory($account, $station){
+	protected function storeAccountSupervisory(Account $account, Station $station){
 		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < date_format(today(), 'Y-m-d')))
 			$this->data[$this->acc_data->status_key] = false;
 		
@@ -352,7 +353,7 @@ class AccountExe extends Base{
 		return $supervisory;
 	}
 	
-	protected function updateAccountSupervisory($supervisory, $station){
+	protected function updateAccountSupervisory(Supervisor $supervisory, Station $station){
 		if(isset($this->data[$this->acc_data->to_key]) && ($this->data[$this->acc_data->to_key] < date_format(today(), 'Y-m-d')))
 			$this->data[$this->acc_data->status_key] = false;
 		try{
@@ -373,7 +374,7 @@ class AccountExe extends Base{
 		return $supervisory;
 	}
 	
-	protected function destroyAccountSupervisory($supervisory){
+	protected function destroyAccountSupervisory(Supervisor $supervisory){
 		try{
 			$supervisory = $supervisory->delete();
 			
@@ -389,7 +390,7 @@ class AccountExe extends Base{
 		return $supervisory;
 	}
 	
-	protected function storeAccountRole($user, $role){
+	protected function storeAccountRole(User $user, Role $role){
 		try{
 			if($role->user()->attach($user)){
 				throw new Exception('Role has not been added to the user successfully');
@@ -403,7 +404,7 @@ class AccountExe extends Base{
 		return $role;
 	}
 	
-	protected function destroyAccountRole($user, $role){
+	protected function destroyAccountRole(User $user, Role $role){
 		try{
 			$del_role = $role->user()->detach($user);
 			if(is_null($del_role)){

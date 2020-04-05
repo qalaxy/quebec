@@ -4,7 +4,7 @@
 		<title>Login</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="{{asset('public/css/w3.css')}}">
-		<link rel="icon" href="{{asset('public/images/logo/kcaa.png')}}">
+		<link rel="icon" href="{{asset('images/logo/kcaa.png')}}">
 		<style>
 			.center{
 				display: block;

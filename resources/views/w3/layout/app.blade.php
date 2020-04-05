@@ -3,10 +3,10 @@
 @yield('title')
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!--<meta http-equiv="refresh" content="5"/>-->
-<link rel="stylesheet" href="{{asset('public/css/w3.css')}}">
+<link rel="stylesheet" href="{{asset('css/w3.css')}}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" type="text/css" href="{{asset('public/css/style.css')}}" >
-<link rel="icon" href="{{asset('public/images/logo/kcaa.png')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('css/style.css')}}" >
+<link rel="icon" href="{{asset('images/logo/kcaa.png')}}">
 <body>
 
 @yield('style')
@@ -14,7 +14,7 @@
 <!-- Top -->
 <div class="w3-top">
   <div class="w3-row w3-white w3-padding">
-    <div class="w3-half" style="margin:4px 0 6px 0"><a href="{{asset('/')}}"><img src="{{asset('public/images/logo/aim.png')}}" alt="Quality Management System"></a></div>
+    <div class="w3-half" style="margin:4px 0 6px 0"><a href="{{url('/')}}"><img src="{{asset('images/logo/aim.png')}}" alt="Quality Management System"></a></div>
     <div class="w3-half w3-margin-top w3-wide w3-hide-medium w3-hide-small"><div class="w3-right">EFFICIENTLY MANAGING AIR SAFETY</div></div>
   </div>
   <div class="w3-bar w3-theme w3-large" style="z-index:4;">
@@ -79,12 +79,12 @@
   </button>
   <div id="error" class="w3-hide w3-white w3-card w3-margin-left w3-leftbar w3-border-gray w3-text-blue-gray">
     <a id="errors" href="{{url('errors')}}" class="w3-bar-item w3-button w3-hover-light-blue">Logs</a>
-    <a id="notifications" href="{{asset('/error-notifications')}}" class="w3-bar-item w3-button w3-hover-light-blue">Notified 
+    <a id="notifications" href="{{url('/error-notifications')}}" class="w3-bar-item w3-button w3-hover-light-blue">Notified 
 		<span class="w3-badge w3-theme w3-small w3-right"></span>
 	</a>
   </div>  
-  <a id="system-errors" class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/system-errors')}}">System errors</a>
-  <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{asset('/home')}}">Help</a>
+  <a id="system-errors" class="w3-bar-item w3-button w3-hover-light-blue" href="{{url('/system-errors')}}">System errors</a>
+  <a class="w3-bar-item w3-button w3-hover-light-blue" href="{{url('/home')}}">Help</a>
   </div>
 </div>
 
@@ -177,7 +177,7 @@ function countErrorNotifications(){
 
 @yield('scripts')
 
-<script src="{{asset('public/js/w3codecolor.js')}}"></script>
+<script src="{{asset('js/w3codecolor.js')}}"></script>
 <script>
 w3CodeColor();
 </script>

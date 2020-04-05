@@ -20,7 +20,7 @@ class FunctionMnt extends FunctionExe{
 		return $this->success;
 	}
 
-	public function editFunction(array $data, object $func){
+	public function editFunction(array $data, $func){
 		$this->data = $data;
 
 		DB::beginTransaction();
@@ -33,7 +33,7 @@ class FunctionMnt extends FunctionExe{
 		return $this->success;
 	}
 
-	public function deleteFunction(object $function){
+	public function deleteFunction($function){
 		DB::beginTransaction();
 		$func = $this->destroyFunction($function);
 		if(is_null($func)){
@@ -45,7 +45,7 @@ class FunctionMnt extends FunctionExe{
 		return $this->success;
 	}
 
-	public function createFunctionProduct(object $function, object $product){
+	public function createFunctionProduct($function, $product){
 		$func_prod = $this->storeFunctionProduct($function, $product);
 		if(is_null($func_prod)){
 			DB::rollback();
@@ -55,7 +55,7 @@ class FunctionMnt extends FunctionExe{
 		return $this->success;
 	}
 
-	public function deleteFunctionProduct(object $func, object $product){
+	public function deleteFunctionProduct($func, $product){
 		$func_prod = $this->destroyFunctionProduct($func, $product);
 		if(is_null($func_prod)){
 			DB::rollback();

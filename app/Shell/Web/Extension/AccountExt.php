@@ -138,7 +138,7 @@ class AccountExt extends Base{
 		return $account;
 	}
 	
-	public function deleteAccount(object $account){
+	public function deleteAccount(Account $account){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
@@ -177,7 +177,7 @@ class AccountExt extends Base{
 		return Validator::make($data, $rules, $this->acc_data->account_credentials_validation_msgs);
 	}
 
-	public function comparePassword(array $data, object $user){
+	public function comparePassword(array $data, User $user){
 		if($data['old_password'] == $data['password'])
 			return 'The old and new passwords are the same. Enter a new password different from the old one.';
 
@@ -310,7 +310,7 @@ class AccountExt extends Base{
 				</div>';
 	}
 	
-	public function showAccountStation(object $station){
+	public function showAccountStation(Station $station){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-theme"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
@@ -337,7 +337,7 @@ class AccountExt extends Base{
 				</div>';
 	}
 	
-	public function searchAccountStations(array $data, object $account){
+	public function searchAccountStations(array $data, Account $account){
 		$data['station_id'] = (isset($data['station_id'])) ? $this->getStation($data['station_id'])->id : null;
 		
 		try{
@@ -352,7 +352,7 @@ class AccountExt extends Base{
 		return $accounts;
 	}
 	
-	public function getAccountStations(object $account){
+	public function getAccountStations(Account $account){
 		try{
 			$stations = $account->accountStation()->paginate($this->acc_data->rows);
 			if(is_null($stations)){
@@ -413,7 +413,7 @@ class AccountExt extends Base{
 				</div>';
 	}
 	
-	public function deleteAccountSupervisory(object $account, object $supervisory){
+	public function deleteAccountSupervisory(Account $account, Supervisor $supervisory){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
@@ -437,7 +437,7 @@ class AccountExt extends Base{
 				</div>';
 	}
 	
-	public function searchAccountSupervisories(array $data, object $account){
+	public function searchAccountSupervisories(array $data, Account $account){
 		$data['station_id'] = (isset($data['station_id'])) ? $this->getStation($data['station_id'])->id : null;
 		
 		try{

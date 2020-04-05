@@ -2,6 +2,9 @@
 namespace App\Shell\Web\Extension;
 
 use Exception;
+
+use App\AccountStation;
+use App\Level;
 use App\Role;
 use App\Station;
 use App\Permission;
@@ -119,7 +122,7 @@ class RoleExt extends Base{
 		return $stations;
 	}
 	
-	public function getRoleStations(object $stations){
+	public function getRoleStations($stations){
 		$data = array();
 		foreach($stations as $station){
 			array_push($data, ['id'=>$station->uuid, 'name'=>$station->name]);
@@ -127,7 +130,7 @@ class RoleExt extends Base{
 		return $data;
 	}
 	
-	public function getRoleUserStations(object $account_stations, object $stations){
+	public function getRoleUserStations($account_stations, $stations){
 		$data = array();
 		foreach($account_stations as $account_station){
 			array_push($data, ['id'=>$account_station->station()->first()->uuid, 'name'=>$account_station->station()->first()->name]);
@@ -198,7 +201,7 @@ class RoleExt extends Base{
 		return $role;
 	}
 	
-	public function deleteRole(object $role){
+	public function deleteRole(Role $role){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
@@ -231,7 +234,7 @@ class RoleExt extends Base{
 		return $permissions;
 	}
 	
-	public function getPaginatedRolePermissions(object $role){
+	public function getPaginatedRolePermissions(Role $role){
 		try{
 			$permissions = $role->permission()->paginate($this->role_data->rows);
 			if(is_null($permissions)){
@@ -294,7 +297,7 @@ class RoleExt extends Base{
 		return $level;
 	}
 	
-	public function getPermNotInRole(object $role, object $level){
+	public function getPermNotInRole(Role $role, Level $level){
 		try{
 			$permissions = DB::table('permissions')
 								->whereNotIn('permissions.id', function($query) use($role){
@@ -316,7 +319,7 @@ class RoleExt extends Base{
 		return $permissions;
 	}
 	
-	public function deleteRolePermission(object $role, object $perm){
+	public function deleteRolePermission(Role $role, Permission $perm){
 		return '<div class="w3-modal-content w3-animate-zoom w3-card-4">
 					<header class="w3-container w3-red"> 
 						<span onclick="document.getElementById(\'delete\').style.display=\'none\'" 
