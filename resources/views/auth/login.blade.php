@@ -3,7 +3,7 @@
 	<head>
 		<title>Login</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="stylesheet" href="{{asset('public/css/w3.css')}}">
+		<link rel="stylesheet" href="{{asset('css/w3.css')}}">
 		<link rel="icon" href="{{asset('images/logo/kcaa.png')}}">
 		<style>
 			.center{
@@ -24,7 +24,7 @@
 	<div class="w3-container" style="padding:50px;">
 		<div class="w3-card-4 w3-white center" style="max-width:600px">
 			<div class="w3-center"><br>
-				<img src="{{asset('public/images/logo/kcaa.png')}}" alt="AIM" style="width:30%" class="w3-margin-top">
+				<img src="{{asset('images/logo/kcaa.png')}}" alt="AIM" style="width:30%" class="w3-margin-top">
 			</div>
 			<form class="w3-container" action="{{route('login')}}" method="POST">
 				@csrf
